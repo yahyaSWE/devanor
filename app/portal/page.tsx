@@ -1,81 +1,108 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth-helpers";
-import { site } from "@/lib/site";
+import { prisma } from "@/lib/db";
+import { getPortalUser, visibilityFilter } from "@/lib/portal";
+import { formatBytes } from "@/lib/format";
 
 export const metadata = { title: "Support Portal" };
 
-const resources = [
-  {
-    title: "E3 Tutorials",
-    description: "Step-by-step guides from first project to advanced automation.",
-    href: "/products/e3-series#tutorials",
-  },
-  {
-    title: "Products",
-    description: "Browse the E3.Series modules and what each one does.",
-    href: "/products/e3-series",
-  },
-  {
-    title: "Services",
-    description: "Helpdesk, automation, training and consulting.",
-    href: "/services",
-  },
-];
-
-export default async function PortalPage() {
+export default async function PortalOverview() {
   const session = await requireUser();
-  const name = session.user.name || session.user.email;
+  const user = await getPortalUser(session.user.id);
+  const clientId = user?.clientId ?? null;
+  const filter = visibilityFilter(clientId);
+
+  const [activeLicenses, downloads, tutorialCount] = await Promise.all([
+    clientId
+      ? prisma.license.count({ where: { clientId, status: "ACTIVE" } })
+      : Promise.resolve(0),
+    prisma.download.findMany({
+      where: filter,
+      orderBy: { createdAt: "desc" },
+      take: 3,
+    }),
+    prisma.tutorial.count({ where: filter }),
+  ]);
+
+  const name = user?.name || session.user.email;
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-10 px-6 py-12">
+    <div className="mx-auto w-full max-w-5xl space-y-8 px-6 py-10">
       <div>
         <h1 className="text-3xl font-semibold">Welcome back, {name}</h1>
         <p className="mt-2 text-muted">
-          This is your Devanor support portal. Reach our team and find resources below.
+          {user?.client
+            ? `${user.client.name} · Devanor support portal`
+            : "Devanor support portal"}
         </p>
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Link
+          href="/portal/licenses"
+          className="rounded-2xl border border-border bg-surface/40 p-5 transition-colors hover:border-accent/40"
+        >
+          <p className="text-2xl font-semibold">{activeLicenses}</p>
+          <p className="text-sm text-muted">Active licenses</p>
+        </Link>
+        <Link
+          href="/portal/downloads"
+          className="rounded-2xl border border-border bg-surface/40 p-5 transition-colors hover:border-accent/40"
+        >
+          <p className="text-2xl font-semibold">{downloads.length}</p>
+          <p className="text-sm text-muted">Recent downloads</p>
+        </Link>
+        <Link
+          href="/portal/tutorials"
+          className="rounded-2xl border border-border bg-surface/40 p-5 transition-colors hover:border-accent/40"
+        >
+          <p className="text-2xl font-semibold">{tutorialCount}</p>
+          <p className="text-sm text-muted">Tutorials available</p>
+        </Link>
+      </div>
+
+      <section className="rounded-2xl border border-border bg-surface/40 p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-semibold">Latest downloads</h2>
+          <Link href="/portal/downloads" className="text-sm text-accent hover:underline">
+            View all
+          </Link>
+        </div>
+        {downloads.length === 0 ? (
+          <p className="text-sm text-muted">No files available yet.</p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {downloads.map((d) => (
+              <li key={d.id} className="flex items-center justify-between gap-4 py-3">
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{d.title}</p>
+                  <p className="truncate text-sm text-muted">
+                    {d.fileName} · {formatBytes(d.size)}
+                  </p>
+                </div>
+                <a
+                  href={`/api/downloads/${d.id}`}
+                  className="shrink-0 text-sm text-accent hover:underline"
+                >
+                  Download
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section className="rounded-2xl border border-border bg-surface/40 p-6">
         <h2 className="font-semibold">Need help?</h2>
         <p className="mt-1 text-sm text-muted">
-          Our helpdesk is here for any E3.Series question.
+          Start a live chat with our support team or browse the resources.
         </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3 text-sm">
-          <div>
-            <p className="text-muted">Email</p>
-            <a href={site.contact.emailHref} className="hover:text-accent">
-              {site.contact.email}
-            </a>
-          </div>
-          <div>
-            <p className="text-muted">Phone</p>
-            <a href={site.contact.phoneHref} className="hover:text-accent">
-              {site.contact.phone}
-            </a>
-          </div>
-          <div>
-            <p className="text-muted">WhatsApp</p>
-            <a href={site.contact.whatsappHref} className="hover:text-accent">
-              {site.contact.whatsapp}
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <h2 className="mb-4 font-semibold">Resources</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {resources.map((r) => (
-            <Link
-              key={r.title}
-              href={r.href}
-              className="rounded-2xl border border-border bg-surface/40 p-6 transition-colors hover:border-accent/40"
-            >
-              <h3 className="font-semibold">{r.title}</h3>
-              <p className="mt-2 text-sm text-muted">{r.description}</p>
-            </Link>
-          ))}
-        </div>
+        <Link
+          href="/portal/support"
+          className="mt-4 inline-block text-sm text-accent hover:underline"
+        >
+          Go to support →
+        </Link>
       </section>
     </div>
   );

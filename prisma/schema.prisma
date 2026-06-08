@@ -25,12 +25,15 @@ model User {
 }
 
 model Client {
-  id         String   @id @default(cuid())
+  id         String     @id @default(cuid())
   name       String
   logoUrl    String
   websiteUrl String
   users      User[]
-  createdAt  DateTime @default(now())
+  downloads  Download[]
+  tutorials  Tutorial[]
+  licenses   License[]
+  createdAt  DateTime   @default(now())
 }
 
 model DemoRequest {
@@ -40,4 +43,50 @@ model DemoRequest {
   company   String?
   message   String?
   createdAt DateTime @default(now())
+}
+
+// A downloadable file (license file, script, document). Files are stored
+// outside /public and served via an auth-gated route.
+model Download {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  category    String?
+  fileName    String // original name, shown to the user
+  storedName  String // name on disk under ./storage/uploads
+  mimeType    String
+  size        Int
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId    String? // null = available to all customers
+  createdAt   DateTime @default(now())
+}
+
+// A gated tutorial / training resource (video or external link).
+model Tutorial {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  level       String   @default("Beginner")
+  url         String
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId    String? // null = available to all customers
+  createdAt   DateTime @default(now())
+}
+
+enum LicenseStatus {
+  ACTIVE
+  TRIAL
+  EXPIRED
+}
+
+// A licensed module/subscription belonging to a client.
+model License {
+  id        String        @id @default(cuid())
+  module    String
+  seats     Int?
+  status    LicenseStatus @default(ACTIVE)
+  expiresAt DateTime?
+  client    Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId  String
+  createdAt DateTime      @default(now())
 }

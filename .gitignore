@@ -44,6 +44,9 @@ yarn-error.log*
 /public/uploads/*
 !/public/uploads/.gitkeep
 
+# private uploaded files (downloads) served via auth-gated route
+/storage
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
