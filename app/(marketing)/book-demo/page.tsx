@@ -54,7 +54,7 @@ export default function BookDemoPage() {
       <div className="rounded-2xl border border-border bg-surface/40 p-8">
         {state.ok ? (
           <div className="flex h-full flex-col items-center justify-center text-center">
-            <div className="grid h-12 w-12 place-items-center rounded-full bg-accent text-[#04110d] text-xl font-bold">
+            <div className="grid h-12 w-12 place-items-center rounded-full bg-accent text-on-accent text-xl font-bold">
               ✓
             </div>
             <h2 className="mt-4 text-xl font-semibold">Thank you!</h2>

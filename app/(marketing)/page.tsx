@@ -16,8 +16,7 @@ export default function HomePage() {
     <>
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="grid-bg pointer-events-none absolute inset-0" />
-        {/* Background video placeholder — drop the real file at /public/hero.mp4 */}
+        {/* Background video — file lives at /public/hero.mp4 */}
         <video
           className="absolute inset-0 h-full w-full object-cover opacity-20"
           autoPlay

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { ButtonLink } from "./Button";
@@ -16,11 +17,15 @@ export function Navbar({ user }: { user: SessionUser }) {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/70 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <span className="grid h-7 w-7 place-items-center rounded-md bg-accent text-[#04110d] text-sm font-bold">
-            D
-          </span>
-          <span className="text-[15px]">{site.name}</span>
+        <Link href="/" className="flex items-center" aria-label={site.name}>
+          <Image
+            src="/logo.png"
+            alt={site.name}
+            width={1339}
+            height={328}
+            priority
+            className="h-9 w-auto"
+          />
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">

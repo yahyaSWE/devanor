@@ -1,14 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #05080f;
-  --surface: #0b111c;
-  --surface-2: #111a28;
-  --foreground: #e7eef6;
-  --muted: #8a99ad;
-  --accent: #25e8bf;
-  --accent-2: #38bdf8;
-  --border: rgba(255, 255, 255, 0.08);
+  /* Brand palette — matched to the Devanor logo (gold #bd9141 + grey #454545) */
+  --background: #0e0e0f;
+  --surface: #181818;
+  --surface-2: #232323;
+  --foreground: #ece8e1;
+  --muted: #9b958c;
+  --accent: #bd9141;
+  --accent-2: #d8b066;
+  --grey: #454545;
+  --on-accent: #1b1813;
+  --border: rgba(255, 255, 255, 0.09);
 }
 
 @theme inline {
@@ -19,6 +22,8 @@
   --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-accent-2: var(--accent-2);
+  --color-grey: var(--grey);
+  --color-on-accent: var(--on-accent);
   --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -41,23 +46,14 @@ body {
 
 ::selection {
   background: var(--accent);
-  color: #04110d;
+  color: var(--on-accent);
 }
 
 /* Subtle radial glow used behind hero / section headers */
 .glow {
   background:
-    radial-gradient(60% 50% at 50% 0%, rgba(37, 232, 191, 0.12) 0%, transparent 70%),
-    radial-gradient(40% 40% at 80% 20%, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
-}
-
-.grid-bg {
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 64px 64px;
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+    radial-gradient(60% 50% at 50% 0%, rgba(189, 145, 65, 0.16) 0%, transparent 70%),
+    radial-gradient(40% 40% at 80% 20%, rgba(216, 176, 102, 0.1) 0%, transparent 70%);
 }
 
 .text-gradient {
