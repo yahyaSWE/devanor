@@ -39,12 +39,12 @@ export default function ProductsPage() {
               </div>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                {e3Modules.map((m) => (
-                  <div
-                    key={m.name}
-                    className="rounded-xl border border-border bg-background/40 p-4"
-                  >
-                    <h3 className="text-sm font-semibold">{m.name}</h3>
+                {e3Modules.map((m, i) => (
+                  <div key={m.name} className="card p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="text-sm font-semibold">{m.name}</h3>
+                      <span className="font-mono text-xs text-muted">0{i + 1}</span>
+                    </div>
                     <p className="mt-1 text-sm text-muted">{m.description}</p>
                   </div>
                 ))}

@@ -38,8 +38,9 @@ export default function AboutPage() {
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {differentiators.map((d, i) => (
             <Reveal key={d.title} delay={i * 0.05}>
-              <div className="h-full rounded-2xl border border-border bg-surface/40 p-6">
-                <h3 className="font-semibold">{d.title}</h3>
+              <div className="card h-full p-6">
+                <span className="font-mono text-xs text-muted">0{i + 1}</span>
+                <h3 className="mt-3 font-semibold">{d.title}</h3>
                 <p className="mt-2 text-sm text-muted">{d.description}</p>
               </div>
             </Reveal>

@@ -62,3 +62,51 @@ body {
   background-clip: text;
   color: transparent;
 }
+
+/* Shared card treatment — subtle lift + gold glow on hover */
+.card {
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--surface) 55%, transparent);
+  border-radius: 1rem;
+  transition:
+    border-color 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.card:hover {
+  border-color: rgba(189, 145, 65, 0.45);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px -20px rgba(189, 145, 65, 0.35);
+}
+
+/* Infinite logo marquee (track holds the list twice for a seamless loop) */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 35s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 12%,
+    #000 88%,
+    transparent
+  );
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+}

@@ -23,8 +23,9 @@ export default function ServicesPage() {
         <div className="mt-12 grid gap-4 sm:grid-cols-2">
           {services.map((s, i) => (
             <Reveal key={s.name} delay={i * 0.05}>
-              <article className="h-full rounded-2xl border border-border bg-surface/40 p-8">
-                <h2 className="text-xl font-semibold">{s.name}</h2>
+              <article className="card h-full p-8">
+                <span className="font-mono text-xs text-muted">0{i + 1}</span>
+                <h2 className="mt-3 text-xl font-semibold">{s.name}</h2>
                 <p className="mt-3 text-muted">{s.description}</p>
               </article>
             </Reveal>

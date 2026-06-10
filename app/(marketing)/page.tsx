@@ -3,6 +3,8 @@ import { Section, SectionHeading } from "@/components/Section";
 import { ButtonLink } from "@/components/Button";
 import { Reveal } from "@/components/Reveal";
 import { CTASection } from "@/components/CTASection";
+import { Stats } from "@/components/Stats";
+import { LogoMarquee } from "@/components/LogoMarquee";
 import {
   caseStudies,
   differentiators,
@@ -57,9 +59,29 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Stats band */}
+      <Section className="!py-0">
+        <div className="-mt-16 relative z-10">
+          <Stats
+            items={[
+              { value: "7+", label: "Years of E3.Series expertise" },
+              { value: "4", label: "Core E3 modules supported" },
+              { value: "2", label: "Disciplines bridged — ECAD & MCAD" },
+              { value: "100%", label: "Focus on your design workflow" },
+            ]}
+          />
+        </div>
+      </Section>
+
+      {/* Client logo marquee (renders when 3+ clients exist) */}
+      <div className="mt-20">
+        <LogoMarquee />
+      </div>
+
       {/* Products teaser */}
       <Section>
         <SectionHeading
+          index="01"
           eyebrow="Products"
           title="E3 Series — one modular platform for electrical design"
           subtitle="Design electrical, wiring and fluid systems with seamless MCAD integration and automated inspections."
@@ -67,10 +89,18 @@ export default function HomePage() {
         <div className="mt-12 grid gap-4 sm:grid-cols-2">
           {e3Modules.map((m, i) => (
             <Reveal key={m.name} delay={i * 0.05}>
-              <div className="h-full rounded-2xl border border-border bg-surface/40 p-6 transition-colors hover:border-accent/40">
-                <h3 className="text-lg font-semibold">{m.name}</h3>
+              <Link href="/products/e3-series" className="card group block h-full p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="text-lg font-semibold">{m.name}</h3>
+                  <span className="font-mono text-xs text-muted">
+                    0{i + 1}
+                  </span>
+                </div>
                 <p className="mt-2 text-sm text-muted">{m.description}</p>
-              </div>
+                <span className="mt-4 inline-block text-sm text-accent opacity-0 transition-opacity group-hover:opacity-100">
+                  Learn more →
+                </span>
+              </Link>
             </Reveal>
           ))}
         </div>
@@ -84,6 +114,7 @@ export default function HomePage() {
       {/* Services teaser */}
       <Section className="border-t border-border">
         <SectionHeading
+          index="02"
           eyebrow="Services"
           title="Expert support at every step"
           subtitle="From helpdesk to consulting, we help your team get the most out of E3.Series."
@@ -91,8 +122,9 @@ export default function HomePage() {
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((s, i) => (
             <Reveal key={s.name} delay={i * 0.05}>
-              <div className="h-full rounded-2xl border border-border bg-surface/40 p-6">
-                <h3 className="font-semibold">{s.name}</h3>
+              <div className="card h-full p-6">
+                <span className="font-mono text-xs text-muted">0{i + 1}</span>
+                <h3 className="mt-3 font-semibold">{s.name}</h3>
                 <p className="mt-2 text-sm text-muted">{s.description}</p>
               </div>
             </Reveal>
@@ -109,6 +141,7 @@ export default function HomePage() {
       <Section className="border-t border-border">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr]">
           <SectionHeading
+            index="03"
             eyebrow="Why Devanor"
             title="Design partners, not just a software reseller"
             subtitle="Over 7 years of hands-on E3.Series experience across electrical and mechanical design."
@@ -116,7 +149,7 @@ export default function HomePage() {
           <div className="grid gap-4 sm:grid-cols-2">
             {differentiators.map((d, i) => (
               <Reveal key={d.title} delay={i * 0.05}>
-                <div className="rounded-2xl border border-border bg-surface/40 p-6">
+                <div className="card h-full p-6">
                   <h3 className="font-semibold">{d.title}</h3>
                   <p className="mt-2 text-sm text-muted">{d.description}</p>
                 </div>
@@ -129,6 +162,7 @@ export default function HomePage() {
       {/* Case Studies (homepage section per spec) */}
       <Section id="case-studies" className="border-t border-border">
         <SectionHeading
+          index="04"
           eyebrow="Case Studies"
           title="Results our customers have seen"
           subtitle="A few examples of what's possible when E3.Series is set up and supported well."
@@ -136,13 +170,15 @@ export default function HomePage() {
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
           {caseStudies.map((c, i) => (
             <Reveal key={c.title} delay={i * 0.05}>
-              <div className="flex h-full flex-col rounded-2xl border border-border bg-surface/40 p-6">
+              <div className="card flex h-full flex-col p-6">
                 <p className="text-xs uppercase tracking-wider text-muted">
                   {c.client}
                 </p>
                 <h3 className="mt-2 text-lg font-semibold">{c.title}</h3>
                 <p className="mt-3 flex-1 text-sm text-muted">{c.summary}</p>
-                <p className="mt-4 text-sm font-semibold text-accent">{c.result}</p>
+                <p className="mt-4 border-t border-border pt-4 text-sm font-semibold text-accent">
+                  {c.result}
+                </p>
               </div>
             </Reveal>
           ))}

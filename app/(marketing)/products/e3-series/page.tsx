@@ -38,8 +38,9 @@ export default function E3SeriesPage() {
         <div className="mt-14 grid gap-4 sm:grid-cols-2">
           {e3Modules.map((m, i) => (
             <Reveal key={m.name} delay={i * 0.05}>
-              <div className="h-full rounded-2xl border border-border bg-surface/40 p-6">
-                <h2 className="text-lg font-semibold">{m.name}</h2>
+              <div className="card h-full p-6">
+                <span className="font-mono text-xs text-muted">0{i + 1}</span>
+                <h2 className="mt-3 text-lg font-semibold">{m.name}</h2>
                 <p className="mt-2 text-sm text-muted">{m.description}</p>
               </div>
             </Reveal>
@@ -57,7 +58,7 @@ export default function E3SeriesPage() {
         <div className="mt-12 grid gap-4 sm:grid-cols-2">
           {e3Tutorials.map((t, i) => (
             <Reveal key={t.title} delay={i * 0.05}>
-              <div className="flex h-full items-start justify-between gap-4 rounded-2xl border border-border bg-surface/40 p-6">
+              <div className="card flex h-full items-start justify-between gap-4 p-6">
                 <div>
                   <h3 className="font-semibold">{t.title}</h3>
                   <p className="mt-2 text-sm text-muted">{t.description}</p>

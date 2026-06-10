@@ -3,10 +3,11 @@ import { DashboardHeader } from "@/components/DashboardHeader";
 import { SubNav } from "@/components/SubNav";
 
 const adminNav = [
-  { label: "Clients & logins", href: "/admin" },
+  { label: "Companies", href: "/admin" },
   { label: "Downloads", href: "/admin/downloads" },
   { label: "Tutorials", href: "/admin/tutorials" },
   { label: "Licenses", href: "/admin/licenses" },
+  { label: "Account", href: "/admin/account" },
 ];
 
 export default async function AdminLayout({
