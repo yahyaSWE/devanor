@@ -24,6 +24,10 @@ export default async function PortalAccountPage() {
               <dd>{user?.name ?? "—"}</dd>
             </div>
             <div className="flex justify-between gap-4">
+              <dt className="text-muted">Role</dt>
+              <dd>{user?.title ?? "—"}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
               <dt className="text-muted">Email</dt>
               <dd className="truncate">{user?.email}</dd>
             </div>

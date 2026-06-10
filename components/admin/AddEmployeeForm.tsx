@@ -8,11 +8,7 @@ const initial: ActionState = {};
 const inputClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent/60";
 
-export function CreateCustomerForm({
-  clients,
-}: {
-  clients: { id: string; name: string }[];
-}) {
+export function AddEmployeeForm({ clientId }: { clientId: string }) {
   const [state, action, pending] = useActionState(createCustomer, initial);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -22,18 +18,25 @@ export function CreateCustomerForm({
 
   return (
     <form ref={formRef} action={action} className="space-y-3">
+      <input type="hidden" name="clientId" value={clientId} />
+      <div>
+        <label className="mb-1 block text-xs text-muted">Full name</label>
+        <input name="name" className={inputClass} />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-muted">Job title / role</label>
+        <input
+          name="title"
+          placeholder="e.g. Lead Engineer, License Admin"
+          className={inputClass}
+        />
+      </div>
       <div>
         <label className="mb-1 block text-xs text-muted">Email *</label>
         <input name="email" type="email" required className={inputClass} />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-muted">Name</label>
-        <input name="name" className={inputClass} />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-muted">
-          Temporary password *
-        </label>
+        <label className="mb-1 block text-xs text-muted">Temporary password *</label>
         <input
           name="password"
           type="text"
@@ -43,23 +46,12 @@ export function CreateCustomerForm({
           className={inputClass}
         />
       </div>
-      <div>
-        <label className="mb-1 block text-xs text-muted">Linked client</label>
-        <select name="clientId" className={inputClass}>
-          <option value="">— None —</option>
-          {clients.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
 
       {state.error && <p className="text-sm text-red-400">{state.error}</p>}
-      {state.ok && <p className="text-sm text-accent">Customer account created.</p>}
+      {state.ok && <p className="text-sm text-accent">Employee added.</p>}
 
       <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Creating…" : "Create portal login"}
+        {pending ? "Adding…" : "Add employee"}
       </Button>
     </form>
   );

@@ -83,6 +83,7 @@ export async function deleteClient(formData: FormData): Promise<void> {
 const customerSchema = z.object({
   email: z.string().email("Enter a valid email."),
   name: z.string().optional(),
+  title: z.string().optional(),
   password: z.string().min(8, "Password must be at least 8 characters."),
   clientId: z.string().optional(),
 });
@@ -96,6 +97,7 @@ export async function createCustomer(
   const parsed = customerSchema.safeParse({
     email: formData.get("email"),
     name: formData.get("name") || undefined,
+    title: formData.get("title") || undefined,
     password: formData.get("password"),
     clientId: formData.get("clientId") || undefined,
   });
@@ -110,6 +112,7 @@ export async function createCustomer(
       data: {
         email: parsed.data.email,
         name: parsed.data.name,
+        title: parsed.data.title || null,
         passwordHash,
         role: "CUSTOMER",
         clientId: parsed.data.clientId || null,
@@ -123,5 +126,21 @@ export async function createCustomer(
   }
 
   revalidatePath("/admin");
+  if (parsed.data.clientId) revalidatePath(`/admin/clients/${parsed.data.clientId}`);
   return { ok: true };
+}
+
+export async function deleteUser(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { role: true, clientId: true },
+  });
+  // Never allow deleting admin accounts from here.
+  if (!user || user.role === "ADMIN") return;
+  await prisma.user.delete({ where: { id } });
+  revalidatePath("/admin");
+  if (user.clientId) revalidatePath(`/admin/clients/${user.clientId}`);
 }
