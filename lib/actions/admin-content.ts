@@ -111,7 +111,8 @@ export async function deleteTutorial(formData: FormData): Promise<void> {
 
 const licenseSchema = z.object({
   clientId: z.string().min(1, "Select a client."),
-  module: z.string().min(1, "Module is required."),
+  type: z.enum(["LICENSE", "MAINTENANCE"]),
+  module: z.string().min(1, "Module / item is required."),
   seats: z.coerce.number().int().positive().optional(),
   status: z.enum(["ACTIVE", "TRIAL", "EXPIRED"]),
   expiresAt: z.string().optional(),
@@ -125,6 +126,7 @@ export async function addLicense(
 
   const parsed = licenseSchema.safeParse({
     clientId: formData.get("clientId"),
+    type: formData.get("type") || "LICENSE",
     module: formData.get("module"),
     seats: formData.get("seats") || undefined,
     status: formData.get("status") || "ACTIVE",
@@ -137,6 +139,7 @@ export async function addLicense(
   await prisma.license.create({
     data: {
       clientId: parsed.data.clientId,
+      type: parsed.data.type,
       module: parsed.data.module,
       seats: parsed.data.seats ?? null,
       status: parsed.data.status,

@@ -2,7 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/db";
 import { AddClientForm } from "@/components/admin/AddClientForm";
-import { deleteClient } from "@/lib/actions/admin";
+import {
+  deleteClient,
+  toggleClientActive,
+  toggleClientVisibility,
+} from "@/lib/actions/admin";
+import { ConfirmSubmit } from "@/components/ConfirmSubmit";
 
 export const metadata = { title: "Admin" };
 
@@ -68,7 +73,19 @@ export default async function AdminPage() {
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{c.name}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate font-medium">{c.name}</p>
+                      {!c.active && (
+                        <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-400">
+                          Inactive
+                        </span>
+                      )}
+                      {!c.showOnSite && (
+                        <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
+                          Hidden from site
+                        </span>
+                      )}
+                    </div>
                     <p className="truncate text-sm text-muted">
                       {c._count.users} employee
                       {c._count.users === 1 ? "" : "s"}
@@ -80,12 +97,33 @@ export default async function AdminPage() {
                   >
                     Manage
                   </Link>
-                  <form action={deleteClient}>
+                  <form action={toggleClientVisibility}>
                     <input type="hidden" name="id" value={c.id} />
-                    <button className="shrink-0 text-sm text-muted hover:text-red-400">
-                      Remove
+                    <button className="shrink-0 text-sm text-muted hover:text-foreground">
+                      {c.showOnSite ? "Hide" : "Show"}
                     </button>
                   </form>
+                  <form action={toggleClientActive}>
+                    <input type="hidden" name="id" value={c.id} />
+                    <button className="shrink-0 text-sm text-muted hover:text-foreground">
+                      {c.active ? "Deactivate" : "Activate"}
+                    </button>
+                  </form>
+                  <ConfirmSubmit
+                    action={deleteClient}
+                    hidden={{ id: c.id }}
+                    trigger="Remove"
+                    confirmLabel="Delete company"
+                    title="Delete company?"
+                    message={`This permanently removes "${c.name}"${
+                      c._count.users > 0
+                        ? ` and its ${c._count.users} employee login${
+                            c._count.users === 1 ? "" : "s"
+                          }`
+                        : ""
+                    }. This cannot be undone.`}
+                    triggerClassName="shrink-0 text-sm text-muted hover:text-red-400"
+                  />
                 </li>
               ))}
             </ul>

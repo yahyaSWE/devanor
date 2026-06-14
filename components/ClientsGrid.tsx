@@ -5,7 +5,10 @@ export async function ClientsGrid() {
   let clients: { id: string; name: string; logoUrl: string; websiteUrl: string }[] =
     [];
   try {
-    clients = await prisma.client.findMany({ orderBy: { createdAt: "desc" } });
+    clients = await prisma.client.findMany({
+      where: { active: true, showOnSite: true },
+      orderBy: { createdAt: "desc" },
+    });
   } catch {
     clients = [];
   }

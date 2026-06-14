@@ -9,7 +9,10 @@ export async function LogoMarquee() {
   let clients: { id: string; name: string; logoUrl: string; websiteUrl: string }[] =
     [];
   try {
-    clients = await prisma.client.findMany({ orderBy: { createdAt: "asc" } });
+    clients = await prisma.client.findMany({
+      where: { active: true, showOnSite: true },
+      orderBy: { createdAt: "asc" },
+    });
   } catch {
     clients = [];
   }

@@ -30,6 +30,8 @@ model Client {
   name       String
   logoUrl    String
   websiteUrl String
+  active     Boolean    @default(true)
+  showOnSite Boolean    @default(true)
   users      User[]
   downloads  Download[]
   tutorials  Tutorial[]
@@ -80,9 +82,15 @@ enum LicenseStatus {
   EXPIRED
 }
 
-// A licensed module/subscription belonging to a client.
+enum LicenseType {
+  LICENSE
+  MAINTENANCE
+}
+
+// A licensed module or a maintenance entry belonging to a client.
 model License {
   id        String        @id @default(cuid())
+  type      LicenseType   @default(LICENSE)
   module    String
   seats     Int?
   status    LicenseStatus @default(ACTIVE)

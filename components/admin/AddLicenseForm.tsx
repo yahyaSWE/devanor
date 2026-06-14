@@ -36,11 +36,18 @@ export function AddLicenseForm({
         </select>
       </div>
       <div>
-        <label className="mb-1 block text-xs text-muted">Module *</label>
+        <label className="mb-1 block text-xs text-muted">Type *</label>
+        <select name="type" className={inputClass} defaultValue="LICENSE">
+          <option value="LICENSE">License</option>
+          <option value="MAINTENANCE">Maintenance</option>
+        </select>
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-muted">Module / item *</label>
         <input
           name="module"
           required
-          placeholder="e.g. E3.Schematic"
+          placeholder="e.g. E3.Schematic or Annual Maintenance"
           className={inputClass}
         />
       </div>

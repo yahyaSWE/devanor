@@ -6,6 +6,7 @@ import { randomUUID } from "crypto";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-helpers";
@@ -74,10 +75,107 @@ export async function deleteClient(formData: FormData): Promise<void> {
   await requireAdmin();
   const id = formData.get("id");
   if (typeof id === "string") {
+    // Employees belong to the company — remove their logins along with it.
+    await prisma.user.deleteMany({ where: { clientId: id, role: "CUSTOMER" } });
     await prisma.client.delete({ where: { id } });
     revalidatePath("/about");
     revalidatePath("/admin");
   }
+}
+
+// Same as deleteClient, but returns the admin to the companies list (the
+// detail page would 404 once its company is gone).
+export async function deleteClientAndRedirect(formData: FormData): Promise<void> {
+  await deleteClient(formData);
+  redirect("/admin");
+}
+
+const updateClientSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1, "Company name is required."),
+  websiteUrl: z.string().url("Enter a valid website URL (including https://)."),
+  logoUrl: z.string().url().optional(),
+});
+
+export async function updateClient(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireAdmin();
+
+  const parsed = updateClientSchema.safeParse({
+    id: formData.get("id"),
+    name: formData.get("name"),
+    websiteUrl: formData.get("websiteUrl"),
+    logoUrl: formData.get("logoUrl") || undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+  }
+
+  const data: { name: string; websiteUrl: string; logoUrl?: string } = {
+    name: parsed.data.name,
+    websiteUrl: parsed.data.websiteUrl,
+  };
+
+  const file = formData.get("logoFile");
+  if (file instanceof File && file.size > 0) {
+    if (!ALLOWED_LOGO_TYPES.includes(file.type)) {
+      return { error: "Logo must be a PNG, JPG, SVG or WebP image." };
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      return { error: "Logo must be smaller than 2 MB." };
+    }
+    data.logoUrl = await saveLogoFile(file);
+  } else if (parsed.data.logoUrl) {
+    data.logoUrl = parsed.data.logoUrl;
+  }
+  // If neither a file nor a URL is given, the existing logo is kept.
+
+  await prisma.client.update({ where: { id: parsed.data.id }, data });
+
+  revalidatePath("/about");
+  revalidatePath("/admin");
+  revalidatePath(`/admin/clients/${parsed.data.id}`);
+  return { ok: true };
+}
+
+export async function toggleClientActive(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const client = await prisma.client.findUnique({
+    where: { id },
+    select: { active: true },
+  });
+  if (!client) return;
+  await prisma.client.update({
+    where: { id },
+    data: { active: !client.active },
+  });
+  revalidatePath("/about");
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath(`/admin/clients/${id}`);
+}
+
+export async function toggleClientVisibility(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const client = await prisma.client.findUnique({
+    where: { id },
+    select: { showOnSite: true },
+  });
+  if (!client) return;
+  await prisma.client.update({
+    where: { id },
+    data: { showOnSite: !client.showOnSite },
+  });
+  revalidatePath("/about");
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath(`/admin/clients/${id}`);
 }
 
 const customerSchema = z.object({

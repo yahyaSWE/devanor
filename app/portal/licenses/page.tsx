@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getPortalUser } from "@/lib/portal";
 import { formatDate } from "@/lib/format";
 import { LicenseStatusBadge } from "@/components/LicenseStatusBadge";
+import { LicenseTypeBadge } from "@/components/LicenseTypeBadge";
 
 export const metadata = { title: "Licenses" };
 
@@ -38,7 +39,8 @@ export default async function PortalLicensesPage() {
           <table className="w-full text-left text-sm">
             <thead className="bg-surface/60 text-muted">
               <tr>
-                <th className="px-5 py-3 font-medium">Module</th>
+                <th className="px-5 py-3 font-medium">Module / item</th>
+                <th className="px-5 py-3 font-medium">Type</th>
                 <th className="px-5 py-3 font-medium">Seats</th>
                 <th className="px-5 py-3 font-medium">Status</th>
                 <th className="px-5 py-3 font-medium">Renews / expires</th>
@@ -48,6 +50,9 @@ export default async function PortalLicensesPage() {
               {licenses.map((l) => (
                 <tr key={l.id} className="bg-surface/30">
                   <td className="px-5 py-3 font-medium">{l.module}</td>
+                  <td className="px-5 py-3">
+                    <LicenseTypeBadge type={l.type} />
+                  </td>
                   <td className="px-5 py-3 text-muted">{l.seats ?? "—"}</td>
                   <td className="px-5 py-3">
                     <LicenseStatusBadge status={l.status} />
