@@ -48,10 +48,6 @@ export default function BookDemoPage() {
               </a>
             </dd>
           </div>
-          <div>
-            <dt className="text-muted">Address</dt>
-            <dd>{site.contact.address}</dd>
-          </div>
         </dl>
       </div>
 
@@ -88,13 +84,25 @@ export default function BookDemoPage() {
             </div>
             <div>
               <label htmlFor="company" className="mb-1.5 block text-sm text-muted">
-                Company
+                Company *
               </label>
-              <input id="company" name="company" className={inputClass} />
+              <input id="company" name="company" required className={inputClass} />
+            </div>
+            <div>
+              <label htmlFor="phone" className="mb-1.5 block text-sm text-muted">
+                Phone *
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                required
+                className={inputClass}
+              />
             </div>
             <div>
               <label htmlFor="message" className="mb-1.5 block text-sm text-muted">
-                What would you like to see?
+                Which E3.series products are you interested in?
               </label>
               <textarea
                 id="message"

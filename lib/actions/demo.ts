@@ -6,7 +6,8 @@ import { prisma } from "@/lib/db";
 const schema = z.object({
   name: z.string().min(1, "Please enter your name."),
   email: z.string().email("Please enter a valid email."),
-  company: z.string().optional(),
+  company: z.string().min(1, "Please enter your company."),
+  phone: z.string().min(1, "Please enter your phone number."),
   message: z.string().optional(),
 });
 
@@ -22,7 +23,8 @@ export async function submitDemo(
   const parsed = schema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
-    company: formData.get("company") || undefined,
+    company: String(formData.get("company") ?? ""),
+    phone: String(formData.get("phone") ?? ""),
     message: formData.get("message") || undefined,
   });
 
