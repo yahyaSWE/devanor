@@ -1,8 +1,5 @@
 "use server";
 
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { randomUUID } from "crypto";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
@@ -21,14 +18,12 @@ const clientSchema = z.object({
 
 const ALLOWED_LOGO_TYPES = ["image/png", "image/jpeg", "image/svg+xml", "image/webp"];
 
-async function saveLogoFile(file: File): Promise<string> {
-  const ext = path.extname(file.name) || ".png";
-  const filename = `${randomUUID()}${ext}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadDir, { recursive: true });
-  const bytes = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(uploadDir, filename), bytes);
-  return `/uploads/${filename}`;
+// Store the logo inline as a base64 data URL. This avoids writing to the
+// filesystem, which is read-only on serverless hosts like Vercel.
+async function fileToDataUrl(file: File): Promise<string> {
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const mime = file.type || "image/png";
+  return `data:${mime};base64,${buffer.toString("base64")}`;
 }
 
 export async function addClient(
@@ -55,7 +50,7 @@ export async function addClient(
     if (file.size > 2 * 1024 * 1024) {
       return { error: "Logo must be smaller than 2 MB." };
     }
-    logoUrl = await saveLogoFile(file);
+    logoUrl = await fileToDataUrl(file);
   }
 
   if (!logoUrl) {
@@ -126,7 +121,7 @@ export async function updateClient(
     if (file.size > 2 * 1024 * 1024) {
       return { error: "Logo must be smaller than 2 MB." };
     }
-    data.logoUrl = await saveLogoFile(file);
+    data.logoUrl = await fileToDataUrl(file);
   } else if (parsed.data.logoUrl) {
     data.logoUrl = parsed.data.logoUrl;
   }
