@@ -20,28 +20,157 @@ export const nav = [
   { label: "About us", href: "/about" },
 ] as const;
 
-export const e3Modules = [
+// General step-by-step demo videos (à la devanor.com/#videos). Replace with the
+// real internal videos section once Johan provides it.
+export const demoVideosUrl = "https://devanor.com/#videos";
+
+export type Product = {
+  slug: string;
+  name: string;
+  summary: string;
+  detail: string;
+  highlights: string[];
+  /** YouTube/Vimeo link — Johan provides; empty hides the player. */
+  videoUrl: string;
+};
+
+export const products: Product[] = [
   {
-    name: "E3.schematic & E3.cable",
-    description:
-      "Design electrical control-system schematics and complete wiring and cabling, with intelligent, rules-driven editing.",
+    slug: "e3-schematic",
+    name: "E3.schematic",
+    summary:
+      "Generate circuit diagrams, terminal, equipment and cable lists, and connection tables in one object-oriented design environment.",
+    detail:
+      "E3.schematic is a Windows-based platform built for automation, power generation, panel building and machinery. Its object-oriented engineering and complete IEC/ISO symbol libraries help you produce consistent documentation while minimising errors, with flexible reports and manufacturing-ready output.",
+    highlights: [
+      "IEC/ISO symbol libraries with virtually defined equipment",
+      "Variant and options management",
+      "Integrated PLC interfaces and Excel data exchange",
+      "Automated generation of lists, tables and reports",
+      "Optional 3D panel layout, hydraulics and pneumatics",
+    ],
+    videoUrl: "",
   },
   {
-    name: "E3.topology",
-    description:
-      "Convert logical designs into physical representations through topology sheets that map real-world routing.",
+    slug: "e3-cable",
+    name: "E3.cable",
+    summary:
+      "Design custom harnesses, hoses and plug connections for complex electromechanical products.",
+    detail:
+      "E3.cable is an object-oriented solution for designing cables, hoses, ducts, liners and bundles — presenting the same object across every document at once. Ideal for machinery, marine, automotive and aerospace, it streamlines the workflow from concept to manufacturing and connects electronics with the physical harness.",
+    highlights: [
+      "Manage hoses, ducts, liners and bundles centrally",
+      "Full-scale nailboard manufacturing templates",
+      "Includes E3.schematic design capabilities",
+      "3D assembly coordination via E3.3D Routing Bridge",
+      "End-to-end control from concept to production",
+    ],
+    videoUrl: "",
   },
   {
-    name: "E3.formboard",
-    description:
-      "Create 1:1 cable-harness drawings and full manufacturing documentation directly from your design data.",
-  },
-  {
+    slug: "e3-panel",
     name: "E3.panel",
-    description:
-      "Lay out components for panel enclosures in 2D and 3D with automated checks and MCAD integration.",
+    summary:
+      "Lay out and wire control-panel enclosures in 2D and 3D with automated design checks.",
+    detail:
+      "E3.panel adds real 3D cabinet and panel layout to E3.series. Place components on mounting plates and rails, route wiring and ducts in 3D, and run automated design and manufacturing checks — keeping the panel layout in sync with the schematic at all times.",
+    highlights: [
+      "2D and 3D panel and enclosure layout",
+      "Component placement on plates and DIN rails",
+      "Automated clearance and design checks",
+      "Wire and duct routing with fill levels",
+      "Manufacturing outputs: drilling, labelling, wiring",
+    ],
+    videoUrl: "",
   },
-] as const;
+  {
+    slug: "e3-formboard",
+    name: "E3.formboard",
+    summary:
+      "Produce 1:1 harness manufacturing drawings (nailboards) directly from your E3.cable design.",
+    detail:
+      "E3.formboard is an add-on to E3.cable for creating fully functional 1:1 harness manufacturing documentation. It turns the electrical design into precise nailboards production teams can build from, with dynamic links back to the source design.",
+    highlights: [
+      "Harnesses at any scale",
+      "Automatic wire lengths and bundle diameters",
+      "Wire segregation and connection specs",
+      "Production-ready, optimised documentation",
+      "Clips, convolute and heat-shrink support",
+      "Dynamic link to the E3.cable design",
+    ],
+    videoUrl: "",
+  },
+  {
+    slug: "e3-topology",
+    name: "E3.topology",
+    summary:
+      "Distribute components across the system and evaluate harnesses on scaled topology drawings.",
+    detail:
+      "E3.topology lets you place equipment and plan routing at the same time. Position components in defined installation spaces, establish valid pathways between them, and the wires and cables for each harness are organised automatically — from first sketch to finished documentation.",
+    highlights: [
+      "Integrated with E3.cable",
+      "Scaled topology drawings with installation spaces",
+      "Valid routing pathway definition",
+      "Automatic harness assignment from connections",
+      "Plan and place equipment simultaneously",
+    ],
+    videoUrl: "",
+  },
+  {
+    slug: "e3-3d-routing-bridge",
+    name: "E3.3D Routing Bridge",
+    summary:
+      "Bridge electrical harness design and major MCAD systems to build and validate digital prototypes.",
+    detail:
+      "The E3.3D Routing Bridge connects E3.series harness design with leading mechanical CAD systems. Electrical and mechanical teams work in parallel in their own tools, then merge data to validate designs virtually — removing the need for costly physical prototypes.",
+    highlights: [
+      "Supports SOLIDWORKS, CATIA V5, Creo, NX, Solid Edge, Inventor",
+      "Parallel mechanical and electrical workflows",
+      "Virtual prototyping cuts physical-prototype cost",
+      "Seamless ECAD/MCAD data integration",
+      "Fewer errors through early digital integration",
+    ],
+    videoUrl: "",
+  },
+  {
+    slug: "e3-3d-transformer",
+    name: "E3.3D Transformer",
+    summary:
+      "Transform 3D MCAD harness data into standardised electrical topology models.",
+    detail:
+      "E3.3D Transformer extracts harness routing from leading MCAD platforms and converts it into standardised electrical topology data — automating the MCAD-to-ECAD handoff with built-in validation and company-specific rules.",
+    highlights: [
+      "Up to 75% faster than other MCAD plugins",
+      "Fewer MCAD↔ECAD revision cycles",
+      "CATIA, NX, Creo, SolidWorks, Solid Edge, Inventor",
+      "Exports standard KBL and VEC formats",
+      "Rule-based, configurable automation",
+      "Built-in connectivity validation",
+    ],
+    videoUrl: "",
+  },
+  {
+    slug: "e3-viewer",
+    name: "E3.viewer",
+    summary:
+      "Share complete E3.series projects as read-only — free for any stakeholder to view.",
+    detail:
+      "E3.viewer is a free, read-only module that opens full E3.series projects in the same interface as the editor. Distribute projects safely to production, service, suppliers and customers, with full navigation, search and printing but no editing.",
+    highlights: [
+      "View all documents and equipment properties",
+      "Search with dynamic pan and zoom",
+      "Cross-reference navigation",
+      "Multi-language interface",
+      "Professional printing",
+      "Free to distribute",
+    ],
+    videoUrl: "",
+  },
+];
+
+export function getProduct(slug: string): Product | undefined {
+  return products.find((p) => p.slug === slug);
+}
 
 export const services = [
   {

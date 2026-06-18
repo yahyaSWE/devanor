@@ -6,7 +6,7 @@ import { CTASection } from "@/components/CTASection";
 import { Stats } from "@/components/Stats";
 import { LogoMarquee } from "@/components/LogoMarquee";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
-import { caseStudies, differentiators, e3Modules, services, site } from "@/lib/site";
+import { caseStudies, differentiators, products, services, site } from "@/lib/site";
 
 export default function HomePage() {
   return (
@@ -80,14 +80,19 @@ export default function HomePage() {
           subtitle="Design complex electrical systems with integrated wiring, fluid engineering, MCAD connectivity and automated design checks."
         />
         <div className="mt-12 grid gap-4 sm:grid-cols-2">
-          {e3Modules.map((m, i) => (
-            <Reveal key={m.name} delay={i * 0.05}>
-              <Link href="/products" className="card group block h-full p-6">
+          {products.map((p, i) => (
+            <Reveal key={p.slug} delay={i * 0.04}>
+              <Link
+                href={`/products/${p.slug}`}
+                className="card group block h-full p-6"
+              >
                 <div className="flex items-start justify-between gap-3">
-                  <h3 className="text-lg font-semibold">{m.name}</h3>
-                  <span className="font-mono text-xs text-muted">0{i + 1}</span>
+                  <h3 className="text-lg font-semibold">{p.name}</h3>
+                  <span className="font-mono text-xs text-muted">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                 </div>
-                <p className="mt-2 text-sm text-muted">{m.description}</p>
+                <p className="mt-2 text-sm text-muted">{p.summary}</p>
                 <span className="mt-4 inline-block text-sm text-accent opacity-0 transition-opacity group-hover:opacity-100">
                   Learn more →
                 </span>

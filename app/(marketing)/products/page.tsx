@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Section, SectionHeading } from "@/components/Section";
-import { ButtonLink } from "@/components/Button";
 import { Reveal } from "@/components/Reveal";
 import { CTASection } from "@/components/CTASection";
 import { BackButton } from "@/components/BackButton";
-import { e3Modules } from "@/lib/site";
+import { products } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Products",
-  description: "E3.series — the modular platform for electrical and mechanical design.",
+  description:
+    "E3.series — a complete modular platform for electrical engineering.",
 };
 
 export default function ProductsPage() {
@@ -18,41 +19,30 @@ export default function ProductsPage() {
         <BackButton />
         <SectionHeading
           eyebrow="Products"
-          title="Our products"
-          subtitle="We currently offer the E3.series platform, with more products to come."
+          title="E3.series — a complete modular platform for electrical engineering"
+          subtitle="Design complex electrical systems with integrated wiring, fluid engineering, MCAD connectivity and automated design checks."
         />
 
-        <div className="mt-12 grid gap-6">
-          <Reveal>
-            <article className="rounded-3xl border border-border bg-surface/40 p-8 sm:p-10">
-              <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-                <div className="max-w-2xl">
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-                    Flagship
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {products.map((p, i) => (
+            <Reveal key={p.slug} delay={i * 0.04}>
+              <Link
+                href={`/products/${p.slug}`}
+                className="card group flex h-full flex-col p-6"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="text-lg font-semibold">{p.name}</h2>
+                  <span className="font-mono text-xs text-muted">
+                    {String(i + 1).padStart(2, "0")}
                   </span>
-                  <h2 className="mt-3 text-2xl font-semibold">E3.series</h2>
-                  <p className="mt-3 text-muted">
-                    A modular platform for designing electrical, wiring and fluid
-                    systems — with seamless MCAD integration, automated electrical
-                    inspections and bidirectional ECAD/MCAD workflows.
-                  </p>
                 </div>
-                <ButtonLink href="/products/e3-series">Learn more</ButtonLink>
-              </div>
-
-              <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                {e3Modules.map((m, i) => (
-                  <div key={m.name} className="card p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-sm font-semibold">{m.name}</h3>
-                      <span className="font-mono text-xs text-muted">0{i + 1}</span>
-                    </div>
-                    <p className="mt-1 text-sm text-muted">{m.description}</p>
-                  </div>
-                ))}
-              </div>
-            </article>
-          </Reveal>
+                <p className="mt-2 flex-1 text-sm text-muted">{p.summary}</p>
+                <span className="mt-4 text-sm text-accent opacity-0 transition-opacity group-hover:opacity-100">
+                  Learn more →
+                </span>
+              </Link>
+            </Reveal>
+          ))}
         </div>
       </Section>
 
