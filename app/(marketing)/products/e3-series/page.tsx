@@ -3,27 +3,29 @@ import { Section, SectionHeading } from "@/components/Section";
 import { ButtonLink } from "@/components/Button";
 import { Reveal } from "@/components/Reveal";
 import { CTASection } from "@/components/CTASection";
+import { BackButton } from "@/components/BackButton";
 import { e3Modules, e3Tutorials } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "E3 Series",
+  title: "E3.series",
   description:
-    "E3.Series modular platform: Schematic & Cable, Topology, Formboard and Panel.",
+    "E3.series modular platform: Schematic & Cable, Topology, Formboard and Panel.",
 };
 
 export default function E3SeriesPage() {
   return (
     <>
-      <Section className="pt-28">
+      <Section className="pt-32">
+        <BackButton />
         <div className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
-            Products / E3 Series
+            Products / E3.series
           </p>
           <h1 className="mt-4 text-balance text-4xl font-semibold sm:text-5xl">
             One platform for electrical, wiring &amp; fluid design
           </h1>
           <p className="mt-5 text-lg text-muted">
-            E3.Series is a modular, object-oriented platform. Each module shares a
+            E3.series is a modular, object-oriented platform. Each module shares a
             single consistent data model, so changes stay in sync from schematic to
             manufacturing — with automated checks and full MCAD integration.
           </p>
@@ -52,7 +54,7 @@ export default function E3SeriesPage() {
       <Section id="tutorials" className="border-t border-border">
         <SectionHeading
           eyebrow="E3 Tutorials"
-          title="Learn E3.Series, step by step"
+          title="Learn E3.series, step by step"
           subtitle="Guided tutorials from first project to advanced automation. More are added regularly."
         />
         <div className="mt-12 grid gap-4 sm:grid-cols-2">

@@ -1,29 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ButtonLink } from "./Button";
 import { nav, site } from "@/lib/site";
 
 export function Footer() {
   return (
     <footer className="mt-auto border-t border-border bg-surface/40">
-      {/* Mini CTA row */}
-      <div className="border-b border-border">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-6 px-6 py-12 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="text-2xl font-semibold">
-              Ready to streamline your design workflow?
-            </h2>
-            <p className="mt-2 text-muted">
-              Book a tailored demo of E3.Series with our team.
-            </p>
-          </div>
-          <ButtonLink href="/book-demo" className="shrink-0 px-8">
-            Book a Demo
-          </ButtonLink>
-        </div>
-      </div>
-
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-6 lg:px-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-2">
           <Image
             src="/logo.png"
@@ -95,10 +77,8 @@ export function Footer() {
       </div>
 
       <div className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
-          <span>
-            © {new Date().getFullYear()} {site.name}. All rights reserved.
-          </span>
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-6 lg:px-10 py-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
+          <span>© 2018 Devanor Solutions. All rights reserved.</span>
           <span>Official Zuken Partner · Dubai, UAE</span>
         </div>
       </div>

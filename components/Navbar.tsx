@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ButtonLink } from "./Button";
 import { nav, site } from "@/lib/site";
@@ -11,29 +12,51 @@ type SessionUser = { email: string; role: "ADMIN" | "CUSTOMER" } | null;
 
 export function Navbar({ user }: { user: SessionUser }) {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const dashboardHref = user?.role === "ADMIN" ? "/admin" : "/portal";
 
-  return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center" aria-label={site.name}>
-          <Image
-            src="/logo.png"
-            alt={site.name}
-            width={1339}
-            height={328}
-            priority
-            className="h-9 w-auto"
-          />
-        </Link>
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-        <nav className="hidden items-center gap-8 md:flex">
+  const solid = scrolled || open;
+
+  return (
+    <header
+      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        solid
+          ? "border-b border-border bg-background/80 backdrop-blur-xl"
+          : "border-b border-transparent bg-transparent"
+      }`}
+    >
+      <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-6 lg:px-10">
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <Link href="/" className="flex items-center" aria-label={site.name}>
+            <Image
+              src="/logo.png"
+              alt={site.name}
+              width={1339}
+              height={328}
+              priority
+              className="h-11 w-auto"
+            />
+          </Link>
+        </motion.div>
+
+        <nav className="hidden items-center gap-9 md:flex">
           {nav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`text-sm transition-colors hover:text-foreground ${
+              className={`text-[15px] font-medium transition-colors hover:text-foreground ${
                 pathname.startsWith(item.href) ? "text-foreground" : "text-muted"
               }`}
             >
@@ -70,7 +93,7 @@ export function Navbar({ user }: { user: SessionUser }) {
 
       {open && (
         <div className="border-t border-border bg-background md:hidden">
-          <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-4">
+          <div className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-4">
             {nav.map((item) => (
               <Link
                 key={item.href}

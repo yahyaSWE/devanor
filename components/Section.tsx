@@ -11,7 +11,7 @@ export function Section({
 }) {
   return (
     <section id={id} className={`py-20 sm:py-28 ${className ?? ""}`}>
-      <div className="mx-auto w-full max-w-6xl px-6">{children}</div>
+      <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">{children}</div>
     </section>
   );
 }

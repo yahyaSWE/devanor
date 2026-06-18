@@ -1,10 +1,10 @@
 export const site = {
   name: "Devanor Solutions",
-  tagline: "Engineering Smarter Electrical & Mechanical Design",
+  tagline: "Engineered for Smarter Electrical Design",
   description:
-    "Devanor Solutions is a Zuken partner delivering E3.Series software, training and expert support for electrical and mechanical design teams.",
+    "Devanor Solutions is a Zuken Partner providing E3.series software, training, consulting and expert support for smarter electrical design.",
   contact: {
-    address: "FZA Business Park, DDP, PO Box 342001, Dubai, United Arab Emirates",
+    address: "IFZA Business Park, DDP, PO Box 342001, Dubai, United Arab Emirates",
     phone: "+971 585 697 040",
     phoneHref: "tel:+971585697040",
     whatsapp: "+971 585 697 040",
@@ -22,22 +22,22 @@ export const nav = [
 
 export const e3Modules = [
   {
-    name: "E3.Schematic & E3.Cable",
+    name: "E3.schematic & E3.cable",
     description:
       "Design electrical control-system schematics and complete wiring and cabling, with intelligent, rules-driven editing.",
   },
   {
-    name: "E3.Topology",
+    name: "E3.topology",
     description:
       "Convert logical designs into physical representations through topology sheets that map real-world routing.",
   },
   {
-    name: "E3.Formboard",
+    name: "E3.formboard",
     description:
       "Create 1:1 cable-harness drawings and full manufacturing documentation directly from your design data.",
   },
   {
-    name: "E3.Panel",
+    name: "E3.panel",
     description:
       "Lay out components for panel enclosures in 2D and 3D with automated checks and MCAD integration.",
   },
@@ -47,29 +47,30 @@ export const services = [
   {
     name: "Helpdesk Support",
     description:
-      "Expert guidance for troubleshooting and day-to-day E3.Series questions, so your team is never blocked.",
+      "Direct access to E3.series experts for troubleshooting, guidance, and best-practice advice—keeping your projects moving and your team productive.",
   },
   {
     name: "Automation",
     description:
-      "Custom scripts that streamline workflows, generate reports and remove repetitive manual work.",
+      "Tailored scripts that eliminate repetitive tasks, improve consistency and save valuable engineering time.",
   },
   {
     name: "Training",
     description:
-      "Beginner to advanced courses, delivered online or on-site and tailored to your team's needs.",
+      "Practical training designed to build expertise, improve confidence and help your team work more efficiently.",
   },
   {
     name: "Consulting",
     description:
-      "Tailored business solutions and hands-on support to optimise your ECAD/MCAD design process.",
+      "Hands-on electrical and mechanical design support, helping your team create accurate drawings and complete projects with confidence.",
   },
 ] as const;
 
 export const differentiators = [
   {
-    title: "Deep E3.Series Expertise",
-    description: "Over 7 years working hands-on with E3.Series across complex projects.",
+    title: "Deep E3.series Expertise",
+    description:
+      "Practical expertise across schematics, harness design and panel engineering.",
   },
   {
     title: "Electrical + Mechanical",
@@ -77,7 +78,7 @@ export const differentiators = [
   },
   {
     title: "Customised Solutions",
-    description: "Solutions and training shaped around how your team actually works.",
+    description: "Solutions and training shaped around your engineering processes.",
   },
   {
     title: "Workflow Optimisation",
@@ -90,33 +91,33 @@ export const caseStudies = [
     title: "Harness Documentation, Automated",
     client: "Industrial Equipment Manufacturer",
     summary:
-      "Cut cable-harness documentation time dramatically by moving from manual drawings to E3.Formboard with custom automation.",
+      "Cut cable-harness documentation time dramatically by moving from manual drawings to E3.formboard with custom automation.",
     result: "60% faster manufacturing documentation",
   },
   {
     title: "ECAD/MCAD in One Flow",
     client: "Special Machinery Builder",
     summary:
-      "Connected electrical and mechanical design with bidirectional E3.Series workflows, eliminating costly rework.",
+      "Connected electrical and mechanical design with bidirectional E3.series workflows, eliminating costly rework.",
     result: "Zero re-spins from ECAD/MCAD mismatches",
   },
   {
     title: "Onboarding a New Engineering Team",
     client: "Power Systems Integrator",
     summary:
-      "Tailored training programme that took a new team from zero to productive on E3.Series in weeks.",
+      "Tailored training programme that took a new team from zero to productive on E3.series in weeks.",
     result: "Productive in under 4 weeks",
   },
 ] as const;
 
 export const e3Tutorials = [
   {
-    title: "Getting Started with E3.Schematic",
+    title: "Getting Started with E3.schematic",
     level: "Beginner",
     description: "Create your first project, place symbols and draw your first connections.",
   },
   {
-    title: "Working with E3.Cable",
+    title: "Working with E3.cable",
     level: "Intermediate",
     description: "Define cables, cores and connectors and keep wiring data consistent.",
   },
@@ -128,6 +129,6 @@ export const e3Tutorials = [
   {
     title: "Automating Reports with Scripts",
     level: "Advanced",
-    description: "Use the E3.Series API to automate repetitive documentation tasks.",
+    description: "Use the E3.series API to automate repetitive documentation tasks.",
   },
 ] as const;

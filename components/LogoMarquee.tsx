@@ -25,18 +25,15 @@ export async function LogoMarquee() {
   return (
     <div className="border-y border-border bg-surface/30 py-10">
       <p className="mb-8 text-center text-xs font-semibold uppercase tracking-[0.25em] text-muted">
-        Trusted by engineering teams
+        Our Clients
       </p>
       <div className="marquee-mask overflow-hidden">
         <div className="marquee-track items-center gap-16 px-8">
           {loop.map((c, i) => (
-            <a
+            <div
               key={`${c.id}-${i}`}
-              href={c.websiteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
               title={c.name}
-              className="shrink-0 opacity-60 transition-opacity hover:opacity-100"
+              className="shrink-0 opacity-70"
             >
               <Image
                 src={c.logoUrl}
@@ -46,7 +43,7 @@ export async function LogoMarquee() {
                 className="h-10 w-auto object-contain"
                 unoptimized
               />
-            </a>
+            </div>
           ))}
         </div>
       </div>

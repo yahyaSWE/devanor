@@ -3,21 +3,23 @@ import { Section, SectionHeading } from "@/components/Section";
 import { ButtonLink } from "@/components/Button";
 import { Reveal } from "@/components/Reveal";
 import { CTASection } from "@/components/CTASection";
+import { BackButton } from "@/components/BackButton";
 import { e3Modules } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Products",
-  description: "E3.Series — the modular platform for electrical and mechanical design.",
+  description: "E3.series — the modular platform for electrical and mechanical design.",
 };
 
 export default function ProductsPage() {
   return (
     <>
-      <Section className="pt-28">
+      <Section className="pt-32">
+        <BackButton />
         <SectionHeading
           eyebrow="Products"
           title="Our products"
-          subtitle="We currently offer the E3 Series platform, with more products to come."
+          subtitle="We currently offer the E3.series platform, with more products to come."
         />
 
         <div className="mt-12 grid gap-6">
@@ -28,7 +30,7 @@ export default function ProductsPage() {
                   <span className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
                     Flagship
                   </span>
-                  <h2 className="mt-3 text-2xl font-semibold">E3 Series</h2>
+                  <h2 className="mt-3 text-2xl font-semibold">E3.series</h2>
                   <p className="mt-3 text-muted">
                     A modular platform for designing electrical, wiring and fluid
                     systems — with seamless MCAD integration, automated electrical

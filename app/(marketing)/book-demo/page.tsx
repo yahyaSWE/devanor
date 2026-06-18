@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { submitDemo, type DemoFormState } from "@/lib/actions/demo";
 import { Button } from "@/components/Button";
+import { BackButton } from "@/components/BackButton";
 import { site } from "@/lib/site";
 
 const initialState: DemoFormState = {};
@@ -14,7 +15,10 @@ export default function BookDemoPage() {
   const [state, formAction, isPending] = useActionState(submitDemo, initialState);
 
   return (
-    <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-28 lg:grid-cols-2">
+    <div className="mx-auto grid w-full max-w-7xl gap-12 px-6 pb-28 pt-32 lg:grid-cols-2 lg:px-10">
+      <div className="lg:col-span-2">
+        <BackButton />
+      </div>
       <div>
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
           Book a Demo
@@ -24,7 +28,7 @@ export default function BookDemoPage() {
         </h1>
         <p className="mt-5 text-lg text-muted">
           Tell us a little about your team and what you&apos;re working on. We&apos;ll
-          get back to you to arrange a tailored demo of E3.Series.
+          get back to you to arrange a tailored demo of E3.series.
         </p>
 
         <dl className="mt-10 space-y-4 text-sm">

@@ -24,23 +24,20 @@ export async function ClientsGrid() {
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
       {clients.map((c) => (
-        <a
+        <div
           key={c.id}
-          href={c.websiteUrl}
-          target="_blank"
-          rel="noopener noreferrer"
           title={c.name}
-          className="flex aspect-[3/2] items-center justify-center rounded-2xl border border-border bg-surface/40 p-6 transition-colors hover:border-accent/40"
+          className="flex aspect-[3/2] items-center justify-center rounded-2xl border border-border bg-surface/40 p-6"
         >
           <Image
             src={c.logoUrl}
             alt={c.name}
             width={160}
             height={80}
-            className="max-h-12 w-auto object-contain opacity-80 transition-opacity hover:opacity-100"
+            className="max-h-12 w-auto object-contain opacity-80"
             unoptimized
           />
-        </a>
+        </div>
       ))}
     </div>
   );
