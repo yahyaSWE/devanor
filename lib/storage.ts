@@ -1,11 +1,18 @@
 import { mkdir, writeFile, readFile, unlink } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
+import {
+  isStorageConfigured,
+  uploadToBucket,
+  downloadFromBucket,
+  deleteFromBucket,
+  DOWNLOAD_BUCKET,
+} from "./supabase-storage";
 
-// Files live OUTSIDE /public so they are never served statically — access is
-// gated through an authenticated route handler. Swap this module for Supabase
-// Storage later without touching callers.
-const STORAGE_DIR = path.join(process.cwd(), "storage", "uploads");
+// Private download files: stored in Supabase Storage when configured (works on
+// serverless/Vercel), otherwise on the local filesystem for local dev. Either
+// way they are served only through the auth-gated /api/downloads/[id] route.
+const LOCAL_DIR = path.join(process.cwd(), "storage", "uploads");
 
 export type StoredFile = {
   storedName: string;
@@ -17,26 +24,35 @@ export type StoredFile = {
 export async function saveUpload(file: File): Promise<StoredFile> {
   const ext = path.extname(file.name) || "";
   const storedName = `${randomUUID()}${ext}`;
-  await mkdir(STORAGE_DIR, { recursive: true });
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(STORAGE_DIR, storedName), buffer);
-  return {
-    storedName,
-    fileName: file.name,
-    mimeType: file.type || "application/octet-stream",
-    size: file.size,
-  };
+  const mimeType = file.type || "application/octet-stream";
+
+  if (isStorageConfigured()) {
+    await uploadToBucket(DOWNLOAD_BUCKET, storedName, buffer, mimeType);
+  } else {
+    await mkdir(LOCAL_DIR, { recursive: true });
+    await writeFile(path.join(LOCAL_DIR, storedName), buffer);
+  }
+
+  return { storedName, fileName: file.name, mimeType, size: file.size };
 }
 
 export async function readUpload(storedName: string): Promise<Buffer> {
   const safe = path.basename(storedName); // prevent path traversal
-  return readFile(path.join(STORAGE_DIR, safe));
+  if (isStorageConfigured()) {
+    return downloadFromBucket(DOWNLOAD_BUCKET, safe);
+  }
+  return readFile(path.join(LOCAL_DIR, safe));
 }
 
 export async function deleteUpload(storedName: string): Promise<void> {
   const safe = path.basename(storedName);
+  if (isStorageConfigured()) {
+    await deleteFromBucket(DOWNLOAD_BUCKET, safe).catch(() => {});
+    return;
+  }
   try {
-    await unlink(path.join(STORAGE_DIR, safe));
+    await unlink(path.join(LOCAL_DIR, safe));
   } catch {
     // already gone — ignore
   }

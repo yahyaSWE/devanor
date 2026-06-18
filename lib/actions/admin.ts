@@ -1,5 +1,7 @@
 "use server";
 
+import { randomUUID } from "crypto";
+import path from "path";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
@@ -7,6 +9,12 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-helpers";
+import {
+  isStorageConfigured,
+  uploadToBucket,
+  getPublicUrl,
+  LOGO_BUCKET,
+} from "@/lib/supabase-storage";
 
 export type ActionState = { ok?: boolean; error?: string };
 
@@ -18,12 +26,24 @@ const clientSchema = z.object({
 
 const ALLOWED_LOGO_TYPES = ["image/png", "image/jpeg", "image/svg+xml", "image/webp"];
 
-// Store the logo inline as a base64 data URL. This avoids writing to the
-// filesystem, which is read-only on serverless hosts like Vercel.
-async function fileToDataUrl(file: File): Promise<string> {
+// Logos go to a public Supabase Storage bucket when configured (works on
+// serverless/Vercel); otherwise — or if the upload fails for any reason —
+// they are inlined as a base64 data URL so logo upload never breaks.
+async function uploadLogo(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer());
-  const mime = file.type || "image/png";
-  return `data:${mime};base64,${buffer.toString("base64")}`;
+  const dataUrl = () =>
+    `data:${file.type || "image/png"};base64,${buffer.toString("base64")}`;
+
+  if (!isStorageConfigured()) return dataUrl();
+
+  try {
+    const ext = path.extname(file.name) || ".png";
+    const key = `${randomUUID()}${ext}`;
+    await uploadToBucket(LOGO_BUCKET, key, buffer, file.type || "image/png");
+    return getPublicUrl(LOGO_BUCKET, key);
+  } catch {
+    return dataUrl();
+  }
 }
 
 export async function addClient(
@@ -50,7 +70,7 @@ export async function addClient(
     if (file.size > 2 * 1024 * 1024) {
       return { error: "Logo must be smaller than 2 MB." };
     }
-    logoUrl = await fileToDataUrl(file);
+    logoUrl = await uploadLogo(file);
   }
 
   if (!logoUrl) {
@@ -121,7 +141,7 @@ export async function updateClient(
     if (file.size > 2 * 1024 * 1024) {
       return { error: "Logo must be smaller than 2 MB." };
     }
-    data.logoUrl = await fileToDataUrl(file);
+    data.logoUrl = await uploadLogo(file);
   } else if (parsed.data.logoUrl) {
     data.logoUrl = parsed.data.logoUrl;
   }
