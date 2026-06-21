@@ -5,7 +5,7 @@ import { Reveal } from "@/components/Reveal";
 import { CTASection } from "@/components/CTASection";
 import { Stats } from "@/components/Stats";
 import { LogoMarquee } from "@/components/LogoMarquee";
-import { ImagePlaceholder } from "@/components/ImagePlaceholder";
+import { AssetImage } from "@/components/AssetImage";
 import { caseStudies, differentiators, products, services, site } from "@/lib/site";
 
 export default function HomePage() {
@@ -138,9 +138,10 @@ export default function HomePage() {
                 Learn more
               </ButtonLink>
             </div>
-            {/* Image — Johan uploads (named after the About us page) */}
-            <ImagePlaceholder
-              label="Why Devanor image (upload to /public/about-devanor.jpg)"
+            {/* Image — same asset as the About us page */}
+            <AssetImage
+              src="/About%20us.webp"
+              label="About Devanor"
               className="mt-8 aspect-[4/3] w-full"
             />
           </div>

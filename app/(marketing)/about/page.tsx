@@ -3,7 +3,7 @@ import { Section, SectionHeading } from "@/components/Section";
 import { Reveal } from "@/components/Reveal";
 import { ClientsGrid } from "@/components/ClientsGrid";
 import { CTASection } from "@/components/CTASection";
-import { ImagePlaceholder } from "@/components/ImagePlaceholder";
+import { AssetImage } from "@/components/AssetImage";
 import { BackButton } from "@/components/BackButton";
 import { differentiators, site } from "@/lib/site";
 
@@ -40,9 +40,10 @@ export default function AboutPage() {
               </p>
             </div>
           </div>
-          {/* Same image as Why Devanor — Johan uploads */}
-          <ImagePlaceholder
-            label="About image (upload to /public/about-devanor.jpg)"
+          {/* Same image as Why Devanor */}
+          <AssetImage
+            src="/About%20us.webp"
+            label="About Devanor"
             className="aspect-[4/3] w-full"
           />
         </div>

@@ -1,7 +1,7 @@
 import { Section } from "./Section";
 import { ButtonLink } from "./Button";
 import { Reveal } from "./Reveal";
-import { ImagePlaceholder } from "./ImagePlaceholder";
+import { AssetImage } from "./AssetImage";
 import { site } from "@/lib/site";
 
 export function CTASection() {
@@ -31,9 +31,10 @@ export function CTASection() {
                 </ButtonLink>
               </div>
             </div>
-            {/* Image — Johan will upload */}
-            <ImagePlaceholder
-              label="Contact section image"
+            {/* Image */}
+            <AssetImage
+              src="/BOOK%20A%20DEMO.webp"
+              label="Book a demo"
               className="aspect-video w-full"
             />
           </div>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Section, SectionHeading } from "@/components/Section";
 import { Reveal } from "@/components/Reveal";
 import { CTASection } from "@/components/CTASection";
-import { ImagePlaceholder } from "@/components/ImagePlaceholder";
+import { AssetImage } from "@/components/AssetImage";
 import { BackButton } from "@/components/BackButton";
 import { services } from "@/lib/site";
 
@@ -23,9 +23,10 @@ export default function ServicesPage() {
           subtitle="From implementation to optimisation, we partner with your team every step of the way."
         />
 
-        {/* Overall services image — only on this page (Johan uploads) */}
-        <ImagePlaceholder
-          label="Services image (upload to /public/services.jpg)"
+        {/* Overall services image — only on this page */}
+        <AssetImage
+          src="/products/SERVICES.webp"
+          label="Devanor services"
           className="mt-10 aspect-[21/9] w-full"
         />
 

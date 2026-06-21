@@ -30,6 +30,8 @@ export type Product = {
   summary: string;
   detail: string;
   highlights: string[];
+  /** Path under /public; omit to show the placeholder. */
+  image?: string;
   /** YouTube/Vimeo link — Johan provides; empty hides the player. */
   videoUrl: string;
 };
@@ -49,6 +51,7 @@ export const products: Product[] = [
       "Automated generation of lists, tables and reports",
       "Optional 3D panel layout, hydraulics and pneumatics",
     ],
+    image: "/products/Schematic.webp",
     videoUrl: "",
   },
   {
@@ -65,6 +68,7 @@ export const products: Product[] = [
       "3D assembly coordination via E3.3D Routing Bridge",
       "End-to-end control from concept to production",
     ],
+    image: "/products/CABLE.webp",
     videoUrl: "",
   },
   {
@@ -81,6 +85,7 @@ export const products: Product[] = [
       "Wire and duct routing with fill levels",
       "Manufacturing outputs: drilling, labelling, wiring",
     ],
+    image: "/products/PANEL.webp",
     videoUrl: "",
   },
   {
@@ -98,6 +103,7 @@ export const products: Product[] = [
       "Clips, convolute and heat-shrink support",
       "Dynamic link to the E3.cable design",
     ],
+    image: "/products/FORMBOARD.webp",
     videoUrl: "",
   },
   {
@@ -114,6 +120,7 @@ export const products: Product[] = [
       "Automatic harness assignment from connections",
       "Plan and place equipment simultaneously",
     ],
+    image: "/products/TOPOLOGY.webp",
     videoUrl: "",
   },
   {
@@ -130,6 +137,7 @@ export const products: Product[] = [
       "Seamless ECAD/MCAD data integration",
       "Fewer errors through early digital integration",
     ],
+    image: "/products/3D%20routing%20bridge.webp",
     videoUrl: "",
   },
   {
@@ -147,6 +155,7 @@ export const products: Product[] = [
       "Rule-based, configurable automation",
       "Built-in connectivity validation",
     ],
+    image: "/products/3D%20routing%20bridge.webp",
     videoUrl: "",
   },
   {
@@ -164,6 +173,7 @@ export const products: Product[] = [
       "Professional printing",
       "Free to distribute",
     ],
+    image: "/products/3DVIEWER.webp",
     videoUrl: "",
   },
 ];

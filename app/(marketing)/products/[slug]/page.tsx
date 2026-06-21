@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Section } from "@/components/Section";
 import { ButtonLink } from "@/components/Button";
@@ -38,25 +39,35 @@ export default async function ProductPage({
 
   return (
     <>
-      <Section className="pt-32">
-        <BackButton />
+      {/* Hero — product image as background, text bottom-left (matches home) */}
+      <section className="relative h-screen min-h-[640px] w-full overflow-hidden">
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt={`${product.name} preview`}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover opacity-55"
+          />
+        ) : null}
+        {/* Legibility gradients (darker toward bottom-left where the text sits) */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-background/20 to-transparent" />
 
-        <div className="max-w-3xl">
+        <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-end px-6 pb-24 lg:px-10">
+          <BackButton className="self-start" />
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
             Products / {product.name}
           </p>
-          <h1 className="mt-4 text-balance text-4xl font-semibold sm:text-5xl">
+          <h1 className="mt-4 max-w-4xl text-balance text-5xl font-semibold leading-[1.04] sm:text-6xl lg:text-7xl">
             {product.name}
           </h1>
-          <p className="mt-5 text-lg text-muted">{product.summary}</p>
+          <p className="mt-5 max-w-xl text-lg text-muted">{product.summary}</p>
         </div>
+      </section>
 
-        {/* Product image — Johan uploads (named per module) */}
-        <ImagePlaceholder
-          label={`${product.name} image (upload to /public/products/${product.slug}.jpg)`}
-          className="mt-10 aspect-video w-full"
-        />
-
+      <Section>
         {/* Detail + highlight boxes */}
         <div className="mt-12 grid gap-10 lg:grid-cols-[1.25fr_1fr]">
           <p className="text-lg leading-relaxed text-muted">{product.detail}</p>
