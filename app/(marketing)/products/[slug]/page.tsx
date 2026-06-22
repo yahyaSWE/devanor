@@ -100,7 +100,7 @@ export default async function ProductPage({
 
         <div className="mt-10">
           <ButtonLink href={demoVideosUrl}>
-            Se tutorials
+            Watch E3.series Tutorial Videos
           </ButtonLink>
         </div>
       </Section>
