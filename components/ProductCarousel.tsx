@@ -28,7 +28,7 @@ export function ProductCarousel({ products }: { products: Product[] }) {
   return (
     <div className="mt-12">
       <div
-        className="relative h-[360px] w-full select-none sm:h-[420px]"
+        className="relative h-[420px] w-full select-none sm:h-[500px]"
         style={{ perspective: "1200px" }}
       >
         {products.map((p, i) => {
@@ -41,10 +41,10 @@ export function ProductCarousel({ products }: { products: Product[] }) {
             <div
               key={p.slug}
               aria-hidden={!isActive}
-              className="absolute left-1/2 top-1/2 w-[260px] transition-all duration-500 ease-out sm:w-[320px]"
+              className="absolute left-1/2 top-1/2 w-[280px] transition-all duration-500 ease-out sm:w-[400px]"
               style={{
-                transform: `translate(-50%, -50%) translateX(${offset * 150}px) scale(${
-                  isActive ? 1 : 0.82
+                transform: `translate(-50%, -50%) translateX(${offset * 200}px) scale(${
+                  isActive ? 1 : 0.72
                 }) rotateY(${offset * -8}deg)`,
                 zIndex: 10 - abs,
                 opacity: hidden ? 0 : isActive ? 1 : 0.45,
@@ -65,7 +65,7 @@ export function ProductCarousel({ products }: { products: Product[] }) {
                         src={p.image}
                         alt={p.name}
                         fill
-                        sizes="320px"
+                        sizes="(max-width: 640px) 280px, 400px"
                         className="object-cover"
                       />
                     ) : (
@@ -73,7 +73,12 @@ export function ProductCarousel({ products }: { products: Product[] }) {
                     )}
                   </div>
                   <div className="p-4">
-                    <h3 className="text-base font-semibold">{p.name}</h3>
+                    <h3 className="text-base font-semibold sm:text-lg">{p.name}</h3>
+                    {isActive && (
+                      <p className="mt-1.5 line-clamp-2 text-sm text-muted">
+                        {p.summary}
+                      </p>
+                    )}
                   </div>
                 </div>
               </button>
