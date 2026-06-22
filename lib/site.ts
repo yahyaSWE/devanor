@@ -23,24 +23,24 @@ export const nav = [
 // Internal tutorials page (the yellow "See tutorials" button links here).
 export const demoVideosUrl = "/videos";
 
-// Tutorial videos shown on /videos. Titles are placeholders — swap for real
-// names when available. Product demo videos live on each product page instead.
+// Tutorial videos shown on /videos. Product demo videos live on each product
+// page instead.
 export type Tutorial = { title: string; videoUrl: string };
 
 export const tutorials: Tutorial[] = [
-  { title: "Tutorial 1", videoUrl: "https://www.loom.com/share/e5caf79ccef6491d9126bf0b4812f895" },
-  { title: "Tutorial 2", videoUrl: "https://www.loom.com/share/501b49380e42477fbf7c3227e9dd83fb" },
-  { title: "Tutorial 3", videoUrl: "https://www.loom.com/share/7b7d2e8b2977445981e79b8abe8e44a5" },
-  { title: "Tutorial 4", videoUrl: "https://www.loom.com/share/36702593f30642aa80e1af6eaae3fe47" },
-  { title: "Tutorial 5", videoUrl: "https://www.loom.com/share/40e7fa379d024987b13897ad7ae6920b" },
-  { title: "Tutorial 6", videoUrl: "https://www.loom.com/share/3288d29dc138421aa910688bf8f80bfd" },
-  { title: "Tutorial 7", videoUrl: "https://www.loom.com/share/54dba11468fe4679b9de3f086f34ee7c" },
-  { title: "Tutorial 8", videoUrl: "https://www.loom.com/share/de27fb3e4bd541dc94d03c0b9c307211" },
-  { title: "Tutorial 9", videoUrl: "https://www.loom.com/share/a281065c6ba34c919c31e92ca1fd695f" },
-  { title: "Tutorial 10", videoUrl: "https://www.loom.com/share/0aa2446395584c74b1fe77109d09fb42" },
-  { title: "Tutorial 11", videoUrl: "https://www.loom.com/share/d88249a75ef244198fe8accb63f52d28" },
-  { title: "Tutorial 12", videoUrl: "https://www.loom.com/share/71539ab968514b0bb83eed86135974c4" },
-  { title: "Tutorial 13", videoUrl: "https://www.loom.com/share/e99cc53eb4c44e6991d14816be026157" },
+  { title: "User Interface Layout", videoUrl: "https://www.loom.com/share/e5caf79ccef6491d9126bf0b4812f895" },
+  { title: "Project and Sheets", videoUrl: "https://www.loom.com/share/501b49380e42477fbf7c3227e9dd83fb" },
+  { title: "Component Search Configurations", videoUrl: "https://www.loom.com/share/7b7d2e8b2977445981e79b8abe8e44a5" },
+  { title: "Connection Methods", videoUrl: "https://www.loom.com/share/36702593f30642aa80e1af6eaae3fe47" },
+  { title: "Inserting and Changing Wires", videoUrl: "https://www.loom.com/share/40e7fa379d024987b13897ad7ae6920b" },
+  { title: "Signal Cross-References", videoUrl: "https://www.loom.com/share/3288d29dc138421aa910688bf8f80bfd" },
+  { title: "Sheet Interconnection", videoUrl: "https://www.loom.com/share/54dba11468fe4679b9de3f086f34ee7c" },
+  { title: "Panel Cabinet", videoUrl: "https://www.loom.com/share/de27fb3e4bd541dc94d03c0b9c307211" },
+  { title: "DIN Rails and Cable Ducts", videoUrl: "https://www.loom.com/share/a281065c6ba34c919c31e92ca1fd695f" },
+  { title: "Inserting Component Models", videoUrl: "https://www.loom.com/share/0aa2446395584c74b1fe77109d09fb42" },
+  { title: "Report Generation", videoUrl: "https://www.loom.com/share/d88249a75ef244198fe8accb63f52d28" },
+  { title: "Export Drawing", videoUrl: "https://www.loom.com/share/71539ab968514b0bb83eed86135974c4" },
+  { title: "How To Add & Configure Database", videoUrl: "https://www.loom.com/share/e99cc53eb4c44e6991d14816be026157" },
 ];
 
 // Shared product-platform blurb (homepage carousel + products index).
