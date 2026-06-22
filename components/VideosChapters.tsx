@@ -5,7 +5,7 @@ import { useState } from "react";
 export type VideoChapter = {
   slug: string;
   name: string;
-  summary: string;
+  summary?: string;
   embed: string;
 };
 
@@ -71,7 +71,9 @@ export function VideosChapters({ chapters }: { chapters: VideoChapter[] }) {
         <div className="mt-5 flex items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-semibold">{current.name}</h2>
-            <p className="mt-1 max-w-xl text-sm text-muted">{current.summary}</p>
+            {current.summary && (
+              <p className="mt-1 max-w-xl text-sm text-muted">{current.summary}</p>
+            )}
           </div>
           <div className="flex shrink-0 items-center gap-3">
             <button
