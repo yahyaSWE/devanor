@@ -52,9 +52,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats + client logos — one matching section */}
-      <Section className="!pt-0">
-        <div className="relative z-10 -mt-16">
+      {/* Stats + client logos — one matching section (reveals on scroll, below the hero) */}
+      <Section>
+        <Reveal>
           <Stats
             items={[
               { value: "8+", label: "Years of hands-on E3.series experience" },
@@ -67,7 +67,7 @@ export default function HomePage() {
               { value: "2", label: "ECAD to MCAD integration" },
             ]}
           />
-        </div>
+        </Reveal>
         {/* Client logo marquee (renders when 3+ clients exist) */}
         <div className="mt-12">
           <p className="mb-6 text-center text-xs font-semibold uppercase tracking-[0.25em] text-muted">
