@@ -44,10 +44,10 @@ export function ProductCarousel({ products }: { products: Product[] }) {
               className="absolute left-1/2 top-1/2 w-[280px] transition-all duration-500 ease-out sm:w-[400px]"
               style={{
                 transform: `translate(-50%, -50%) translateX(${offset * 200}px) scale(${
-                  isActive ? 1 : 0.72
+                  isActive ? 1 : 1 - abs * 0.2
                 }) rotateY(${offset * -8}deg)`,
                 zIndex: 10 - abs,
-                opacity: hidden ? 0 : isActive ? 1 : 0.45,
+                opacity: hidden ? 0 : isActive ? 1 : abs === 1 ? 0.5 : 0.3,
                 pointerEvents: hidden ? "none" : "auto",
                 filter: isActive ? "none" : "blur(1px)",
               }}
