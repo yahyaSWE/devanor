@@ -1,4 +1,4 @@
-// Helpers to turn a pasted YouTube/Vimeo URL into an embeddable player URL.
+// Helpers to turn a pasted YouTube/Vimeo/Loom URL into an embeddable player URL.
 
 export function getYouTubeId(url: string): string | null {
   try {
@@ -16,7 +16,7 @@ export function getYouTubeId(url: string): string | null {
   }
 }
 
-/** Returns an embeddable player URL for YouTube/Vimeo links, or null. */
+/** Returns an embeddable player URL for YouTube/Vimeo/Loom links, or null. */
 export function getEmbedUrl(url: string): string | null {
   const ytId = getYouTubeId(url);
   if (ytId) return `https://www.youtube.com/embed/${ytId}`;
@@ -29,6 +29,12 @@ export function getEmbedUrl(url: string): string | null {
       if (id && /^\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
     }
     if (host === "player.vimeo.com") return u.toString();
+    if (host === "loom.com") {
+      // Share links look like loom.com/share/{id}; embeds use loom.com/embed/{id}.
+      const parts = u.pathname.split("/").filter(Boolean);
+      const id = parts[0] === "share" || parts[0] === "embed" ? parts[1] : parts[0];
+      if (id) return `https://www.loom.com/embed/${id}`;
+    }
   } catch {
     // not a valid URL
   }

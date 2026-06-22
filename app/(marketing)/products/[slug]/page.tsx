@@ -6,7 +6,6 @@ import { ButtonLink } from "@/components/Button";
 import { Reveal } from "@/components/Reveal";
 import { CTASection } from "@/components/CTASection";
 import { BackButton } from "@/components/BackButton";
-import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { getProduct, products, demoVideosUrl } from "@/lib/site";
 import { getEmbedUrl } from "@/lib/video";
 
@@ -48,12 +47,11 @@ export default async function ProductPage({
             fill
             priority
             sizes="100vw"
-            className="object-cover opacity-55"
+            className="object-cover opacity-65"
           />
         ) : null}
-        {/* Legibility gradients (darker toward bottom-left where the text sits) */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-background/20 to-transparent" />
+        {/* Legibility gradient — original/light at the top, fading to solid black at the bottom */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/35 to-background" />
 
         <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-end px-6 pb-24 lg:px-10">
           <BackButton className="self-start" />
@@ -83,10 +81,10 @@ export default async function ProductPage({
           </div>
         </div>
 
-        {/* Module video */}
-        <div className="mt-12">
-          <h2 className="mb-4 text-xl font-semibold">See {product.name} in action</h2>
-          {embed ? (
+        {/* Module video — only when a video exists for this product */}
+        {embed && (
+          <div className="mt-12">
+            <h2 className="mb-4 text-xl font-semibold">See {product.name} in action</h2>
             <div className="aspect-video w-full overflow-hidden rounded-2xl border border-border bg-black">
               <iframe
                 src={embed}
@@ -97,20 +95,11 @@ export default async function ProductPage({
                 allowFullScreen
               />
             </div>
-          ) : (
-            <ImagePlaceholder
-              label={`${product.name} video — add a YouTube/Vimeo link in lib/site.ts`}
-              className="aspect-video w-full"
-            />
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="mt-10">
-          <ButtonLink
-            href={demoVideosUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <ButtonLink href={demoVideosUrl}>
             Watch E3.series Demo Videos
           </ButtonLink>
         </div>

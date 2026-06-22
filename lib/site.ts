@@ -20,9 +20,12 @@ export const nav = [
   { label: "About us", href: "/about" },
 ] as const;
 
-// General step-by-step demo videos (à la devanor.com/#videos). Replace with the
-// real internal videos section once Johan provides it.
-export const demoVideosUrl = "https://devanor.com/#videos";
+// Internal step-by-step demo videos page (chapters built from products w/ videoUrl).
+export const demoVideosUrl = "/videos";
+
+// Shared product-platform blurb (homepage carousel + products index).
+export const productsBlurb =
+  "Design electrical, wiring, and fluid systems with seamless MCAD integration and automated design checks.";
 
 export type Product = {
   slug: string;
@@ -52,7 +55,7 @@ export const products: Product[] = [
       "Optional 3D panel layout, hydraulics and pneumatics",
     ],
     image: "/products/Schematic.webp",
-    videoUrl: "",
+    videoUrl: "https://www.loom.com/share/fcd2893080044baca3ba20b653251f01",
   },
   {
     slug: "e3-cable",
@@ -69,7 +72,7 @@ export const products: Product[] = [
       "End-to-end control from concept to production",
     ],
     image: "/products/CABLE.webp",
-    videoUrl: "",
+    videoUrl: "https://www.loom.com/share/10f79eee3399432895d8bda0ab70009f",
   },
   {
     slug: "e3-panel",
@@ -86,7 +89,7 @@ export const products: Product[] = [
       "Manufacturing outputs: drilling, labelling, wiring",
     ],
     image: "/products/PANEL.webp",
-    videoUrl: "",
+    videoUrl: "https://www.loom.com/share/49717c0524394dcfacdeaab53874613d",
   },
   {
     slug: "e3-formboard",
@@ -104,7 +107,7 @@ export const products: Product[] = [
       "Dynamic link to the E3.cable design",
     ],
     image: "/products/FORMBOARD.webp",
-    videoUrl: "",
+    videoUrl: "https://vimeo.com/760231915",
   },
   {
     slug: "e3-topology",
@@ -137,6 +140,7 @@ export const products: Product[] = [
       "Seamless ECAD/MCAD data integration",
       "Fewer errors through early digital integration",
     ],
+    // TODO(media): swap to the new routing-bridge image once uploaded to /public/products.
     image: "/products/3D%20routing%20bridge.webp",
     videoUrl: "",
   },
@@ -155,6 +159,7 @@ export const products: Product[] = [
       "Rule-based, configurable automation",
       "Built-in connectivity validation",
     ],
+    // TODO(media): swap to the new transformer image once uploaded to /public/products.
     image: "/products/3D%20routing%20bridge.webp",
     videoUrl: "",
   },

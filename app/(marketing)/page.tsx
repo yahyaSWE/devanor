@@ -6,16 +6,25 @@ import { CTASection } from "@/components/CTASection";
 import { Stats } from "@/components/Stats";
 import { LogoMarquee } from "@/components/LogoMarquee";
 import { AssetImage } from "@/components/AssetImage";
-import { caseStudies, differentiators, products, services, site } from "@/lib/site";
+import { HeroBadge } from "@/components/HeroBadge";
+import { ProductCarousel } from "@/components/ProductCarousel";
+import {
+  caseStudies,
+  differentiators,
+  products,
+  productsBlurb,
+  services,
+  site,
+} from "@/lib/site";
 
 export default function HomePage() {
   return (
     <>
-      {/* Hero — full screen video with text bottom-left, badge bottom-right */}
+      {/* Hero — full screen video with text bottom-left, badge in line with content */}
       <section className="relative h-screen min-h-[640px] w-full overflow-hidden">
         {/* Background video — drop the real file at /public/hero.mp4 */}
         <video
-          className="absolute inset-0 h-full w-full object-cover opacity-55"
+          className="absolute inset-0 h-full w-full object-cover opacity-65"
           autoPlay
           muted
           loop
@@ -24,9 +33,8 @@ export default function HomePage() {
         >
           <source src="/hero.mp4" type="video/mp4" />
         </video>
-        {/* Legibility gradients (darker toward bottom-left where the text sits) */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-background/20 to-transparent" />
+        {/* Legibility gradient — original/light at the top, fading to solid black at the bottom */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/35 to-background" />
 
         <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-end px-6 pb-24 lg:px-10">
           <Reveal>
@@ -37,19 +45,15 @@ export default function HomePage() {
           <Reveal delay={0.08}>
             <p className="mt-6 max-w-xl text-lg text-muted">{site.description}</p>
           </Reveal>
-        </div>
-
-        {/* Badge — lower right */}
-        <div className="absolute bottom-24 right-6 hidden lg:block lg:right-10">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-4 py-1.5 text-xs font-medium text-muted backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-            Official Zuken Partner · E3.series Experts
-          </span>
+          {/* Badge — in line with the content, reveals on scroll */}
+          <div className="mt-8">
+            <HeroBadge />
+          </div>
         </div>
       </section>
 
-      {/* Stats band */}
-      <Section className="!py-0">
+      {/* Stats + client logos — one matching section */}
+      <Section className="!pt-0">
         <div className="relative z-10 -mt-16">
           <Stats
             items={[
@@ -64,12 +68,14 @@ export default function HomePage() {
             ]}
           />
         </div>
+        {/* Client logo marquee (renders when 3+ clients exist) */}
+        <div className="mt-12">
+          <p className="mb-6 text-center text-xs font-semibold uppercase tracking-[0.25em] text-muted">
+            Our Clients
+          </p>
+          <LogoMarquee />
+        </div>
       </Section>
-
-      {/* Client logo marquee (renders when 3+ clients exist) */}
-      <div className="mt-20">
-        <LogoMarquee />
-      </div>
 
       {/* 01 — Products */}
       <Section>
@@ -77,29 +83,12 @@ export default function HomePage() {
           index="01"
           eyebrow="Products"
           title="Products: E3.series — a complete modular platform for electrical engineering"
-          subtitle="Design complex electrical systems with integrated wiring, fluid engineering, MCAD connectivity and automated design checks."
         />
-        <div className="mt-12 grid gap-4 sm:grid-cols-2">
-          {products.map((p, i) => (
-            <Reveal key={p.slug} delay={i * 0.04}>
-              <Link
-                href={`/products/${p.slug}`}
-                className="card group block h-full p-6"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="text-lg font-semibold">{p.name}</h3>
-                  <span className="font-mono text-xs text-muted">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-muted">{p.summary}</p>
-                <span className="mt-4 inline-block text-sm text-accent opacity-0 transition-opacity group-hover:opacity-100">
-                  Learn more →
-                </span>
-              </Link>
-            </Reveal>
-          ))}
-        </div>
+        <ProductCarousel products={products} />
+        {/* Description under the carousel */}
+        <p className="mx-auto mt-10 max-w-2xl text-center text-lg text-muted">
+          {productsBlurb}
+        </p>
       </Section>
 
       {/* 02 — Services */}

@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { IntroSplash } from "@/components/IntroSplash";
 
 export default async function MarketingLayout({
   children,
@@ -14,6 +15,7 @@ export default async function MarketingLayout({
 
   return (
     <>
+      <IntroSplash />
       <Navbar user={user} />
       <main className="flex-1">{children}</main>
       <Footer />
