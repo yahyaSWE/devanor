@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ComponentProps } from "react";
 
-type Variant = "primary" | "outline" | "ghost";
+type Variant = "primary" | "outline" | "ghost" | "white" | "whiteGhost";
 
 const base =
   "inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 disabled:opacity-50 disabled:pointer-events-none";
@@ -12,6 +12,8 @@ const variants: Record<Variant, string> = {
   outline:
     "border border-white/15 text-foreground hover:border-accent/60 hover:text-accent",
   ghost: "text-muted hover:text-foreground",
+  white: "bg-white text-on-accent hover:bg-accent hover:text-on-accent",
+  whiteGhost: "text-white hover:text-accent",
 };
 
 function classes(variant: Variant, className?: string) {

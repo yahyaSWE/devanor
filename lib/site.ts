@@ -20,8 +20,12 @@ export const nav = [
   { label: "About us", href: "/about" },
 ] as const;
 
-// Internal tutorials page (the yellow "See tutorials" button links here).
+// Internal tutorials page (the yellow tutorials button links here).
 export const demoVideosUrl = "/videos";
+
+// E3.series logo shown next to the "Watch E3.series Tutorial Videos" CTA.
+// TODO(media): place the uploaded E3 logo at this path under /public.
+export const e3SeriesLogo = "/e3-series.png";
 
 // Tutorial videos shown on /videos. Product demo videos live on each product
 // page instead.
@@ -55,8 +59,12 @@ export type Product = {
   highlights: string[];
   /** Path under /public; omit to show the placeholder. */
   image?: string;
-  /** YouTube/Vimeo link — Johan provides; empty hides the player. */
+  /** YouTube/Vimeo/Loom link — empty hides the player. */
   videoUrl: string;
+  /** Per-MCAD-system videos (routing bridge & transformer) — renders a menu. */
+  mcadVideos?: { name: string; videoUrl: string }[];
+  /** Images shown instead of a video (e.g. topology). Paths under /public. */
+  gallery?: string[];
 };
 
 export const products: Product[] = [
@@ -127,7 +135,7 @@ export const products: Product[] = [
       "Dynamic link to the E3.cable design",
     ],
     image: "/products/FORMBOARD.webp",
-    videoUrl: "https://vimeo.com/760231915",
+    videoUrl: "https://www.loom.com/share/3c5e61f31db642a985d4ef05ffa743b8",
   },
   {
     slug: "e3-topology",
@@ -145,6 +153,8 @@ export const products: Product[] = [
     ],
     image: "/products/TOPOLOGY.webp",
     videoUrl: "",
+    // Topology shows two images instead of a video (uploaded to /public/products).
+    gallery: ["/products/topology-1.webp", "/products/topology-2.webp"],
   },
   {
     slug: "e3-3d-routing-bridge",
@@ -160,9 +170,18 @@ export const products: Product[] = [
       "Seamless ECAD/MCAD data integration",
       "Fewer errors through early digital integration",
     ],
-    // TODO(media): swap to the new routing-bridge image once uploaded to /public/products.
+    // Shared new MCAD image for routing bridge + transformer.
     image: "/products/3D%20routing%20bridge.webp",
     videoUrl: "",
+    mcadVideos: [
+      { name: "Catia V5", videoUrl: "https://www.loom.com/share/feae98e6b9344d04a51883294b9d800d" },
+      { name: "Catia V6", videoUrl: "https://www.loom.com/share/90cbbb0b83e94e12a99d65ee29c882d6" },
+      { name: "Siemens NX", videoUrl: "https://www.loom.com/share/3151d0bd029c402aa5b5f66baef6ae95" },
+      { name: "PTC Creo", videoUrl: "https://www.loom.com/share/5c4297e7d14643f2be10c53bd06e14aa" },
+      { name: "Solid Edge", videoUrl: "https://www.loom.com/share/4d2ec475f2da46059080ca1a4fe5e28e" },
+      { name: "SolidWorks", videoUrl: "https://www.loom.com/share/80e0a13c12754eb3a8e10ca9ef3ffb10" },
+      { name: "Inventor", videoUrl: "https://www.loom.com/share/e23dfce56cf1440d8ba111d8bdb42677" },
+    ],
   },
   {
     slug: "e3-3d-transformer",
@@ -179,9 +198,18 @@ export const products: Product[] = [
       "Rule-based, configurable automation",
       "Built-in connectivity validation",
     ],
-    // TODO(media): swap to the new transformer image once uploaded to /public/products.
+    // Shared new MCAD image (same as routing bridge, per feedback 8D).
     image: "/products/3D%20routing%20bridge.webp",
     videoUrl: "",
+    mcadVideos: [
+      { name: "Catia V5", videoUrl: "https://www.loom.com/share/69b1fd9e88b645a29a5d7be15ad3f9a0" },
+      { name: "Catia V6", videoUrl: "https://www.loom.com/share/5648990c3b254654b6b0bb570dbc4aca" },
+      { name: "Siemens NX", videoUrl: "https://www.loom.com/share/73cd364d31c74245a70502df4262522b" },
+      { name: "PTC Creo", videoUrl: "https://www.loom.com/share/30af0bacc7d64f8cb4a1f2723ff492de" },
+      { name: "Solid Edge", videoUrl: "https://www.loom.com/share/41cacb7f1cd147d0835eaa2a4e176eb4" },
+      { name: "SolidWorks", videoUrl: "https://www.loom.com/share/1769f18871954eff8e2eab62df593812" },
+      { name: "Inventor", videoUrl: "https://www.loom.com/share/83b12d5772a14710ae99afba099367da" },
+    ],
   },
   {
     slug: "e3-viewer",

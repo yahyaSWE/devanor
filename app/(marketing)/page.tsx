@@ -5,9 +5,8 @@ import { Reveal } from "@/components/Reveal";
 import { CTASection } from "@/components/CTASection";
 import { Stats } from "@/components/Stats";
 import { LogoMarquee } from "@/components/LogoMarquee";
-import { AssetImage } from "@/components/AssetImage";
-import { HeroBadge } from "@/components/HeroBadge";
 import { ProductCarousel } from "@/components/ProductCarousel";
+import { TutorialsCta } from "@/components/TutorialsCta";
 import {
   caseStudies,
   differentiators,
@@ -20,7 +19,7 @@ import {
 export default function HomePage() {
   return (
     <>
-      {/* Hero — full screen video with text bottom-left, badge in line with content */}
+      {/* Hero — full screen video, text bottom-left, badge bottom-right (in line w/ content) */}
       <section className="relative h-screen min-h-[640px] w-full overflow-hidden">
         {/* Background video — drop the real file at /public/hero.mp4 */}
         <video
@@ -36,18 +35,23 @@ export default function HomePage() {
         {/* Legibility gradient — original/light at the top, fading to solid black at the bottom */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/35 to-background" />
 
-        <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-end px-6 pb-24 lg:px-10">
-          <Reveal>
-            <h1 className="max-w-4xl text-balance text-5xl font-semibold leading-[1.04] sm:text-6xl lg:text-7xl">
-              <span className="text-gradient">{site.tagline}</span>
-            </h1>
-          </Reveal>
-          <Reveal delay={0.08}>
-            <p className="mt-6 max-w-xl text-lg text-muted">{site.description}</p>
-          </Reveal>
-          {/* Badge — in line with the content, reveals on scroll */}
-          <div className="mt-8">
-            <HeroBadge />
+        <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-end px-6 pb-16 lg:px-10">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <Reveal>
+                <h1 className="max-w-4xl text-balance text-5xl font-semibold leading-[1.04] sm:text-6xl lg:text-7xl">
+                  <span className="text-gradient">{site.tagline}</span>
+                </h1>
+              </Reveal>
+              <Reveal delay={0.08}>
+                <p className="mt-6 max-w-xl text-lg text-muted">{site.description}</p>
+              </Reveal>
+            </div>
+            {/* Badge — bottom-right, aligned with the bottom of the text, visible immediately */}
+            <span className="hidden shrink-0 items-center gap-2 rounded-full border border-border bg-surface/60 px-4 py-1.5 text-xs font-medium text-muted backdrop-blur lg:inline-flex">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+              Official Zuken Partner · E3.series Experts
+            </span>
           </div>
         </div>
       </section>
@@ -68,27 +72,31 @@ export default function HomePage() {
             ]}
           />
         </Reveal>
-        {/* Client logo marquee (renders when 3+ clients exist) */}
-        <div className="mt-12">
-          <p className="mb-6 text-center text-xs font-semibold uppercase tracking-[0.25em] text-muted">
-            Our Clients
-          </p>
+        {/* Client logos box — same width as the stats box, label inside, clear gap above */}
+        <div className="mt-8">
           <LogoMarquee />
         </div>
       </Section>
 
       {/* 01 — Products */}
-      <Section>
-        <SectionHeading
-          index="01"
-          eyebrow="Products"
-          title="Products: E3.series — a complete modular platform for electrical engineering"
-        />
+      <Section className="border-t border-border">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-2xl">
+            <SectionHeading
+              index="01"
+              eyebrow="Products"
+              title="Products: E3.series — a complete modular platform for electrical engineering"
+              subtitle={productsBlurb}
+            />
+            <div className="mt-6">
+              <ButtonLink href="/products" variant="outline">
+                View all products
+              </ButtonLink>
+            </div>
+          </div>
+          <TutorialsCta className="lg:pt-2" />
+        </div>
         <ProductCarousel products={products} />
-        {/* Description under the carousel */}
-        <p className="mx-auto mt-10 max-w-2xl text-center text-lg text-muted">
-          {productsBlurb}
-        </p>
       </Section>
 
       {/* 02 — Services */}
@@ -99,12 +107,19 @@ export default function HomePage() {
           title="Services that keep your design team moving"
           subtitle="From implementation to optimisation, we partner with your team every step of the way."
         />
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6">
+          <ButtonLink href="/services" variant="outline">
+            Learn more
+          </ButtonLink>
+        </div>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((s, i) => (
             <Reveal key={s.name} delay={i * 0.05}>
               <div className="card h-full p-6">
-                <span className="font-mono text-xs text-muted">0{i + 1}</span>
-                <h3 className="mt-3 font-semibold">{s.name}</h3>
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="font-semibold">{s.name}</h3>
+                  <span className="font-mono text-xs text-muted">0{i + 1}</span>
+                </div>
                 <p className="mt-2 text-sm text-muted">{s.description}</p>
               </div>
             </Reveal>
@@ -114,7 +129,8 @@ export default function HomePage() {
 
       {/* 03 — Why Devanor */}
       <Section className="border-t border-border">
-        <div className="grid items-start gap-12 lg:grid-cols-[1fr_1.2fr]">
+        {/* Top row: heading (left) + full image (right) */}
+        <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
             <SectionHeading
               index="03"
@@ -127,23 +143,30 @@ export default function HomePage() {
                 Learn more
               </ButtonLink>
             </div>
-            {/* Image — same asset as the About us page */}
-            <AssetImage
+          </div>
+          {/* Whole image visible (not cropped), rounded corners */}
+          <div className="overflow-hidden rounded-2xl border border-border">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="/About%20us.webp"
-              label="About Devanor"
-              className="mt-8 aspect-[4/3] w-full"
+              alt="About Devanor"
+              className="block h-auto w-full"
             />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {differentiators.map((d, i) => (
-              <Reveal key={d.title} delay={i * 0.05}>
-                <div className="card h-full p-6">
+        </div>
+        {/* Differentiator cards — full-width row below */}
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {differentiators.map((d, i) => (
+            <Reveal key={d.title} delay={i * 0.05}>
+              <div className="card h-full p-6">
+                <div className="flex items-start justify-between gap-3">
                   <h3 className="font-semibold">{d.title}</h3>
-                  <p className="mt-2 text-sm text-muted">{d.description}</p>
+                  <span className="font-mono text-xs text-muted">0{i + 1}</span>
                 </div>
-              </Reveal>
-            ))}
-          </div>
+                <p className="mt-2 text-sm text-muted">{d.description}</p>
+              </div>
+            </Reveal>
+          ))}
         </div>
       </Section>
 

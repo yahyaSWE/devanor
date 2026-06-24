@@ -27,7 +27,7 @@ export default function VideosPage() {
         <SectionHeading
           eyebrow="Tutorials"
           title="E3.series tutorials"
-          subtitle="Step-by-step walkthroughs. Pick a tutorial or use the arrows — no scrolling required."
+          subtitle="Step-by-step walkthroughs. Pick a tutorial or use the arrows."
         />
         <VideosChapters chapters={chapters} />
       </Section>

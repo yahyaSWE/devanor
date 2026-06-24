@@ -28,7 +28,10 @@ export async function LogoMarquee() {
   const loop = [...oneSet, ...oneSet];
 
   return (
-    <div className="mx-auto max-w-4xl rounded-2xl border border-border bg-surface/30 px-6 py-8">
+    <div className="rounded-2xl border border-border bg-surface/30 px-6 py-10">
+      <p className="mb-8 text-center text-xs font-semibold uppercase tracking-[0.25em] text-muted">
+        Our Clients
+      </p>
       <div className="marquee-mask overflow-hidden">
         {/* gap/item widths tuned so ~4 logos are visible at a time */}
         <div className="marquee-track items-center gap-24">

@@ -26,8 +26,8 @@ export function Navbar({ user }: { user: SessionUser }) {
 
   const solid = scrolled || open;
   const linkClass = (active: boolean) =>
-    `text-[15px] font-medium transition-colors hover:text-foreground ${
-      active ? "text-foreground" : "text-muted"
+    `text-[15px] font-medium transition-colors hover:text-accent ${
+      active ? "text-accent" : "text-white"
     }`;
 
   return (
@@ -117,15 +117,17 @@ export function Navbar({ user }: { user: SessionUser }) {
 
         <div className="hidden items-center gap-3 md:flex">
           {user ? (
-            <ButtonLink href={dashboardHref} variant="outline">
+            <ButtonLink href={dashboardHref} variant="whiteGhost">
               Dashboard
             </ButtonLink>
           ) : (
-            <ButtonLink href="/login" variant="ghost">
+            <ButtonLink href="/login" variant="whiteGhost">
               Login
             </ButtonLink>
           )}
-          <ButtonLink href="/book-demo">Book a Demo</ButtonLink>
+          <ButtonLink href="/book-demo" variant="white">
+            Book a Demo
+          </ButtonLink>
         </div>
 
         <button
@@ -174,12 +176,12 @@ export function Navbar({ user }: { user: SessionUser }) {
             <div className="mt-3 flex flex-col gap-3">
               <ButtonLink
                 href={user ? dashboardHref : "/login"}
-                variant="outline"
+                variant="white"
                 onClick={() => setOpen(false)}
               >
                 {user ? "Dashboard" : "Login"}
               </ButtonLink>
-              <ButtonLink href="/book-demo" onClick={() => setOpen(false)}>
+              <ButtonLink href="/book-demo" variant="white" onClick={() => setOpen(false)}>
                 Book a Demo
               </ButtonLink>
             </div>

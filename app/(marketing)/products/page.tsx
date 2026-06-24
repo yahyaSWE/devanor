@@ -5,6 +5,7 @@ import { Section, SectionHeading } from "@/components/Section";
 import { Reveal } from "@/components/Reveal";
 import { CTASection } from "@/components/CTASection";
 import { BackButton } from "@/components/BackButton";
+import { TutorialsCta } from "@/components/TutorialsCta";
 import { products, productsBlurb } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -18,11 +19,16 @@ export default function ProductsPage() {
     <>
       <Section className="pt-32">
         <BackButton />
-        <SectionHeading
-          eyebrow="Products"
-          title="E3.series — a complete modular platform for electrical engineering"
-          subtitle={productsBlurb}
-        />
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-2xl">
+            <SectionHeading
+              eyebrow="Products"
+              title="E3.series — a complete modular platform for electrical engineering"
+              subtitle={productsBlurb}
+            />
+          </div>
+          <TutorialsCta className="lg:pt-2" />
+        </div>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((p, i) => (
@@ -31,8 +37,8 @@ export default function ProductsPage() {
                 href={`/products/${p.slug}`}
                 className="card group flex h-full flex-col overflow-hidden p-0"
               >
-                {/* Square product image */}
-                <div className="relative aspect-square w-full overflow-hidden">
+                {/* Landscape image — whole image visible, not zoomed/cropped */}
+                <div className="relative aspect-video w-full overflow-hidden">
                   {p.image ? (
                     <Image
                       src={p.image}

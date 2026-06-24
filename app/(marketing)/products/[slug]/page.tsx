@@ -6,6 +6,7 @@ import { ButtonLink } from "@/components/Button";
 import { Reveal } from "@/components/Reveal";
 import { CTASection } from "@/components/CTASection";
 import { BackButton } from "@/components/BackButton";
+import { McadVideoMenu } from "@/components/McadVideoMenu";
 import { getProduct, products, demoVideosUrl } from "@/lib/site";
 import { getEmbedUrl } from "@/lib/video";
 
@@ -69,20 +70,46 @@ export default async function ProductPage({
         {/* Detail + highlight boxes */}
         <div className="mt-12 grid gap-10 lg:grid-cols-[1.25fr_1fr]">
           <p className="text-lg leading-relaxed text-muted">{product.detail}</p>
-          <div className="grid gap-3">
-            {product.highlights.map((h, i) => (
-              <Reveal key={h} delay={i * 0.04}>
-                <div className="card flex items-start gap-3 p-4 text-sm">
-                  <span className="mt-0.5 text-accent">▸</span>
-                  <span>{h}</span>
-                </div>
-              </Reveal>
-            ))}
+          <div>
+            <div className="grid gap-3">
+              {product.highlights.map((h, i) => (
+                <Reveal key={h} delay={i * 0.04}>
+                  <div className="card flex items-start gap-3 p-4 text-sm">
+                    <span className="mt-0.5 text-accent">▸</span>
+                    <span>{h}</span>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+            {/* Tutorials button — under the highlights, spaced */}
+            <div className="mt-8">
+              <ButtonLink href={demoVideosUrl}>
+                Watch E3.series Tutorial Videos
+              </ButtonLink>
+            </div>
           </div>
         </div>
 
-        {/* Module video — only when a video exists for this product */}
-        {embed && (
+        {/* "In action" — MCAD menu (routing bridge/transformer), gallery (topology) or single video */}
+        {product.mcadVideos ? (
+          <div className="mt-12">
+            <h2 className="mb-4 text-xl font-semibold">See {product.name} in action</h2>
+            <McadVideoMenu videos={product.mcadVideos} />
+          </div>
+        ) : product.gallery ? (
+          <div className="mt-12 grid gap-6 sm:grid-cols-2">
+            {product.gallery.map((src, i) => (
+              <div key={src} className="overflow-hidden rounded-2xl border border-border">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt={`${product.name} ${i + 1}`}
+                  className="block h-auto w-full"
+                />
+              </div>
+            ))}
+          </div>
+        ) : embed ? (
           <div className="mt-12">
             <h2 className="mb-4 text-xl font-semibold">See {product.name} in action</h2>
             <div className="aspect-video w-full overflow-hidden rounded-2xl border border-border bg-black">
@@ -96,13 +123,7 @@ export default async function ProductPage({
               />
             </div>
           </div>
-        )}
-
-        <div className="mt-10">
-          <ButtonLink href={demoVideosUrl}>
-            Watch E3.series Tutorial Videos
-          </ButtonLink>
-        </div>
+        ) : null}
       </Section>
 
       <CTASection />

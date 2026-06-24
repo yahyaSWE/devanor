@@ -6,10 +6,10 @@ import Link from "next/link";
 import type { Product } from "@/lib/site";
 
 /**
- * Coverflow-style product carousel. The centre card is enlarged and active,
- * shows the product image + a "See more" link to its page; side cards are
- * scaled down and clickable to bring them to the centre. Left/right arrows
- * rotate which product is centred.
+ * Coverflow-style product carousel. The centre card is enlarged, active, solid
+ * (non-transparent) and links to its product page with a "Learn more →" hover
+ * hint; side cards are scaled/dimmed by distance and clickable to bring them to
+ * the centre. Left/right arrows rotate which product is centred.
  */
 export function ProductCarousel({ products }: { products: Product[] }) {
   const [active, setActive] = useState(0);
@@ -27,21 +27,65 @@ export function ProductCarousel({ products }: { products: Product[] }) {
 
   return (
     <div className="mt-12">
+      {/* overflow-hidden stops side cards creating a horizontal scrollbar */}
       <div
-        className="relative h-[420px] w-full select-none sm:h-[500px]"
+        className="relative h-[420px] w-full select-none overflow-hidden sm:h-[500px]"
         style={{ perspective: "1200px" }}
       >
         {products.map((p, i) => {
           const offset = offsetOf(i);
           const isActive = offset === 0;
           const abs = Math.abs(offset);
-          // Hide cards far from the centre.
           const hidden = abs > 2;
+          const number = String(i + 1).padStart(2, "0");
+
+          const inner = (
+            <div
+              className={`overflow-hidden rounded-2xl border ${
+                isActive
+                  ? "border-border bg-surface"
+                  : "card"
+              }`}
+            >
+              <div className="relative aspect-video w-full">
+                {p.image ? (
+                  <Image
+                    src={p.image}
+                    alt={p.name}
+                    fill
+                    sizes="(max-width: 640px) 280px, 400px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-surface-2" />
+                )}
+              </div>
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="text-base font-semibold sm:text-lg">{p.name}</h3>
+                  {isActive && (
+                    <span className="font-mono text-xs text-muted">{number}</span>
+                  )}
+                </div>
+                {isActive && (
+                  <>
+                    <p className="mt-1.5 line-clamp-2 text-sm text-muted">
+                      {p.summary}
+                    </p>
+                    <span className="mt-3 inline-block text-sm font-medium text-accent opacity-0 transition-opacity group-hover:opacity-100">
+                      Learn more →
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+
           return (
             <div
               key={p.slug}
               aria-hidden={!isActive}
-              className="absolute left-1/2 top-1/2 w-[280px] transition-all duration-500 ease-out sm:w-[400px]"
+              className="absolute left-1/2 top-1/2 w-[260px] transition-all duration-500 ease-out sm:w-[400px]"
               style={{
                 transform: `translate(-50%, -50%) translateX(${offset * 200}px) scale(${
                   isActive ? 1 : 1 - abs * 0.2
@@ -52,54 +96,27 @@ export function ProductCarousel({ products }: { products: Product[] }) {
                 filter: isActive ? "none" : "blur(1px)",
               }}
             >
-              <button
-                type="button"
-                onClick={() => !isActive && setActive(i)}
-                className="block w-full cursor-pointer text-left"
-                tabIndex={isActive ? -1 : 0}
-              >
-                <div className="card overflow-hidden p-0">
-                  <div className="relative aspect-video w-full">
-                    {p.image ? (
-                      <Image
-                        src={p.image}
-                        alt={p.name}
-                        fill
-                        sizes="(max-width: 640px) 280px, 400px"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-surface-2" />
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-base font-semibold sm:text-lg">{p.name}</h3>
-                    {isActive && (
-                      <p className="mt-1.5 line-clamp-2 text-sm text-muted">
-                        {p.summary}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </button>
-
-              {isActive && (
-                <div className="mt-4 flex justify-center">
-                  <Link
-                    href={`/products/${p.slug}`}
-                    className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-on-accent transition-opacity hover:opacity-90"
-                  >
-                    See more →
-                  </Link>
-                </div>
+              {isActive ? (
+                <Link href={`/products/${p.slug}`} className="group block">
+                  {inner}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setActive(i)}
+                  className="block w-full cursor-pointer text-left"
+                  tabIndex={0}
+                >
+                  {inner}
+                </button>
               )}
             </div>
           );
         })}
       </div>
 
-      {/* Arrows */}
-      <div className="mt-2 flex items-center justify-center gap-4">
+      {/* Arrows — spaced apart */}
+      <div className="mt-2 flex items-center justify-center gap-10">
         <button
           type="button"
           onClick={() => go(-1)}

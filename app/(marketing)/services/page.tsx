@@ -45,12 +45,28 @@ export default function ServicesPage() {
       </section>
 
       <Section>
-        <div className="grid gap-4 sm:grid-cols-2">
+        {/* Intro text */}
+        <div className="space-y-4 text-lg text-muted">
+          <p>
+            Our services are built to support every stage of your E3.series journey.
+            Whether you need expert guidance, process optimization, skill development,
+            or tailored solutions.
+          </p>
+          <p>
+            By combining technical expertise with practical industry experience, we
+            deliver solutions that improve efficiency, enhance collaboration and help
+            your team achieve better results with confidence.
+          </p>
+        </div>
+
+        <div className="mt-12 grid gap-4 sm:grid-cols-2">
           {services.map((s, i) => (
             <Reveal key={s.name} delay={i * 0.05}>
-              <article className="card h-full p-8">
-                <span className="font-mono text-xs text-muted">0{i + 1}</span>
-                <h2 className="mt-3 text-xl font-semibold">{s.name}</h2>
+              <article className="card h-full p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="text-xl font-semibold">{s.name}</h2>
+                  <span className="font-mono text-xs text-muted">0{i + 1}</span>
+                </div>
                 <p className="mt-3 text-muted">{s.description}</p>
               </article>
             </Reveal>

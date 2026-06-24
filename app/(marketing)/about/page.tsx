@@ -42,7 +42,8 @@ export default function AboutPage() {
 
       {/* Text + boxes under the image */}
       <Section>
-        <div className="mx-auto max-w-3xl space-y-4 text-lg text-muted">
+        {/* Full-width text — fills the row */}
+        <div className="space-y-4 text-lg text-muted">
           <p>
             {site.name} is a trusted Zuken Partner providing E3.series software,
             training, consulting and expert support across the GCC region. Based in
@@ -61,8 +62,10 @@ export default function AboutPage() {
           {differentiators.map((d, i) => (
             <Reveal key={d.title} delay={i * 0.05}>
               <div className="card h-full p-6">
-                <span className="font-mono text-xs text-muted">0{i + 1}</span>
-                <h3 className="mt-3 font-semibold">{d.title}</h3>
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="font-semibold">{d.title}</h3>
+                  <span className="font-mono text-xs text-muted">0{i + 1}</span>
+                </div>
                 <p className="mt-2 text-sm text-muted">{d.description}</p>
               </div>
             </Reveal>
