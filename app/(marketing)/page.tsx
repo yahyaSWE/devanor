@@ -94,7 +94,7 @@ export default function HomePage() {
               </ButtonLink>
             </div>
           </div>
-          <TutorialsCta className="lg:pt-2" />
+          <TutorialsCta className="self-end lg:self-start lg:pt-2" />
         </div>
         <ProductCarousel products={products} />
       </Section>

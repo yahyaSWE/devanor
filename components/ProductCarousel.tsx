@@ -26,10 +26,10 @@ export function ProductCarousel({ products }: { products: Product[] }) {
   };
 
   return (
-    <div className="mt-12">
+    <div className="mt-4">
       {/* overflow-hidden stops side cards creating a horizontal scrollbar */}
       <div
-        className="relative h-[420px] w-full select-none overflow-hidden sm:h-[500px]"
+        className="relative h-[360px] w-full select-none overflow-hidden sm:h-[410px]"
         style={{ perspective: "1200px" }}
       >
         {products.map((p, i) => {

@@ -27,7 +27,7 @@ export default function ProductsPage() {
               subtitle={productsBlurb}
             />
           </div>
-          <TutorialsCta className="lg:pt-2" />
+          <TutorialsCta className="self-end lg:self-start lg:pt-2" />
         </div>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

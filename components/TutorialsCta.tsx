@@ -9,12 +9,12 @@ import { demoVideosUrl, e3SeriesLogo } from "@/lib/site";
  */
 export function TutorialsCta({ className }: { className?: string }) {
   return (
-    <div className={`flex flex-col items-center gap-4 sm:items-end ${className ?? ""}`}>
+    <div className={`flex flex-col items-center gap-4 ${className ?? ""}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={e3SeriesLogo}
         alt="E3.series"
-        className="h-12 w-auto object-contain"
+        className="h-16 w-auto object-contain"
       />
       <ButtonLink href={demoVideosUrl}>Watch E3.series Tutorial Videos</ButtonLink>
     </div>
