@@ -43,7 +43,7 @@ export function ProductCarousel({ products }: { products: Product[] }) {
             <div
               className={`overflow-hidden rounded-2xl border ${
                 isActive
-                  ? "border-border bg-surface"
+                  ? "border-border bg-surface transition-all duration-300 group-hover:border-accent/50 group-hover:shadow-[0_18px_50px_-18px_rgba(189,145,65,0.5)]"
                   : "card"
               }`}
             >
