@@ -26,10 +26,12 @@ export function ProductCarousel({ products }: { products: Product[] }) {
   };
 
   return (
-    <div className="mt-4">
-      {/* overflow-hidden stops side cards creating a horizontal scrollbar */}
+    <div className="mt-4 overflow-x-hidden">
+      {/* Clip horizontal overflow on this full-width wrapper so side cards fade
+          out at the screen edges instead of being cut by a hard line above the
+          arrows */}
       <div
-        className="relative h-[360px] w-full select-none overflow-hidden sm:h-[410px]"
+        className="relative h-[330px] w-full select-none sm:h-[380px]"
         style={{ perspective: "1200px" }}
       >
         {products.map((p, i) => {
@@ -54,13 +56,13 @@ export function ProductCarousel({ products }: { products: Product[] }) {
                     alt={p.name}
                     fill
                     sizes="(max-width: 640px) 280px, 400px"
-                    className="object-cover"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div className="h-full w-full bg-surface-2" />
                 )}
               </div>
-              <div className="p-4">
+              <div className="px-4 pb-3 pt-2.5">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="text-base font-semibold sm:text-lg">{p.name}</h3>
                   {isActive && (
@@ -69,10 +71,10 @@ export function ProductCarousel({ products }: { products: Product[] }) {
                 </div>
                 {isActive && (
                   <>
-                    <p className="mt-1.5 line-clamp-2 text-sm text-muted">
+                    <p className="mt-1 line-clamp-2 text-sm text-muted">
                       {p.summary}
                     </p>
-                    <span className="mt-3 inline-block text-sm font-medium text-accent opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="mt-2 inline-block text-sm font-medium text-accent opacity-0 transition-opacity group-hover:opacity-100">
                       Learn more →
                     </span>
                   </>
