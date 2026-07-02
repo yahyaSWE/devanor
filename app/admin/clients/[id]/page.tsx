@@ -4,13 +4,18 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { AddEmployeeForm } from "@/components/admin/AddEmployeeForm";
 import { EditCompanyForm } from "@/components/admin/EditCompanyForm";
+import { EmployeeRow } from "@/components/admin/EmployeeRow";
+import { LicenseForm } from "@/components/admin/LicenseForm";
+import { LicenseRow, type LicenseRowData } from "@/components/admin/LicenseRow";
+import { SendWelcomeMail } from "@/components/admin/SendWelcomeMail";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
 import {
-  deleteUser,
   deleteClientAndRedirect,
   toggleClientActive,
   toggleClientVisibility,
 } from "@/lib/actions/admin";
+import { getWelcomeTemplate } from "@/lib/welcome";
+import { appUrl } from "@/lib/email";
 import { formatDate } from "@/lib/format";
 
 export async function generateMetadata({
@@ -29,19 +34,48 @@ export default async function AdminClientDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const client = await prisma.client.findUnique({
-    where: { id },
-    include: {
-      users: { orderBy: { createdAt: "asc" } },
-      licenses: { select: { type: true } },
-    },
-  });
+  const [client, modules] = await Promise.all([
+    prisma.client.findUnique({
+      where: { id },
+      include: {
+        users: { orderBy: { createdAt: "asc" } },
+        licenses: { orderBy: { createdAt: "desc" }, include: { modules: true } },
+      },
+    }),
+    prisma.licenseModule.findMany({ orderBy: { name: "asc" } }),
+  ]);
   if (!client) notFound();
 
-  const licenseCount = client.licenses.filter((l) => l.type === "LICENSE").length;
-  const maintenanceCount = client.licenses.filter(
-    (l) => l.type === "MAINTENANCE",
+  const welcomeTemplate = await getWelcomeTemplate();
+
+  const licenseCount = client.licenses.filter(
+    (l) => l.contractType !== "MAINTENANCE",
   ).length;
+  const maintenanceCount = client.licenses.filter(
+    (l) => l.contractType === "MAINTENANCE",
+  ).length;
+
+  const moduleOptions = modules.map((m) => ({ id: m.id, name: m.name }));
+  const licenseRows: LicenseRowData[] = client.licenses.map((l) => ({
+    id: l.id,
+    moduleNames: l.modules.map((m) => m.name),
+    moduleIds: l.modules.map((m) => m.id),
+    contractType: l.contractType,
+    lockType: l.lockType,
+    version: l.version,
+    macIds: l.macIds,
+    seats: l.seats,
+    status: l.status,
+    permanent: l.permanent,
+    expiresAt: l.expiresAt ? l.expiresAt.toISOString().slice(0, 10) : null,
+    expiresLabel: formatDate(l.expiresAt),
+    hasKey: !!l.keyStoredName,
+  }));
+  const licenseGroups = [
+    { key: "PERPETUAL", label: "Perpetual licenses" },
+    { key: "SUBSCRIPTION", label: "Subscriptions" },
+    { key: "MAINTENANCE", label: "Maintenance" },
+  ];
 
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-10">
@@ -91,10 +125,10 @@ export default async function AdminClientDetailPage({
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href="/admin/licenses" className="text-sm text-accent hover:underline">
+          <a href="#licenses" className="text-sm text-accent hover:underline">
             {licenseCount} license{licenseCount === 1 ? "" : "s"} ·{" "}
-            {maintenanceCount} maintenance →
-          </Link>
+            {maintenanceCount} maintenance · Manage license →
+          </a>
           <form action={toggleClientVisibility}>
             <input type="hidden" name="id" value={client.id} />
             <button className="rounded-full border border-white/15 px-4 py-2 text-sm transition-colors hover:border-white/30">
@@ -126,6 +160,7 @@ export default async function AdminClientDetailPage({
               id: client.id,
               name: client.name,
               websiteUrl: client.websiteUrl,
+              address: client.address,
             }}
           />
           <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
@@ -164,7 +199,20 @@ export default async function AdminClientDetailPage({
 
       {/* Employees */}
       <div className="mt-6 rounded-2xl border border-border bg-surface/40 p-6">
-        <h2 className="mb-4 font-semibold">Employees ({client.users.length})</h2>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-semibold">Employees ({client.users.length})</h2>
+          <SendWelcomeMail
+            clientId={client.id}
+            employees={client.users.map((u) => ({
+              id: u.id,
+              name: u.name,
+              email: u.email,
+            }))}
+            template={welcomeTemplate}
+            companyName={client.name}
+            loginUrl={`${appUrl()}/login`}
+          />
+        </div>
         {client.users.length === 0 ? (
           <p className="text-sm text-muted">
             No employees yet. Add the first one above.
@@ -172,35 +220,70 @@ export default async function AdminClientDetailPage({
         ) : (
           <ul className="divide-y divide-border">
             {client.users.map((u) => (
-              <li key={u.id} className="flex items-center gap-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="truncate font-medium">{u.name ?? u.email}</p>
-                    {u.title && (
-                      <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
-                        {u.title}
-                      </span>
-                    )}
-                  </div>
-                  <p className="truncate text-sm text-muted">
-                    {u.email} · added {formatDate(u.createdAt)}
-                  </p>
-                </div>
-                <ConfirmSubmit
-                  action={deleteUser}
-                  hidden={{ id: u.id }}
-                  trigger="Remove"
-                  confirmLabel="Remove employee"
-                  title="Remove employee?"
-                  message={`This removes the portal login for ${
-                    u.name ?? u.email
-                  }. This cannot be undone.`}
-                  triggerClassName="shrink-0 text-sm text-muted hover:text-red-400"
-                />
-              </li>
+              <EmployeeRow
+                key={u.id}
+                user={{
+                  id: u.id,
+                  name: u.name,
+                  email: u.email,
+                  title: u.title,
+                  active: u.active,
+                  zgsUsername: u.zgsUsername,
+                  zgsTempPassword: u.zgsTempPassword,
+                  welcomeEmailSent: !!u.welcomeEmailSentAt,
+                  addedLabel: formatDate(u.createdAt),
+                }}
+              />
             ))}
           </ul>
         )}
+      </div>
+
+      {/* Licenses */}
+      <div id="licenses" className="mt-6 grid gap-6 lg:grid-cols-[360px_1fr]">
+        <div className="h-fit rounded-2xl border border-border bg-surface/40 p-6">
+          <h2 className="mb-4 font-semibold">Assign a license</h2>
+          <p className="mb-4 text-sm text-muted">
+            Pick one or more modules from the catalog (created in the Licenses
+            tab).
+          </p>
+          <LicenseForm clientId={client.id} modules={moduleOptions} />
+        </div>
+
+        <div className="rounded-2xl border border-border bg-surface/40 p-6">
+          <h2 className="mb-4 font-semibold">
+            Licenses ({licenseRows.length})
+          </h2>
+          {licenseRows.length === 0 ? (
+            <p className="text-sm text-muted">No licenses assigned yet.</p>
+          ) : (
+            <div className="space-y-6">
+              {licenseGroups.map((g) => {
+                const rows = licenseRows.filter(
+                  (l) => l.contractType === g.key,
+                );
+                if (rows.length === 0) return null;
+                return (
+                  <div key={g.key}>
+                    <h3 className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted">
+                      {g.label}
+                    </h3>
+                    <ul className="divide-y divide-border">
+                      {rows.map((l) => (
+                        <LicenseRow
+                          key={l.id}
+                          license={l}
+                          clientId={client.id}
+                          modules={moduleOptions}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

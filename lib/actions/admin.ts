@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-helpers";
+import { sendWelcomeEmailToUser } from "@/lib/welcome";
 import {
   isStorageConfigured,
   uploadToBucket,
@@ -22,6 +23,7 @@ const clientSchema = z.object({
   name: z.string().min(1, "Client name is required."),
   websiteUrl: z.string().url("Enter a valid website URL (including https://)."),
   logoUrl: z.string().url().optional(),
+  address: z.string().optional(),
 });
 
 const ALLOWED_LOGO_TYPES = ["image/png", "image/jpeg", "image/svg+xml", "image/webp"];
@@ -56,9 +58,19 @@ export async function addClient(
     name: formData.get("name"),
     websiteUrl: formData.get("websiteUrl"),
     logoUrl: formData.get("logoUrl") || undefined,
+    address: formData.get("address") || undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+  }
+
+  // Block duplicate company names (case-insensitive).
+  const duplicate = await prisma.client.findFirst({
+    where: { name: { equals: parsed.data.name, mode: "insensitive" } },
+    select: { id: true },
+  });
+  if (duplicate) {
+    return { error: "A company with that name already exists." };
   }
 
   let logoUrl = parsed.data.logoUrl;
@@ -78,7 +90,12 @@ export async function addClient(
   }
 
   await prisma.client.create({
-    data: { name: parsed.data.name, websiteUrl: parsed.data.websiteUrl, logoUrl },
+    data: {
+      name: parsed.data.name,
+      websiteUrl: parsed.data.websiteUrl,
+      logoUrl,
+      address: parsed.data.address || null,
+    },
   });
 
   revalidatePath("/about");
@@ -110,6 +127,7 @@ const updateClientSchema = z.object({
   name: z.string().min(1, "Company name is required."),
   websiteUrl: z.string().url("Enter a valid website URL (including https://)."),
   logoUrl: z.string().url().optional(),
+  address: z.string().optional(),
 });
 
 export async function updateClient(
@@ -123,14 +141,21 @@ export async function updateClient(
     name: formData.get("name"),
     websiteUrl: formData.get("websiteUrl"),
     logoUrl: formData.get("logoUrl") || undefined,
+    address: formData.get("address") || undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
   }
 
-  const data: { name: string; websiteUrl: string; logoUrl?: string } = {
+  const data: {
+    name: string;
+    websiteUrl: string;
+    logoUrl?: string;
+    address: string | null;
+  } = {
     name: parsed.data.name,
     websiteUrl: parsed.data.websiteUrl,
+    address: parsed.data.address || null,
   };
 
   const file = formData.get("logoFile");
@@ -199,6 +224,8 @@ const customerSchema = z.object({
   title: z.string().optional(),
   password: z.string().min(8, "Password must be at least 8 characters."),
   clientId: z.string().optional(),
+  zgsUsername: z.string().optional(),
+  zgsTempPassword: z.string().optional(),
 });
 
 export async function createCustomer(
@@ -220,8 +247,9 @@ export async function createCustomer(
 
   const passwordHash = await bcrypt.hash(parsed.data.password, 10);
 
+  let createdId: string | null = null;
   try {
-    await prisma.user.create({
+    const created = await prisma.user.create({
       data: {
         email: parsed.data.email,
         name: parsed.data.name,
@@ -229,13 +257,25 @@ export async function createCustomer(
         passwordHash,
         role: "CUSTOMER",
         clientId: parsed.data.clientId || null,
+        zgsUsername: parsed.data.zgsUsername || null,
+        zgsTempPassword: parsed.data.zgsTempPassword || null,
       },
     });
+    createdId = created.id;
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
       return { error: "A user with that email already exists." };
     }
     return { error: "Could not create the account. Please try again." };
+  }
+
+  // Auto-send the welcome email (best-effort; no-op if Resend isn't configured).
+  if (createdId) {
+    try {
+      await sendWelcomeEmailToUser(createdId);
+    } catch {
+      // Don't fail account creation if the email can't be sent.
+    }
   }
 
   revalidatePath("/admin");
@@ -256,4 +296,119 @@ export async function deleteUser(formData: FormData): Promise<void> {
   await prisma.user.delete({ where: { id } });
   revalidatePath("/admin");
   if (user.clientId) revalidatePath(`/admin/clients/${user.clientId}`);
+}
+
+const updateUserSchema = z.object({
+  id: z.string().min(1),
+  email: z.string().email("Enter a valid email."),
+  name: z.string().optional(),
+  title: z.string().optional(),
+  zgsUsername: z.string().optional(),
+  zgsTempPassword: z.string().optional(),
+});
+
+// Edit an employee's details (name, title, email, ZGS portal credentials).
+export async function updateUser(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireAdmin();
+
+  const parsed = updateUserSchema.safeParse({
+    id: formData.get("id"),
+    email: formData.get("email"),
+    name: formData.get("name") || undefined,
+    title: formData.get("title") || undefined,
+    zgsUsername: formData.get("zgsUsername") || undefined,
+    zgsTempPassword: formData.get("zgsTempPassword") || undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+  }
+
+  const existing = await prisma.user.findUnique({
+    where: { id: parsed.data.id },
+    select: { role: true, clientId: true },
+  });
+  if (!existing || existing.role === "ADMIN") {
+    return { error: "This account cannot be edited here." };
+  }
+
+  try {
+    await prisma.user.update({
+      where: { id: parsed.data.id },
+      data: {
+        email: parsed.data.email,
+        name: parsed.data.name || null,
+        title: parsed.data.title || null,
+        zgsUsername: parsed.data.zgsUsername || null,
+        zgsTempPassword: parsed.data.zgsTempPassword || null,
+      },
+    });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      return { error: "A user with that email already exists." };
+    }
+    return { error: "Could not update the account. Please try again." };
+  }
+
+  revalidatePath("/admin");
+  if (existing.clientId) revalidatePath(`/admin/clients/${existing.clientId}`);
+  return { ok: true };
+}
+
+// Activate / deactivate a single employee login. Deactivated users cannot sign in.
+export async function toggleUserActive(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { role: true, active: true, clientId: true },
+  });
+  if (!user || user.role === "ADMIN") return; // never lock out admins here
+  await prisma.user.update({ where: { id }, data: { active: !user.active } });
+  revalidatePath("/admin");
+  if (user.clientId) revalidatePath(`/admin/clients/${user.clientId}`);
+}
+
+// ── Bulk company actions ─────────────────────────────────────────
+async function revalidateCompanies() {
+  revalidatePath("/about");
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function bulkSetClientActive(
+  ids: string[],
+  active: boolean,
+): Promise<void> {
+  await requireAdmin();
+  if (!ids.length) return;
+  await prisma.client.updateMany({ where: { id: { in: ids } }, data: { active } });
+  await revalidateCompanies();
+}
+
+export async function bulkSetClientVisibility(
+  ids: string[],
+  showOnSite: boolean,
+): Promise<void> {
+  await requireAdmin();
+  if (!ids.length) return;
+  await prisma.client.updateMany({
+    where: { id: { in: ids } },
+    data: { showOnSite },
+  });
+  await revalidateCompanies();
+}
+
+export async function bulkDeleteClients(ids: string[]): Promise<void> {
+  await requireAdmin();
+  if (!ids.length) return;
+  // Remove employee logins for these companies first.
+  await prisma.user.deleteMany({
+    where: { clientId: { in: ids }, role: "CUSTOMER" },
+  });
+  await prisma.client.deleteMany({ where: { id: { in: ids } } });
+  await revalidateCompanies();
 }

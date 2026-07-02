@@ -1,10 +1,13 @@
 import { requireAdmin } from "@/lib/auth-helpers";
 import { ChangePasswordForm } from "@/components/portal/ChangePasswordForm";
+import { WelcomeTemplateEditor } from "@/components/admin/WelcomeTemplateEditor";
+import { getWelcomeTemplate } from "@/lib/welcome";
 
 export const metadata = { title: "Admin · Account" };
 
 export default async function AdminAccountPage() {
   const session = await requireAdmin();
+  const welcomeTemplate = await getWelcomeTemplate();
 
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-10">
@@ -35,6 +38,15 @@ export default async function AdminAccountPage() {
           <p className="mb-4 mt-1 text-sm text-muted">Use at least 8 characters.</p>
           <ChangePasswordForm />
         </div>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-border bg-surface/40 p-6">
+        <h2 className="font-semibold">Welcome email template</h2>
+        <p className="mb-4 mt-1 text-sm text-muted">
+          Sent automatically when an employee is created, and from each
+          company&apos;s &ldquo;Send Welcome Mail&rdquo; button.
+        </p>
+        <WelcomeTemplateEditor initial={welcomeTemplate} />
       </div>
     </div>
   );

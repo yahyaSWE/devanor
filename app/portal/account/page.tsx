@@ -46,6 +46,26 @@ export default async function PortalAccountPage() {
           <ChangePasswordForm />
         </div>
       </section>
+
+      {(user?.zgsUsername || user?.zgsTempPassword) && (
+        <section className="rounded-2xl border border-border bg-surface/40 p-6">
+          <h2 className="font-semibold">ZGS portal</h2>
+          <p className="mb-4 mt-1 text-sm text-muted">
+            Use these to sign in to the ZGS portal. Change the temporary password
+            on your first login there.
+          </p>
+          <dl className="space-y-3 text-sm">
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted">ZGS user name</dt>
+              <dd>{user.zgsUsername ?? "—"}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted">Temporary password</dt>
+              <dd className="font-mono">{user.zgsTempPassword ?? "—"}</dd>
+            </div>
+          </dl>
+        </section>
+      )}
     </div>
   );
 }

@@ -32,6 +32,14 @@ export function AddClientForm() {
         />
       </div>
       <div>
+        <label className="mb-1 block text-xs text-muted">Address</label>
+        <input
+          name="address"
+          placeholder="Street, city, country"
+          className={inputClass}
+        />
+      </div>
+      <div>
         <label className="mb-1 block text-xs text-muted">Logo file</label>
         <input
           name="logoFile"

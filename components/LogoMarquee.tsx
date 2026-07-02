@@ -10,7 +10,8 @@ export async function LogoMarquee() {
     [];
   try {
     clients = await prisma.client.findMany({
-      where: { active: true, showOnSite: true },
+      // Deactivated companies still show as logos; only showOnSite controls this.
+      where: { showOnSite: true },
       orderBy: { createdAt: "asc" },
     });
   } catch {

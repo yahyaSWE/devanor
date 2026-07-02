@@ -2,6 +2,7 @@ import { requireUser } from "@/lib/auth-helpers";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { SubNav } from "@/components/SubNav";
 import { ZendeskChat } from "@/components/portal/ZendeskChat";
+import { IdleLogout } from "@/components/IdleLogout";
 
 const portalNav = [
   { label: "Overview", href: "/portal" },
@@ -21,6 +22,7 @@ export default async function PortalLayout({
 
   return (
     <div className="flex min-h-full flex-col">
+      <IdleLogout />
       <DashboardHeader label="Support Portal" email={session.user.email ?? ""} />
       <SubNav items={portalNav} base="/portal" />
       <main className="flex-1">{children}</main>

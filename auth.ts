@@ -12,7 +12,9 @@ const credentialsSchema = z.object({
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  session: { strategy: "jwt" },
+  // Idle timeout: the JWT expires after 30 min of inactivity; it is refreshed
+  // (updateAge) at most every 5 min while the user is active.
+  session: { strategy: "jwt", maxAge: 30 * 60, updateAge: 5 * 60 },
   providers: [
     Credentials({
       async authorize(credentials) {
@@ -28,6 +30,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) return null;
+
+        // Block deactivated user accounts.
+        if (!user.active) return null;
 
         // Block employees whose company has been deactivated.
         if (user.role === "CUSTOMER" && user.client && !user.client.active) {

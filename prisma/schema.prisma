@@ -20,9 +20,26 @@ model User {
   name         String?
   title        String? // job title / role at the company, shown to support
   role         Role     @default(CUSTOMER)
+  active       Boolean  @default(true) // deactivated users cannot sign in
+  // ZGS portal credentials (third-party site) shown to the employee. Plain text
+  // on purpose: admin shares them, the user changes them on the ZGS site.
+  zgsUsername     String?
+  zgsTempPassword String?
+  welcomeEmailSentAt DateTime? // set when a welcome email has been sent
   client       Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
   clientId     String?
+  resetTokens  PasswordResetToken[]
   createdAt    DateTime @default(now())
+}
+
+// One-time password-reset token (hashed). Emailed via Resend.
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model Client {
@@ -30,6 +47,7 @@ model Client {
   name       String
   logoUrl    String
   websiteUrl String
+  address    String?
   active     Boolean    @default(true)
   showOnSite Boolean    @default(true)
   users      User[]
@@ -83,20 +101,54 @@ enum LicenseStatus {
   EXPIRED
 }
 
-enum LicenseType {
-  LICENSE
+enum ContractType {
+  PERPETUAL
+  SUBSCRIPTION
   MAINTENANCE
 }
 
-// A licensed module or a maintenance entry belonging to a client.
+enum LockType {
+  SUPER_FLOATING
+  NODE_LOCKED
+}
+
+// A reusable license module defined once in the Licenses tab (name only),
+// not tied to any company. Assigned to companies as License rows.
+model LicenseModule {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  licenses  License[]
+  createdAt DateTime  @default(now())
+}
+
+// A license/maintenance entry assigned to a client. One row can cover several
+// catalog modules. The uploaded license key file is downloadable by the customer.
 model License {
-  id        String        @id @default(cuid())
-  type      LicenseType   @default(LICENSE)
-  module    String
-  seats     Int?
-  status    LicenseStatus @default(ACTIVE)
-  expiresAt DateTime?
-  client    Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  id           String          @id @default(cuid())
+  modules      LicenseModule[]
+  contractType ContractType    @default(PERPETUAL)
+  lockType     LockType? // null for maintenance
+  version      String? // license version / year model
+  macIds       String[] // one or more MAC IDs
+  seats        Int?
+  status       LicenseStatus   @default(ACTIVE)
+  permanent    Boolean         @default(false) // no expiry when true
+  expiresAt    DateTime?
+  // Uploaded license key file (served via /api/licenses/[id]/key)
+  keyFileName   String?
+  keyStoredName String?
+  keyMimeType   String?
+  keySize       Int?
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId  String
-  createdAt DateTime      @default(now())
+  createdAt DateTime @default(now())
+}
+
+// Editable email templates (e.g. the welcome email). Keyed by purpose.
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  subject   String
+  body      String
+  updatedAt DateTime @updatedAt
 }

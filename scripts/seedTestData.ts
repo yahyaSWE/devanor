@@ -40,10 +40,20 @@ async function main() {
     await prisma.license.create({
       data: {
         clientId: client.id,
-        module: "E3.Schematic + E3.Cable",
+        contractType: "PERPETUAL",
+        lockType: "NODE_LOCKED",
+        version: "2026",
+        macIds: ["00:11:22:33:44:55"],
         seats: 5,
         status: "ACTIVE",
+        permanent: false,
         expiresAt: new Date("2027-01-01"),
+        modules: {
+          connectOrCreate: [
+            { where: { name: "E3.Schematic" }, create: { name: "E3.Schematic" } },
+            { where: { name: "E3.Cable" }, create: { name: "E3.Cable" } },
+          ],
+        },
       },
     });
     console.log("Seeded license for client:", client.name);

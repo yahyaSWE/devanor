@@ -36,7 +36,9 @@ export function AddEmployeeForm({ clientId }: { clientId: string }) {
         <input name="email" type="email" required className={inputClass} />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-muted">Temporary password *</label>
+        <label className="mb-1 block text-xs text-muted">
+          Login temporary password *
+        </label>
         <input
           name="password"
           type="text"
@@ -45,6 +47,22 @@ export function AddEmployeeForm({ clientId }: { clientId: string }) {
           placeholder="At least 8 characters"
           className={inputClass}
         />
+      </div>
+
+      <div className="rounded-lg border border-border bg-background/40 p-3">
+        <p className="mb-2 text-xs font-medium text-muted">ZGS portal (optional)</p>
+        <div className="space-y-2">
+          <input
+            name="zgsUsername"
+            placeholder="ZGS user name"
+            className={inputClass}
+          />
+          <input
+            name="zgsTempPassword"
+            placeholder="ZGS temporary password"
+            className={inputClass}
+          />
+        </div>
       </div>
 
       {state.error && <p className="text-sm text-red-400">{state.error}</p>}

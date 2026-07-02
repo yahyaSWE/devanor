@@ -11,7 +11,7 @@ const inputClass =
 export function EditCompanyForm({
   client,
 }: {
-  client: { id: string; name: string; websiteUrl: string };
+  client: { id: string; name: string; websiteUrl: string; address: string | null };
 }) {
   const [state, action, pending] = useActionState(updateClient, initial);
 
@@ -33,6 +33,15 @@ export function EditCompanyForm({
           name="websiteUrl"
           required
           defaultValue={client.websiteUrl}
+          className={inputClass}
+        />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-muted">Address</label>
+        <input
+          name="address"
+          defaultValue={client.address ?? ""}
+          placeholder="Street, city, country"
           className={inputClass}
         />
       </div>

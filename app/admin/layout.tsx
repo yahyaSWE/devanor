@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth-helpers";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { SubNav } from "@/components/SubNav";
+import { IdleLogout } from "@/components/IdleLogout";
 
 const adminNav = [
   { label: "Companies", href: "/admin" },
@@ -18,6 +19,7 @@ export default async function AdminLayout({
   const session = await requireAdmin();
   return (
     <div className="flex min-h-full flex-col">
+      <IdleLogout />
       <DashboardHeader label="Admin" email={session.user.email ?? ""} />
       <SubNav items={adminNav} base="/admin" />
       <main className="flex-1">{children}</main>
