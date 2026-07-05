@@ -6,6 +6,7 @@ import {
   updateLicense,
   type ActionState,
 } from "@/lib/actions/admin-content";
+import { uploadFileToStorage } from "@/lib/upload-client";
 import { Button } from "@/components/Button";
 
 const inputClass =
@@ -49,8 +50,35 @@ export function LicenseForm({
   );
   const [permanent, setPermanent] = useState(license?.permanent ?? false);
   const [macs, setMacs] = useState<string[]>([...(license?.macIds ?? []), ""]);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
   const isMaint = contractType === "MAINTENANCE";
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setErr(null);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const file = (form.elements.namedItem("keyFile") as HTMLInputElement)?.files?.[0];
+    fd.delete("keyFile");
+    if (file && !isMaint) {
+      setBusy(true);
+      try {
+        const meta = await uploadFileToStorage(file);
+        fd.set("keyStoredName", meta.storedName);
+        fd.set("keyFileName", meta.fileName);
+        fd.set("keyMimeType", meta.mimeType);
+        fd.set("keySize", String(meta.size));
+      } catch (e2) {
+        setErr(e2 instanceof Error ? e2.message : "Upload failed.");
+        setBusy(false);
+        return;
+      }
+      setBusy(false);
+    }
+    formAction(fd);
+  }
 
   useEffect(() => {
     if (state.ok) {
@@ -82,7 +110,7 @@ export function LicenseForm({
   }
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-3">
+    <form ref={formRef} onSubmit={onSubmit} className="space-y-3">
       <input type="hidden" name="clientId" value={clientId} />
       {isEdit && <input type="hidden" name="id" value={license!.id} />}
 
@@ -234,17 +262,20 @@ export function LicenseForm({
         Permanent license (no expiry date)
       </label>
 
+      {err && <p className="text-sm text-red-400">{err}</p>}
       {state.error && <p className="text-sm text-red-400">{state.error}</p>}
       {state.ok && !isEdit && (
         <p className="text-sm text-accent">License assigned.</p>
       )}
 
-      <Button type="submit" disabled={pending} className="w-full">
-        {pending
-          ? "Saving…"
-          : isEdit
-            ? "Save changes"
-            : "Add license"}
+      <Button type="submit" disabled={busy || pending} className="w-full">
+        {busy
+          ? "Uploading…"
+          : pending
+            ? "Saving…"
+            : isEdit
+              ? "Save changes"
+              : "Add license"}
       </Button>
     </form>
   );

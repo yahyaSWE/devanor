@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { addDownload, type ActionState } from "@/lib/actions/admin-content";
+import { uploadFileToStorage } from "@/lib/upload-client";
 import { Button } from "@/components/Button";
 
 const initial: ActionState = {};
@@ -13,15 +14,43 @@ export function AddDownloadForm({
 }: {
   clients: { id: string; name: string }[];
 }) {
-  const [state, action, pending] = useActionState(addDownload, initial);
+  const [state, formAction, pending] = useActionState(addDownload, initial);
   const formRef = useRef<HTMLFormElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
     if (state.ok) formRef.current?.reset();
   }, [state.ok]);
 
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setErr(null);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const file = (form.elements.namedItem("file") as HTMLInputElement)?.files?.[0];
+    fd.delete("file");
+    if (!file) {
+      setErr("Choose a file to upload.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const meta = await uploadFileToStorage(file);
+      fd.set("storedName", meta.storedName);
+      fd.set("fileName", meta.fileName);
+      fd.set("mimeType", meta.mimeType);
+      fd.set("size", String(meta.size));
+      formAction(fd);
+    } catch (e2) {
+      setErr(e2 instanceof Error ? e2.message : "Upload failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <form ref={formRef} action={action} className="space-y-3">
+    <form ref={formRef} onSubmit={onSubmit} className="space-y-3">
       <div>
         <label className="mb-1 block text-xs text-muted">Title *</label>
         <input name="title" required className={inputClass} />
@@ -39,7 +68,7 @@ export function AddDownloadForm({
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-muted">File *</label>
+        <label className="mb-1 block text-xs text-muted">File * (up to 25 MB)</label>
         <input
           name="file"
           type="file"
@@ -59,11 +88,12 @@ export function AddDownloadForm({
         </select>
       </div>
 
+      {err && <p className="text-sm text-red-400">{err}</p>}
       {state.error && <p className="text-sm text-red-400">{state.error}</p>}
       {state.ok && <p className="text-sm text-accent">File uploaded.</p>}
 
-      <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Uploading…" : "Upload file"}
+      <Button type="submit" disabled={busy || pending} className="w-full">
+        {busy ? "Uploading…" : pending ? "Saving…" : "Upload file"}
       </Button>
     </form>
   );

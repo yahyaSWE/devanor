@@ -62,6 +62,23 @@ export function getPublicUrl(bucket: string, path: string): string {
   return getClient().storage.from(bucket).getPublicUrl(path).data.publicUrl;
 }
 
+// Create a one-time signed upload URL so the browser can upload a (large) file
+// straight to Supabase Storage, bypassing the Vercel/Server-Action body limit.
+export async function createSignedUpload(
+  bucket: string,
+  storedName: string,
+): Promise<{ token: string; path: string }> {
+  const client = getClient();
+  await ensureBucket(client, bucket);
+  const { data, error } = await client.storage
+    .from(bucket)
+    .createSignedUploadUrl(storedName, { upsert: true });
+  if (error || !data) {
+    throw error ?? new Error("Could not create upload URL");
+  }
+  return { token: data.token, path: data.path };
+}
+
 export async function downloadFromBucket(
   bucket: string,
   path: string,

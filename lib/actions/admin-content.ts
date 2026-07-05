@@ -5,14 +5,14 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-helpers";
-import { saveUpload, deleteUpload } from "@/lib/storage";
+import { deleteUpload } from "@/lib/storage";
 
 export type ActionState = { ok?: boolean; error?: string };
 
-const MAX_FILE = 25 * 1024 * 1024; // 25 MB
-
 // ─────────────────────────── Downloads ───────────────────────────
 
+// The file is uploaded to Supabase directly from the browser (see
+// lib/upload-client.ts); this only stores the resulting metadata.
 export async function addDownload(
   _prev: ActionState,
   formData: FormData,
@@ -22,20 +22,20 @@ export async function addDownload(
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return { error: "Title is required." };
 
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) {
-    return { error: "Choose a file to upload." };
-  }
-  if (file.size > MAX_FILE) return { error: "File must be smaller than 25 MB." };
+  const storedName = String(formData.get("storedName") ?? "");
+  const fileName = String(formData.get("fileName") ?? "");
+  if (!storedName || !fileName) return { error: "Upload a file first." };
 
-  const saved = await saveUpload(file);
   await prisma.download.create({
     data: {
       title,
       description: String(formData.get("description") ?? "").trim() || null,
       category: String(formData.get("category") ?? "").trim() || null,
       clientId: String(formData.get("clientId") ?? "") || null,
-      ...saved,
+      storedName,
+      fileName,
+      mimeType: String(formData.get("mimeType") ?? "") || "application/octet-stream",
+      size: Number(formData.get("size") ?? 0),
     },
   });
 
@@ -222,21 +222,18 @@ function parseLicenseFields(formData: FormData) {
   } as const;
 }
 
-async function saveKeyFile(
-  formData: FormData,
-  isMaint: boolean,
-): Promise<LicenseKeyFields | { error: string }> {
-  const file = formData.get("keyFile");
-  if (isMaint || !(file instanceof File) || file.size === 0) return {};
-  if (file.size > MAX_FILE) {
-    return { error: "License key file must be smaller than 25 MB." };
-  }
-  const saved = await saveUpload(file);
+// The key file is uploaded to Supabase directly from the browser; this reads
+// the resulting metadata from hidden fields. Maintenance contracts have no key.
+function readKeyMeta(formData: FormData, isMaint: boolean): LicenseKeyFields {
+  if (isMaint) return {};
+  const keyStoredName = String(formData.get("keyStoredName") ?? "");
+  if (!keyStoredName) return {};
   return {
-    keyFileName: saved.fileName,
-    keyStoredName: saved.storedName,
-    keyMimeType: saved.mimeType,
-    keySize: saved.size,
+    keyStoredName,
+    keyFileName: String(formData.get("keyFileName") ?? "") || "license-key",
+    keyMimeType:
+      String(formData.get("keyMimeType") ?? "") || "application/octet-stream",
+    keySize: Number(formData.get("keySize") ?? 0) || undefined,
   };
 }
 
@@ -258,8 +255,7 @@ export async function assignLicense(
   const fields = parseLicenseFields(formData);
   if ("error" in fields) return { error: fields.error };
 
-  const key = await saveKeyFile(formData, fields.isMaint);
-  if ("error" in key) return { error: key.error };
+  const key = readKeyMeta(formData, fields.isMaint);
 
   await prisma.license.create({
     data: {
@@ -300,10 +296,9 @@ export async function updateLicense(
   const fields = parseLicenseFields(formData);
   if ("error" in fields) return { error: fields.error };
 
-  const key = await saveKeyFile(formData, fields.isMaint);
-  if ("error" in key) return { error: key.error };
+  const key = readKeyMeta(formData, fields.isMaint);
   // Replace the old key file if a new one was uploaded.
-  if ("keyStoredName" in key && key.keyStoredName && existing.keyStoredName) {
+  if (key.keyStoredName && existing.keyStoredName) {
     await deleteUpload(existing.keyStoredName);
   }
 
