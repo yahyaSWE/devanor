@@ -57,7 +57,23 @@ export function getEmbedUrl(url: string): string | null {
   return null;
 }
 
-/** A poster/thumbnail image URL for a YouTube or Vimeo link (compact previews). */
+/** Extracts the Loom session id from a loom.com share/embed URL. */
+export function getLoomId(url: string): string | null {
+  try {
+    const u = new URL(url.trim());
+    if (u.hostname.replace(/^www\./, "") !== "loom.com") return null;
+    const parts = u.pathname.split("/").filter(Boolean);
+    const id = parts[0] === "share" || parts[0] === "embed" ? parts[1] : parts[0];
+    return id || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A poster/thumbnail image URL for a YouTube or Vimeo link (compact previews).
+ * Loom thumbnails carry an unpredictable hash, so use getLoomThumbnail instead.
+ */
 export function getVideoThumbnail(url: string): string | null {
   const ytId = getYouTubeId(url);
   if (ytId) return `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
@@ -66,4 +82,28 @@ export function getVideoThumbnail(url: string): string | null {
   if (vimeoId) return `https://vumbnail.com/${vimeoId}.jpg`;
 
   return null;
+}
+
+/**
+ * Resolves a Loom video's (animated) thumbnail via its oEmbed endpoint.
+ * Returns null for non-Loom URLs or if the lookup fails. Cached for a day.
+ */
+export async function getLoomThumbnail(url: string): Promise<string | null> {
+  const id = getLoomId(url);
+  if (!id) return null;
+  try {
+    const res = await fetch(
+      `https://www.loom.com/v1/oembed?format=json&url=https://www.loom.com/share/${id}`,
+      { next: { revalidate: 86400 } },
+    );
+    if (!res.ok) return null;
+    const data: unknown = await res.json();
+    const thumb =
+      data && typeof data === "object"
+        ? (data as { thumbnail_url?: unknown }).thumbnail_url
+        : null;
+    return typeof thumb === "string" ? thumb : null;
+  } catch {
+    return null;
+  }
 }

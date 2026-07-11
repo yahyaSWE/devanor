@@ -4,7 +4,7 @@ import {
   TutorialsManager,
   type TutorialRow,
 } from "@/components/admin/TutorialsManager";
-import { getEmbedUrl, getVideoThumbnail } from "@/lib/video";
+import { getEmbedUrl, getVideoThumbnail, getLoomThumbnail } from "@/lib/video";
 
 export const metadata = { title: "Admin · Tutorials" };
 
@@ -18,22 +18,26 @@ export default async function AdminTutorialsPage() {
   ]);
 
   const clientOptions = clients.map((c) => ({ id: c.id, name: c.name }));
-  const rows: TutorialRow[] = tutorials.map((t) => {
-    const embedUrl = getEmbedUrl(t.url);
-    return {
-      id: t.id,
-      title: t.title,
-      description: t.description,
-      level: t.level,
-      url: t.url,
-      clientId: t.clientId,
-      clientName: t.client ? t.client.name : null,
-      active: t.active,
-      isVideo: Boolean(embedUrl),
-      embedUrl,
-      thumb: getVideoThumbnail(t.url),
-    };
-  });
+  const rows: TutorialRow[] = await Promise.all(
+    tutorials.map(async (t) => {
+      const embedUrl = getEmbedUrl(t.url);
+      const thumb =
+        getVideoThumbnail(t.url) ?? (await getLoomThumbnail(t.url));
+      return {
+        id: t.id,
+        title: t.title,
+        description: t.description,
+        level: t.level,
+        url: t.url,
+        clientId: t.clientId,
+        clientName: t.client ? t.client.name : null,
+        active: t.active,
+        isVideo: Boolean(embedUrl),
+        embedUrl,
+        thumb,
+      };
+    }),
+  );
 
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-10">

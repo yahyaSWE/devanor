@@ -61,6 +61,7 @@ export function TutorialsManager({
   const [filters, setFilters] = useState<Set<FilterKey>>(new Set());
   const [preview, setPreview] = useState<TutorialRow | null>(null);
   const [editing, setEditing] = useState<TutorialRow | null>(null);
+  const [failedThumbs, setFailedThumbs] = useState<Set<string>>(new Set());
 
   const toggleFilter = (k: FilterKey) =>
     setFilters((prev) => {
@@ -180,11 +181,14 @@ export function TutorialsManager({
                 title={t.isVideo ? "Preview video" : "Open link"}
                 className="group relative grid h-14 w-24 shrink-0 place-items-center overflow-hidden rounded-md border border-border bg-background"
               >
-                {t.thumb ? (
+                {t.thumb && !failedThumbs.has(t.id) ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={t.thumb}
                     alt=""
+                    onError={() =>
+                      setFailedThumbs((prev) => new Set(prev).add(t.id))
+                    }
                     className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
                   />
                 ) : (
