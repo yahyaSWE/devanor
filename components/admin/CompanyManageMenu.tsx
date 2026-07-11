@@ -157,6 +157,7 @@ export function CompanyManageMenu({
               hidden={{ id: client.id }}
               trigger="Delete company"
               confirmLabel="Delete company"
+              requireText="DELETE"
               title="Delete company?"
               message={`This permanently removes "${client.name}"${
                 employees.length > 0

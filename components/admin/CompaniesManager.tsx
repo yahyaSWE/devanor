@@ -291,6 +291,7 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
                   hidden={{ id: c.id }}
                   trigger="Remove"
                   confirmLabel="Delete company"
+                  requireText="DELETE"
                   title="Delete company?"
                   message={`This permanently removes "${c.name}"${
                     c.employeeCount > 0
