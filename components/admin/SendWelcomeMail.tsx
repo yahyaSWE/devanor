@@ -13,14 +13,16 @@ export function SendWelcomeMail({
   template,
   companyName,
   loginUrl,
+  embedded = false,
 }: {
   clientId: string;
   employees: { id: string; name: string | null; email: string }[];
   template: { subject: string; body: string };
   companyName: string;
   loginUrl: string;
+  embedded?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(embedded);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [cc, setCc] = useState("");
   const [showPreview, setShowPreview] = useState(false);
@@ -52,12 +54,24 @@ export function SendWelcomeMail({
 
   return (
     <div>
-      <Button type="button" variant="outline" onClick={() => setOpen((v) => !v)}>
-        Send Welcome Mail
-      </Button>
+      {!embedded && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setOpen((v) => !v)}
+        >
+          Send Welcome Mail
+        </Button>
+      )}
 
       {open && (
-        <div className="mt-4 space-y-4 rounded-2xl border border-border bg-surface/40 p-6">
+        <div
+          className={
+            embedded
+              ? "space-y-4"
+              : "mt-4 space-y-4 rounded-2xl border border-border bg-surface/40 p-6"
+          }
+        >
           <div>
             <p className="mb-2 text-xs font-medium text-muted">Recipients</p>
             <div className="space-y-1">

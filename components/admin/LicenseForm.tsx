@@ -48,7 +48,6 @@ export function LicenseForm({
   const [contractType, setContractType] = useState(
     license?.contractType ?? "PERPETUAL",
   );
-  const [permanent, setPermanent] = useState(license?.permanent ?? false);
   const [macs, setMacs] = useState<string[]>([...(license?.macIds ?? []), ""]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -82,8 +81,8 @@ export function LicenseForm({
 
   useEffect(() => {
     if (state.ok) {
-      if (isEdit) onDone?.();
-      else formRef.current?.reset();
+      formRef.current?.reset();
+      onDone?.();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.ok]);
@@ -246,21 +245,10 @@ export function LicenseForm({
             name="expiresAt"
             type="date"
             defaultValue={license?.expiresAt ?? ""}
-            disabled={permanent}
             className={inputClass}
           />
         </div>
       </div>
-
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          name="permanent"
-          checked={permanent}
-          onChange={(e) => setPermanent(e.target.checked)}
-        />
-        Permanent license (no expiry date)
-      </label>
 
       {err && <p className="text-sm text-red-400">{err}</p>}
       {state.error && <p className="text-sm text-red-400">{state.error}</p>}

@@ -2,18 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { AddEmployeeForm } from "@/components/admin/AddEmployeeForm";
-import { EditCompanyForm } from "@/components/admin/EditCompanyForm";
+import { CompanyManageMenu } from "@/components/admin/CompanyManageMenu";
 import { EmployeeRow } from "@/components/admin/EmployeeRow";
-import { LicenseForm } from "@/components/admin/LicenseForm";
 import { LicenseRow, type LicenseRowData } from "@/components/admin/LicenseRow";
-import { SendWelcomeMail } from "@/components/admin/SendWelcomeMail";
-import { ConfirmSubmit } from "@/components/ConfirmSubmit";
-import {
-  deleteClientAndRedirect,
-  toggleClientActive,
-  toggleClientVisibility,
-} from "@/lib/actions/admin";
 import { getWelcomeTemplate } from "@/lib/welcome";
 import { appUrl } from "@/lib/email";
 import { formatDate } from "@/lib/format";
@@ -127,20 +118,26 @@ export default async function AdminClientDetailPage({
         <div className="flex items-center gap-3">
           <a href="#licenses" className="text-sm text-accent hover:underline">
             {licenseCount} license{licenseCount === 1 ? "" : "s"} ·{" "}
-            {maintenanceCount} maintenance · Manage license →
+            {maintenanceCount} maintenance
           </a>
-          <form action={toggleClientVisibility}>
-            <input type="hidden" name="id" value={client.id} />
-            <button className="rounded-full border border-white/15 px-4 py-2 text-sm transition-colors hover:border-white/30">
-              {client.showOnSite ? "Hide from site" : "Show on site"}
-            </button>
-          </form>
-          <form action={toggleClientActive}>
-            <input type="hidden" name="id" value={client.id} />
-            <button className="rounded-full border border-white/15 px-4 py-2 text-sm transition-colors hover:border-white/30">
-              {client.active ? "Deactivate" : "Activate"}
-            </button>
-          </form>
+          <CompanyManageMenu
+            client={{
+              id: client.id,
+              name: client.name,
+              websiteUrl: client.websiteUrl,
+              address: client.address,
+              active: client.active,
+              showOnSite: client.showOnSite,
+            }}
+            modules={moduleOptions}
+            employees={client.users.map((u) => ({
+              id: u.id,
+              name: u.name,
+              email: u.email,
+            }))}
+            welcomeTemplate={welcomeTemplate}
+            loginUrl={`${appUrl()}/login`}
+          />
         </div>
       </div>
 
@@ -151,71 +148,14 @@ export default async function AdminClientDetailPage({
         </p>
       )}
 
-      {/* Company settings */}
-      <div className="mt-8 grid gap-6 lg:grid-cols-[360px_1fr]">
-        <div className="h-fit rounded-2xl border border-border bg-surface/40 p-6">
-          <h2 className="mb-4 font-semibold">Edit company</h2>
-          <EditCompanyForm
-            client={{
-              id: client.id,
-              name: client.name,
-              websiteUrl: client.websiteUrl,
-              address: client.address,
-            }}
-          />
-          <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
-            <span className="text-xs text-muted">
-              Removes the company and all its employee logins.
-            </span>
-            <ConfirmSubmit
-              action={deleteClientAndRedirect}
-              hidden={{ id: client.id }}
-              trigger="Delete company"
-              confirmLabel="Delete company"
-              title="Delete company?"
-              message={`This permanently removes "${client.name}"${
-                client.users.length > 0
-                  ? ` and its ${client.users.length} employee login${
-                      client.users.length === 1 ? "" : "s"
-                    }`
-                  : ""
-              }. This cannot be undone.`}
-              triggerClassName="shrink-0 rounded-full border border-red-500/40 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/10"
-            />
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-surface/40 p-6">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="font-semibold">Add an employee</h2>
-          </div>
-          <p className="mb-4 text-sm text-muted">
-            Creates a portal login under {client.name}. Each employee signs in with
-            their own email, so support can tell them apart.
-          </p>
-          <AddEmployeeForm clientId={client.id} />
-        </div>
-      </div>
-
       {/* Employees */}
-      <div className="mt-6 rounded-2xl border border-border bg-surface/40 p-6">
+      <div className="mt-8 rounded-2xl border border-border bg-surface/40 p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-semibold">Employees ({client.users.length})</h2>
-          <SendWelcomeMail
-            clientId={client.id}
-            employees={client.users.map((u) => ({
-              id: u.id,
-              name: u.name,
-              email: u.email,
-            }))}
-            template={welcomeTemplate}
-            companyName={client.name}
-            loginUrl={`${appUrl()}/login`}
-          />
         </div>
         {client.users.length === 0 ? (
           <p className="text-sm text-muted">
-            No employees yet. Add the first one above.
+            No employees yet. Use the menu (top right) to add one.
           </p>
         ) : (
           <ul className="divide-y divide-border">
@@ -240,16 +180,7 @@ export default async function AdminClientDetailPage({
       </div>
 
       {/* Licenses */}
-      <div id="licenses" className="mt-6 grid gap-6 lg:grid-cols-[360px_1fr]">
-        <div className="h-fit rounded-2xl border border-border bg-surface/40 p-6">
-          <h2 className="mb-4 font-semibold">Assign a license</h2>
-          <p className="mb-4 text-sm text-muted">
-            Pick one or more modules from the catalog (created in the Licenses
-            tab).
-          </p>
-          <LicenseForm clientId={client.id} modules={moduleOptions} />
-        </div>
-
+      <div id="licenses" className="mt-6">
         <div className="rounded-2xl border border-border bg-surface/40 p-6">
           <h2 className="mb-4 font-semibold">
             Licenses ({licenseRows.length})

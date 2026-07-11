@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { updateClient, type ActionState } from "@/lib/actions/admin";
 import { Button } from "@/components/Button";
 
@@ -10,10 +10,17 @@ const inputClass =
 
 export function EditCompanyForm({
   client,
+  onSuccess,
 }: {
   client: { id: string; name: string; websiteUrl: string; address: string | null };
+  onSuccess?: () => void;
 }) {
   const [state, action, pending] = useActionState(updateClient, initial);
+
+  useEffect(() => {
+    if (state.ok) onSuccess?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.ok]);
 
   return (
     <form action={action} className="space-y-3">
