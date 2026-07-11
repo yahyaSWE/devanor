@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { AddClientForm } from "@/components/admin/AddClientForm";
+import { RegisterCompanyModal } from "@/components/admin/RegisterCompanyModal";
 import { CompaniesManager, type CompanyRow } from "@/components/admin/CompaniesManager";
 
 export const metadata = { title: "Admin" };
@@ -49,19 +49,12 @@ export default async function AdminPage() {
         <Stat label="Employee logins" value={customerCount} />
       </div>
 
-      <section className="grid gap-6 lg:grid-cols-[360px_1fr]">
-        <div className="h-fit rounded-2xl border border-border bg-surface/40 p-6">
-          <h2 className="font-semibold">Register a company</h2>
-          <p className="mb-4 mt-1 text-sm text-muted">
-            Also appears in “Our Clients” on the About page.
-          </p>
-          <AddClientForm />
+      <section className="rounded-2xl border border-border bg-surface/40 p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-semibold">Companies ({clients.length})</h2>
+          <RegisterCompanyModal />
         </div>
-
-        <div className="rounded-2xl border border-border bg-surface/40 p-6">
-          <h2 className="mb-4 font-semibold">Companies ({clients.length})</h2>
-          <CompaniesManager clients={rows} />
-        </div>
+        <CompaniesManager clients={rows} />
       </section>
     </div>
   );

@@ -8,12 +8,16 @@ const initial: ActionState = {};
 const inputClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent/60";
 
-export function AddClientForm() {
+export function AddClientForm({ onSuccess }: { onSuccess?: () => void }) {
   const [state, action, pending] = useActionState(addClient, initial);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (state.ok) formRef.current?.reset();
+    if (state.ok) {
+      formRef.current?.reset();
+      onSuccess?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.ok]);
 
   return (

@@ -262,13 +262,27 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
                 </Link>
                 <form action={toggleClientVisibility}>
                   <input type="hidden" name="id" value={c.id} />
-                  <button className="shrink-0 text-sm text-muted hover:text-foreground">
+                  <button
+                    title={
+                      c.showOnSite
+                        ? "Hide this company's logo from the public website"
+                        : "Show this company's logo on the public website"
+                    }
+                    className="shrink-0 text-sm text-muted hover:text-foreground"
+                  >
                     {c.showOnSite ? "Hide" : "Show"}
                   </button>
                 </form>
                 <form action={toggleClientActive}>
                   <input type="hidden" name="id" value={c.id} />
-                  <button className="shrink-0 text-sm text-muted hover:text-foreground">
+                  <button
+                    title={
+                      c.active
+                        ? "Deactivate — blocks portal sign-in for this company's employees (its logo stays visible on the site)"
+                        : "Activate — let this company's employees sign in to the portal again"
+                    }
+                    className="shrink-0 text-sm text-muted hover:text-foreground"
+                  >
                     {c.active ? "Deactivate" : "Activate"}
                   </button>
                 </form>
