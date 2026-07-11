@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/db";
-import { AddTutorialForm } from "@/components/admin/AddTutorialForm";
-import { deleteTutorial } from "@/lib/actions/admin-content";
+import { AddTutorialModal } from "@/components/admin/AddTutorialModal";
+import {
+  TutorialsManager,
+  type TutorialRow,
+} from "@/components/admin/TutorialsManager";
 import { getEmbedUrl, getVideoThumbnail } from "@/lib/video";
 
 export const metadata = { title: "Admin · Tutorials" };
@@ -14,6 +17,24 @@ export default async function AdminTutorialsPage() {
     }),
   ]);
 
+  const clientOptions = clients.map((c) => ({ id: c.id, name: c.name }));
+  const rows: TutorialRow[] = tutorials.map((t) => {
+    const embedUrl = getEmbedUrl(t.url);
+    return {
+      id: t.id,
+      title: t.title,
+      description: t.description,
+      level: t.level,
+      url: t.url,
+      clientId: t.clientId,
+      clientName: t.client ? t.client.name : null,
+      active: t.active,
+      isVideo: Boolean(embedUrl),
+      embedUrl,
+      thumb: getVideoThumbnail(t.url),
+    };
+  });
+
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-10">
       <h1 className="text-2xl font-semibold">Tutorials</h1>
@@ -22,66 +43,13 @@ export default async function AdminTutorialsPage() {
         links play as an embedded video; other links open in a new tab.
       </p>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[360px_1fr]">
-        <div className="h-fit rounded-2xl border border-border bg-surface/40 p-6">
-          <h2 className="mb-4 font-semibold">Add a tutorial</h2>
-          <AddTutorialForm clients={clients.map((c) => ({ id: c.id, name: c.name }))} />
+      <section className="mt-8 rounded-2xl border border-border bg-surface/40 p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-semibold">Tutorials ({tutorials.length})</h2>
+          <AddTutorialModal clients={clientOptions} />
         </div>
-
-        <div className="rounded-2xl border border-border bg-surface/40 p-6">
-          <h2 className="mb-4 font-semibold">Tutorials ({tutorials.length})</h2>
-          {tutorials.length === 0 ? (
-            <p className="text-sm text-muted">No tutorials yet.</p>
-          ) : (
-            <ul className="divide-y divide-border">
-              {tutorials.map((t) => {
-                const thumb = getVideoThumbnail(t.url);
-                const isVideo = Boolean(getEmbedUrl(t.url));
-                return (
-                  <li key={t.id} className="flex items-center gap-4 py-3">
-                    <div className="grid h-12 w-20 shrink-0 place-items-center overflow-hidden rounded-md border border-border bg-background">
-                      {thumb ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={thumb}
-                          alt=""
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-[10px] uppercase tracking-wide text-muted">
-                          {isVideo ? "Video" : "Link"}
-                        </span>
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate font-medium">{t.title}</p>
-                        <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
-                          {t.level}
-                        </span>
-                        {isVideo && (
-                          <span className="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-xs text-accent">
-                            Video
-                          </span>
-                        )}
-                      </div>
-                      <p className="truncate text-sm text-muted">
-                        {t.client ? t.client.name : "All customers"} · {t.url}
-                      </p>
-                    </div>
-                    <form action={deleteTutorial}>
-                      <input type="hidden" name="id" value={t.id} />
-                      <button className="text-sm text-muted hover:text-red-400">
-                        Remove
-                      </button>
-                    </form>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-      </div>
+        <TutorialsManager tutorials={rows} clients={clientOptions} />
+      </section>
     </div>
   );
 }

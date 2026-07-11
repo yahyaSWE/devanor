@@ -9,7 +9,7 @@ export default async function PortalTutorialsPage() {
   const session = await requireUser();
   const user = await getPortalUser(session.user.id);
   const tutorials = await prisma.tutorial.findMany({
-    where: visibilityFilter(user?.clientId ?? null),
+    where: { AND: [{ active: true }, visibilityFilter(user?.clientId ?? null)] },
     orderBy: { createdAt: "desc" },
   });
 

@@ -90,6 +90,7 @@ model Tutorial {
   description String?
   level       String   @default("Beginner")
   url         String
+  active      Boolean  @default(true) // false = hidden from customers in the portal
   client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId    String? // null = available to all customers
   createdAt   DateTime @default(now())

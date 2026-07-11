@@ -98,6 +98,56 @@ export async function addTutorial(
   return { ok: true };
 }
 
+export async function updateTutorial(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireAdmin();
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { error: "Missing tutorial id." };
+
+  const parsed = tutorialSchema.safeParse({
+    title: formData.get("title"),
+    description: formData.get("description") || undefined,
+    level: formData.get("level") || "Beginner",
+    url: formData.get("url"),
+    clientId: formData.get("clientId") || undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+  }
+
+  await prisma.tutorial.update({
+    where: { id },
+    data: {
+      title: parsed.data.title,
+      description: parsed.data.description || null,
+      level: parsed.data.level,
+      url: parsed.data.url,
+      clientId: parsed.data.clientId || null,
+    },
+  });
+
+  revalidatePath("/admin/tutorials");
+  revalidatePath("/portal/tutorials");
+  return { ok: true };
+}
+
+export async function toggleTutorialActive(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  const tutorial = await prisma.tutorial.findUnique({ where: { id } });
+  if (tutorial) {
+    await prisma.tutorial.update({
+      where: { id },
+      data: { active: !tutorial.active },
+    });
+    revalidatePath("/admin/tutorials");
+    revalidatePath("/portal/tutorials");
+  }
+}
+
 export async function deleteTutorial(formData: FormData): Promise<void> {
   await requireAdmin();
   const id = String(formData.get("id") ?? "");

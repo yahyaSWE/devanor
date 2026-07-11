@@ -16,6 +16,22 @@ export function getYouTubeId(url: string): string | null {
   }
 }
 
+/** Extracts the numeric Vimeo id from a vimeo.com / player.vimeo.com URL. */
+export function getVimeoId(url: string): string | null {
+  try {
+    const u = new URL(url.trim());
+    const host = u.hostname.replace(/^www\./, "");
+    if (host === "vimeo.com" || host === "player.vimeo.com") {
+      const parts = u.pathname.split("/").filter(Boolean);
+      const id = parts[parts.indexOf("video") + 1] || parts[0];
+      if (id && /^\d+$/.test(id)) return id;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 /** Returns an embeddable player URL for YouTube/Vimeo/Loom links, or null. */
 export function getEmbedUrl(url: string): string | null {
   const ytId = getYouTubeId(url);
@@ -41,8 +57,13 @@ export function getEmbedUrl(url: string): string | null {
   return null;
 }
 
-/** A thumbnail image URL for a YouTube link (used for compact previews). */
+/** A poster/thumbnail image URL for a YouTube or Vimeo link (compact previews). */
 export function getVideoThumbnail(url: string): string | null {
-  const id = getYouTubeId(url);
-  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
+  const ytId = getYouTubeId(url);
+  if (ytId) return `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+
+  const vimeoId = getVimeoId(url);
+  if (vimeoId) return `https://vumbnail.com/${vimeoId}.jpg`;
+
+  return null;
 }
