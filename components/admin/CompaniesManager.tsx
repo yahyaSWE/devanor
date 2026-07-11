@@ -55,6 +55,8 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<Set<FilterKey>>(new Set());
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
+  const [bulkTyped, setBulkTyped] = useState("");
   const [pending, startTransition] = useTransition();
 
   const toggleFilter = (k: FilterKey) =>
@@ -186,16 +188,7 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
           <button
             type="button"
             disabled={pending}
-            onClick={() => {
-              if (
-                confirm(
-                  `Remove ${selected.size} compan${
-                    selected.size === 1 ? "y" : "ies"
-                  } and their employee logins? This cannot be undone.`,
-                )
-              )
-                runBulk(() => bulkDeleteClients(ids()));
-            }}
+            onClick={() => setConfirmBulkDelete(true)}
             className="text-red-400 hover:text-red-300"
           >
             Remove
@@ -306,6 +299,67 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
             ))}
           </ul>
         </>
+      )}
+
+      {/* Bulk delete confirmation — requires typing DELETE */}
+      {confirmBulkDelete && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => {
+              setConfirmBulkDelete(false);
+              setBulkTyped("");
+            }}
+          />
+          <div className="relative w-full max-w-sm rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+            <h3 className="text-lg font-semibold">
+              Delete {selected.size} compan{selected.size === 1 ? "y" : "ies"}?
+            </h3>
+            <p className="mt-2 text-sm text-muted">
+              This permanently removes {selected.size} compan
+              {selected.size === 1 ? "y" : "ies"} and all their employee logins.
+              This cannot be undone.
+            </p>
+            <div className="mt-4">
+              <label className="mb-1 block text-xs text-muted">
+                Type{" "}
+                <span className="font-semibold text-foreground">DELETE</span> to
+                confirm
+              </label>
+              <input
+                autoFocus
+                value={bulkTyped}
+                onChange={(e) => setBulkTyped(e.target.value)}
+                placeholder="DELETE"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-red-500/60"
+              />
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmBulkDelete(false);
+                  setBulkTyped("");
+                }}
+                className="rounded-full border border-white/15 px-4 py-2 text-sm transition-colors hover:border-white/30"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={pending || bulkTyped !== "DELETE"}
+                onClick={() => {
+                  setConfirmBulkDelete(false);
+                  setBulkTyped("");
+                  runBulk(() => bulkDeleteClients(ids()));
+                }}
+                className="rounded-full bg-red-500/90 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-red-500/90"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
