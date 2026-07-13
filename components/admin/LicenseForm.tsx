@@ -53,6 +53,8 @@ export function LicenseForm({
   const [err, setErr] = useState<string | null>(null);
 
   const isMaint = contractType === "MAINTENANCE";
+  // A perpetual license is bought for life — it never expires.
+  const isPerpetual = contractType === "PERPETUAL";
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -245,10 +247,23 @@ export function LicenseForm({
             name="expiresAt"
             type="date"
             defaultValue={license?.expiresAt ?? ""}
-            className={inputClass}
+            disabled={isPerpetual}
+            className={`${inputClass} [color-scheme:dark]`}
           />
+          {isPerpetual && (
+            <p className="mt-1 text-xs text-muted">
+              Perpetual license — never expires.
+            </p>
+          )}
         </div>
       </div>
+
+      {/* A perpetual license is permanent (no expiry date). */}
+      <input
+        type="hidden"
+        name="permanent"
+        value={isPerpetual ? "on" : ""}
+      />
 
       {err && <p className="text-sm text-red-400">{err}</p>}
       {state.error && <p className="text-sm text-red-400">{state.error}</p>}
