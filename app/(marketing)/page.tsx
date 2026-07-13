@@ -21,6 +21,16 @@ export default function HomePage() {
     <>
       {/* Hero — full screen video, text bottom-left, badge bottom-right (in line w/ content) */}
       <section className="relative h-screen min-h-[640px] w-full overflow-hidden">
+        {/* Always-visible fallback: an <img> renders the poster even on phones
+            that block autoplay (iOS Low Power/Data Mode) or won't paint an SVG
+            video poster. The video plays on top when it can. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/hero-poster.svg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
         {/* Background video — drop the real file at /public/hero.mp4 */}
         <video
           className="absolute inset-0 h-full w-full object-cover opacity-65"
@@ -28,6 +38,7 @@ export default function HomePage() {
           muted
           loop
           playsInline
+          preload="auto"
           poster="/hero-poster.svg"
         >
           <source src="/hero.mp4" type="video/mp4" />

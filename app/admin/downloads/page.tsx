@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
-import { AddDownloadForm } from "@/components/admin/AddDownloadForm";
+import { AddDownloadModal } from "@/components/admin/AddDownloadModal";
 import { deleteDownload } from "@/lib/actions/admin-content";
+import { ConfirmSubmit } from "@/components/ConfirmSubmit";
 import { formatBytes } from "@/lib/format";
 
 export const metadata = { title: "Admin · Downloads" };
@@ -14,6 +15,8 @@ export default async function AdminDownloadsPage() {
     }),
   ]);
 
+  const clientOptions = clients.map((c) => ({ id: c.id, name: c.name }));
+
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-10">
       <h1 className="text-2xl font-semibold">Downloads</h1>
@@ -22,46 +25,46 @@ export default async function AdminDownloadsPage() {
         users with access.
       </p>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[360px_1fr]">
-        <div className="h-fit rounded-2xl border border-border bg-surface/40 p-6">
-          <h2 className="mb-4 font-semibold">Add a download</h2>
-          <AddDownloadForm clients={clients.map((c) => ({ id: c.id, name: c.name }))} />
+      <section className="mt-8 rounded-2xl border border-border bg-surface/40 p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-semibold">Files ({downloads.length})</h2>
+          <AddDownloadModal clients={clientOptions} />
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface/40 p-6">
-          <h2 className="mb-4 font-semibold">Files ({downloads.length})</h2>
-          {downloads.length === 0 ? (
-            <p className="text-sm text-muted">No files yet.</p>
-          ) : (
-            <ul className="divide-y divide-border">
-              {downloads.map((d) => (
-                <li key={d.id} className="flex items-center gap-4 py-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="truncate font-medium">{d.title}</p>
-                      {d.category && (
-                        <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
-                          {d.category}
-                        </span>
-                      )}
-                    </div>
-                    <p className="truncate text-sm text-muted">
-                      {d.fileName} · {formatBytes(d.size)} ·{" "}
-                      {d.client ? d.client.name : "All customers"}
-                    </p>
+        {downloads.length === 0 ? (
+          <p className="text-sm text-muted">No files yet.</p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {downloads.map((d) => (
+              <li key={d.id} className="flex items-center gap-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="truncate font-medium">{d.title}</p>
+                    {d.category && (
+                      <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted">
+                        {d.category}
+                      </span>
+                    )}
                   </div>
-                  <form action={deleteDownload}>
-                    <input type="hidden" name="id" value={d.id} />
-                    <button className="text-sm text-muted hover:text-red-400">
-                      Remove
-                    </button>
-                  </form>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
+                  <p className="truncate text-sm text-muted">
+                    {d.fileName} · {formatBytes(d.size)} ·{" "}
+                    {d.client ? d.client.name : "All customers"}
+                  </p>
+                </div>
+                <ConfirmSubmit
+                  action={deleteDownload}
+                  hidden={{ id: d.id }}
+                  trigger="Remove"
+                  confirmLabel="Delete file"
+                  title="Delete file?"
+                  message={`This permanently removes "${d.title}". This cannot be undone.`}
+                  triggerClassName="shrink-0 text-sm text-muted transition-colors hover:text-red-400"
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

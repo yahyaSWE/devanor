@@ -173,7 +173,7 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
             type="button"
             disabled={pending}
             onClick={() => runBulk(() => bulkSetClientVisibility(ids(), false))}
-            className="text-muted hover:text-foreground"
+            className="text-muted transition-colors hover:text-foreground"
           >
             Hide
           </button>
@@ -181,7 +181,7 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
             type="button"
             disabled={pending}
             onClick={() => runBulk(() => bulkSetClientActive(ids(), false))}
-            className="text-muted hover:text-foreground"
+            className="text-muted transition-colors hover:text-foreground"
           >
             Deactivate
           </button>
@@ -189,7 +189,7 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
             type="button"
             disabled={pending}
             onClick={() => setConfirmBulkDelete(true)}
-            className="text-red-400 hover:text-red-300"
+            className="text-muted transition-colors hover:text-red-400"
           >
             Remove
           </button>
@@ -233,12 +233,12 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="truncate font-medium">{c.name}</p>
                     {!c.active && (
-                      <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-400">
+                      <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs text-amber-400">
                         Inactive
                       </span>
                     )}
                     {!c.showOnSite && (
-                      <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
+                      <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted">
                         Hidden from site
                       </span>
                     )}
@@ -261,7 +261,7 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
                         ? "Hide this company's logo from the public website"
                         : "Show this company's logo on the public website"
                     }
-                    className="shrink-0 text-sm text-muted hover:text-foreground"
+                    className="shrink-0 text-sm text-muted transition-colors hover:text-foreground"
                   >
                     {c.showOnSite ? "Hide" : "Show"}
                   </button>
@@ -274,7 +274,7 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
                         ? "Deactivate — blocks portal sign-in for this company's employees (its logo stays visible on the site)"
                         : "Activate — let this company's employees sign in to the portal again"
                     }
-                    className="shrink-0 text-sm text-muted hover:text-foreground"
+                    className="shrink-0 text-sm text-muted transition-colors hover:text-foreground"
                   >
                     {c.active ? "Deactivate" : "Activate"}
                   </button>
@@ -293,7 +293,7 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
                         }`
                       : ""
                   }. This cannot be undone.`}
-                  triggerClassName="shrink-0 text-sm text-muted hover:text-red-400"
+                  triggerClassName="shrink-0 text-sm text-muted transition-colors hover:text-red-400"
                 />
               </li>
             ))}

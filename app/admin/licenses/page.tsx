@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { AddLicenseModuleForm } from "@/components/admin/AddLicenseModuleForm";
+import { AddLicenseModuleModal } from "@/components/admin/AddLicenseModuleModal";
 import {
   LicenseCatalogManager,
   type CatalogModule,
@@ -36,16 +36,13 @@ export default async function AdminLicensesPage() {
         keys and seats — from each company&apos;s Manage page.
       </p>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[360px_1fr]">
-        <div className="h-fit rounded-2xl border border-border bg-surface/40 p-6">
-          <h2 className="mb-4 font-semibold">Add module</h2>
-          <AddLicenseModuleForm />
+      <section className="mt-8 rounded-2xl border border-border bg-surface/40 p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-semibold">Modules ({catalog.length})</h2>
+          <AddLicenseModuleModal />
         </div>
-
-        <div className="rounded-2xl border border-border bg-surface/40 p-6">
-          <LicenseCatalogManager modules={catalog} />
-        </div>
-      </div>
+        <LicenseCatalogManager modules={catalog} />
+      </section>
     </div>
   );
 }

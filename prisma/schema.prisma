@@ -21,6 +21,7 @@ model User {
   title        String? // job title / role at the company, shown to support
   role         Role     @default(CUSTOMER)
   active       Boolean  @default(true) // deactivated users cannot sign in
+  mustChangePassword Boolean @default(true) // force a password change on first login
   // ZGS portal credentials (third-party site) shown to the employee. Plain text
   // on purpose: admin shares them, the user changes them on the ZGS site.
   zgsUsername     String?

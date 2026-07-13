@@ -208,16 +208,16 @@ export function TutorialsManager({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="truncate font-medium">{t.title}</p>
-                  <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
+                  <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted">
                     {t.level}
                   </span>
                   {t.isVideo && (
-                    <span className="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-xs text-accent">
+                    <span className="rounded-full border border-accent/40 bg-accent/10 px-2.5 py-0.5 text-xs text-accent">
                       Video
                     </span>
                   )}
                   {!t.active && (
-                    <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-400">
+                    <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs text-amber-400">
                       Hidden
                     </span>
                   )}

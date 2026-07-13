@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import { signOut } from "next-auth/react";
 import { changePassword, type ActionState } from "@/lib/actions/account";
 import { Button } from "@/components/Button";
 
@@ -8,12 +9,21 @@ const initial: ActionState = {};
 const inputClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent/60";
 
-export function ChangePasswordForm() {
+export function ChangePasswordForm({
+  signOutOnSuccess = false,
+}: {
+  signOutOnSuccess?: boolean;
+}) {
   const [state, action, pending] = useActionState(changePassword, initial);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (state.ok) formRef.current?.reset();
+    if (!state.ok) return;
+    formRef.current?.reset();
+    // After a forced first-login change, the JWT still carries the stale flag —
+    // sign out so the next login mints a fresh token without it.
+    if (signOutOnSuccess) signOut({ redirectTo: "/login" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.ok]);
 
   return (

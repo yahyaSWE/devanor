@@ -11,8 +11,10 @@ const inputClass =
 
 export function AddDownloadForm({
   clients,
+  onSuccess,
 }: {
   clients: { id: string; name: string }[];
+  onSuccess?: () => void;
 }) {
   const [state, formAction, pending] = useActionState(addDownload, initial);
   const formRef = useRef<HTMLFormElement>(null);
@@ -20,7 +22,11 @@ export function AddDownloadForm({
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    if (state.ok) formRef.current?.reset();
+    if (state.ok) {
+      formRef.current?.reset();
+      onSuccess?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.ok]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {

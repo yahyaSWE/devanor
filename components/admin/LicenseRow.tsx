@@ -70,7 +70,7 @@ export function LicenseRow({
           confirmLabel="Delete license"
           title="Delete license?"
           message="Are you sure you want to delete this license? This cannot be undone."
-          triggerClassName="shrink-0 text-sm text-muted hover:text-red-400"
+          triggerClassName="shrink-0 text-sm text-muted transition-colors hover:text-red-400"
         />
       </div>
 

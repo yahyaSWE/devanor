@@ -71,7 +71,7 @@ function ModuleRow({
           confirmLabel="Delete module"
           title="Delete module?"
           message={`Delete "${module.name}" from the catalog? Existing assignments keep working.`}
-          triggerClassName="shrink-0 text-sm text-muted hover:text-red-400"
+          triggerClassName="shrink-0 text-sm text-muted transition-colors hover:text-red-400"
         />
       </div>
       {editing && (
@@ -111,7 +111,7 @@ export function LicenseCatalogManager({
     <div className="grid gap-6 lg:grid-cols-2">
       <div>
         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
-          Modules ({modules.length})
+          Catalog
         </h3>
         <ul className="divide-y divide-border">
           {modules.map((m) => (

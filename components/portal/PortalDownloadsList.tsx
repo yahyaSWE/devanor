@@ -141,12 +141,12 @@ export function PortalDownloadsList({ downloads }: { downloads: DownloadRow[] })
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-medium">{d.title}</p>
                   {d.category && (
-                    <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
+                    <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted">
                       {d.category}
                     </span>
                   )}
                   {isNew(d) && (
-                    <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
+                    <span className="rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-semibold text-white">
                       NEW
                     </span>
                   )}

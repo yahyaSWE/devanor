@@ -90,16 +90,16 @@ export default async function AdminClientDetailPage({
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-semibold">{client.name}</h1>
               {client.active ? (
-                <span className="rounded-full border border-green-500/30 bg-green-500/10 px-2 py-0.5 text-xs text-green-400">
+                <span className="rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-0.5 text-xs text-green-400">
                   Active
                 </span>
               ) : (
-                <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-400">
+                <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs text-amber-400">
                   Inactive
                 </span>
               )}
               {!client.showOnSite && (
-                <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
+                <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted">
                   Hidden from site
                 </span>
               )}

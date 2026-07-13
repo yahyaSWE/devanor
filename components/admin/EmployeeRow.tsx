@@ -57,22 +57,22 @@ export function EmployeeRow({ user }: { user: EmployeeRowData }) {
           <div className="flex flex-wrap items-center gap-2">
             <p className="truncate font-medium">{user.name ?? user.email}</p>
             {user.title && (
-              <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
+              <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted">
                 {user.title}
               </span>
             )}
             {!user.active && (
-              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-400">
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs text-amber-400">
                 Inactive
               </span>
             )}
             {user.zgsUsername && (
-              <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
+              <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted">
                 ZGS
               </span>
             )}
             {user.welcomeEmailSent && (
-              <span className="rounded-full border border-green-500/30 bg-green-500/10 px-2 py-0.5 text-xs text-green-400">
+              <span className="rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-0.5 text-xs text-green-400">
                 Welcome Email sent
               </span>
             )}
@@ -91,7 +91,7 @@ export function EmployeeRow({ user }: { user: EmployeeRowData }) {
         </button>
         <form action={toggleUserActive}>
           <input type="hidden" name="id" value={user.id} />
-          <button className="shrink-0 text-sm text-muted hover:text-foreground">
+          <button className="shrink-0 text-sm text-muted transition-colors hover:text-foreground">
             {user.active ? "Deactivate" : "Activate"}
           </button>
         </form>
@@ -104,7 +104,7 @@ export function EmployeeRow({ user }: { user: EmployeeRowData }) {
           message={`This removes the portal login for ${
             user.name ?? user.email
           }. This cannot be undone.`}
-          triggerClassName="shrink-0 text-sm text-muted hover:text-red-400"
+          triggerClassName="shrink-0 text-sm text-muted transition-colors hover:text-red-400"
         />
       </div>
 

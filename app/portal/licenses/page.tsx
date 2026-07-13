@@ -63,7 +63,7 @@ export default async function PortalLicensesPage() {
                     <span className="flex flex-wrap items-center gap-2">
                       {l.modules.map((m) => m.name).join(", ") || "—"}
                       {isUnread(l, seen) && (
-                        <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
+                        <span className="rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-semibold text-white">
                           NEW
                         </span>
                       )}
@@ -91,7 +91,7 @@ export default async function PortalLicensesPage() {
                     {l.keyStoredName ? (
                       <a
                         href={`/api/licenses/${l.id}/key`}
-                        className="text-accent hover:underline"
+                        className="text-sm text-accent hover:underline"
                       >
                         Download
                       </a>
