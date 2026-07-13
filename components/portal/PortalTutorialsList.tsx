@@ -1,0 +1,260 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { markItemsRead } from "@/lib/actions/portal";
+
+export type PortalTutorialRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  level: string;
+  url: string;
+  isVideo: boolean;
+  embedUrl: string | null;
+  thumb: string | null;
+  isNew: boolean;
+};
+
+type FilterKey = "new" | "read" | "video" | "link";
+
+function FilterChip({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+        active
+          ? "border-accent/60 bg-accent/10 text-accent"
+          : "border-border text-muted hover:text-foreground"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+export function PortalTutorialsList({
+  tutorials,
+}: {
+  tutorials: PortalTutorialRow[];
+}) {
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState<Set<FilterKey>>(new Set());
+  const [read, setRead] = useState<Set<string>>(new Set());
+  const [failedThumbs, setFailedThumbs] = useState<Set<string>>(new Set());
+  const [preview, setPreview] = useState<PortalTutorialRow | null>(null);
+
+  const isNew = (t: PortalTutorialRow) => t.isNew && !read.has(t.id);
+
+  const toggleFilter = (k: FilterKey) =>
+    setFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(k)) next.delete(k);
+      else next.add(k);
+      return next;
+    });
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const wantNew = filters.has("new");
+    const wantRead = filters.has("read");
+    const wantVideo = filters.has("video");
+    const wantLink = filters.has("link");
+    return tutorials.filter((t) => {
+      if (wantNew || wantRead) {
+        const n = isNew(t);
+        if (!((wantNew && n) || (wantRead && !n))) return false;
+      }
+      if (wantVideo || wantLink) {
+        if (!((wantVideo && t.isVideo) || (wantLink && !t.isVideo)))
+          return false;
+      }
+      if (q && !t.title.toLowerCase().includes(q)) return false;
+      return true;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tutorials, search, filters, read]);
+
+  // Close the preview modal on Escape.
+  useEffect(() => {
+    if (!preview) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPreview(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [preview]);
+
+  const view = (t: PortalTutorialRow) => {
+    setRead((prev) => new Set(prev).add(t.id));
+    markItemsRead("TUTORIAL", [t.id]).then(() => router.refresh());
+    if (t.isVideo && t.embedUrl) setPreview(t);
+    else window.open(t.url, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Search + filters */}
+      <div className="space-y-3 rounded-2xl border border-border bg-surface/40 p-5">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search tutorials…"
+          className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm outline-none focus:border-accent/60"
+        />
+        <div className="flex flex-wrap items-center gap-2">
+          <FilterChip
+            active={filters.has("new")}
+            label="New"
+            onClick={() => toggleFilter("new")}
+          />
+          <FilterChip
+            active={filters.has("read")}
+            label="Read"
+            onClick={() => toggleFilter("read")}
+          />
+          <FilterChip
+            active={filters.has("video")}
+            label="Videos"
+            onClick={() => toggleFilter("video")}
+          />
+          <FilterChip
+            active={filters.has("link")}
+            label="Links"
+            onClick={() => toggleFilter("link")}
+          />
+          {(filters.size > 0 || search) && (
+            <button
+              type="button"
+              onClick={() => {
+                setFilters(new Set());
+                setSearch("");
+              }}
+              className="text-xs text-muted underline hover:text-foreground"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
+
+      {tutorials.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-border bg-surface/30 p-10 text-center text-sm text-muted">
+          No tutorials are available to you yet.
+        </p>
+      ) : filtered.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-border bg-surface/30 p-10 text-center text-sm text-muted">
+          No tutorials match your search.
+        </p>
+      ) : (
+        <ul className="space-y-3">
+          {filtered.map((t) => (
+            <li
+              key={t.id}
+              className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-surface/40 p-5"
+            >
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-medium">{t.title}</p>
+                  <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
+                    {t.level}
+                  </span>
+                  {isNew(t) && (
+                    <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
+                      NEW
+                    </span>
+                  )}
+                </div>
+                {t.description && (
+                  <p className="mt-1 text-sm text-muted">{t.description}</p>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => view(t)}
+                className="shrink-0 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110"
+              >
+                View
+              </button>
+
+              {/* Mini preview poster (right) */}
+              <button
+                type="button"
+                onClick={() => view(t)}
+                title={t.isVideo ? "Preview video" : "Open link"}
+                className="group relative grid h-16 w-28 shrink-0 place-items-center overflow-hidden rounded-md border border-border bg-background"
+              >
+                {t.thumb && !failedThumbs.has(t.id) ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={t.thumb}
+                    alt=""
+                    onError={() =>
+                      setFailedThumbs((prev) => new Set(prev).add(t.id))
+                    }
+                    className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                  />
+                ) : (
+                  <span className="text-[10px] uppercase tracking-wide text-muted">
+                    {t.isVideo ? "Video" : "Link"}
+                  </span>
+                )}
+                {t.isVideo && (
+                  <span className="absolute inset-0 grid place-items-center bg-black/25 opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="grid h-7 w-7 place-items-center rounded-full bg-white/90 text-black">
+                      ▶
+                    </span>
+                  </span>
+                )}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Preview modal */}
+      {preview && preview.embedUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setPreview(null)}
+          />
+          <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
+            <div className="flex items-center justify-between gap-3 p-4">
+              <h2 className="truncate font-semibold">{preview.title}</h2>
+              <button
+                type="button"
+                onClick={() => setPreview(null)}
+                aria-label="Close"
+                className="text-muted transition-colors hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="aspect-video w-full bg-black">
+              <iframe
+                src={preview.embedUrl}
+                title={preview.title}
+                className="h-full w-full"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

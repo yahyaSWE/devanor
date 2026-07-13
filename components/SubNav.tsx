@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export type SubNavItem = { label: string; href: string };
+export type SubNavItem = { label: string; href: string; count?: number };
 
 export function SubNav({ items, base }: { items: SubNavItem[]; base: string }) {
   const path = usePathname();
@@ -19,13 +19,18 @@ export function SubNav({ items, base }: { items: SubNavItem[]; base: string }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`whitespace-nowrap border-b-2 px-3 py-3 text-sm transition-colors ${
+              className={`flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-3 text-sm transition-colors ${
                 active
                   ? "border-accent text-foreground"
                   : "border-transparent text-muted hover:text-foreground"
               }`}
             >
               {item.label}
+              {item.count ? (
+                <span className="grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1.5 text-xs font-semibold text-white">
+                  {item.count}
+                </span>
+              ) : null}
             </Link>
           );
         })}

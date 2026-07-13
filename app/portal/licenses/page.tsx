@@ -1,10 +1,12 @@
 import { requireUser } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
 import { getPortalUser } from "@/lib/portal";
+import { getSeenMap, isUnread } from "@/lib/portal-reads";
 import { formatDate } from "@/lib/format";
 import { LicenseStatusBadge } from "@/components/LicenseStatusBadge";
 import { ContractTypeBadge } from "@/components/ContractTypeBadge";
 import { LockTypeBadge } from "@/components/LockTypeBadge";
+import { MarkLicensesRead } from "@/components/portal/MarkLicensesRead";
 
 export const metadata = { title: "Licenses" };
 
@@ -20,8 +22,11 @@ export default async function PortalLicensesPage() {
       })
     : [];
 
+  const seen = await getSeenMap(session.user.id, "LICENSE");
+
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-6 py-10">
+      <MarkLicensesRead ids={licenses.map((l) => l.id)} />
       <div>
         <h1 className="text-3xl font-semibold">Licenses</h1>
         <p className="mt-2 text-muted">
@@ -55,7 +60,14 @@ export default async function PortalLicensesPage() {
               {licenses.map((l) => (
                 <tr key={l.id} className="bg-surface/30">
                   <td className="px-5 py-3 font-medium">
-                    {l.modules.map((m) => m.name).join(", ") || "—"}
+                    <span className="flex flex-wrap items-center gap-2">
+                      {l.modules.map((m) => m.name).join(", ") || "—"}
+                      {isUnread(l, seen) && (
+                        <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
+                          NEW
+                        </span>
+                      )}
+                    </span>
                   </td>
                   <td className="px-5 py-3">
                     <ContractTypeBadge type={l.contractType} />

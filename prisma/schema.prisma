@@ -29,7 +29,28 @@ model User {
   client       Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
   clientId     String?
   resetTokens  PasswordResetToken[]
+  views        ItemView[]
   createdAt    DateTime @default(now())
+}
+
+// Records that a customer has seen a specific download/tutorial/license, so the
+// portal can flag items that are new or were edited since they last looked.
+enum ItemType {
+  DOWNLOAD
+  TUTORIAL
+  LICENSE
+}
+
+model ItemView {
+  id       String   @id @default(cuid())
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  itemType ItemType
+  itemId   String
+  seenAt   DateTime @default(now())
+
+  @@unique([userId, itemType, itemId])
+  @@index([userId, itemType])
 }
 
 // One-time password-reset token (hashed). Emailed via Resend.
@@ -81,6 +102,7 @@ model Download {
   client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId    String? // null = available to all customers
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // A gated tutorial / training resource (video or external link).
@@ -94,6 +116,7 @@ model Tutorial {
   client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId    String? // null = available to all customers
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum LicenseStatus {
@@ -143,6 +166,7 @@ model License {
   client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId  String
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Editable email templates (e.g. the welcome email). Keyed by purpose.
