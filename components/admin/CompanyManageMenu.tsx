@@ -130,24 +130,36 @@ export function CompanyManageMenu({
 
           <div className="my-1 border-t border-border" />
 
-          <form action={toggleClientVisibility}>
-            <input type="hidden" name="id" value={client.id} />
-            <button
-              type="submit"
-              className="block w-full px-4 py-2 text-left text-sm text-foreground transition-colors hover:bg-white/5"
-            >
-              {client.showOnSite ? "Hide from site" : "Show on site"}
-            </button>
-          </form>
-          <form action={toggleClientActive}>
-            <input type="hidden" name="id" value={client.id} />
-            <button
-              type="submit"
-              className="block w-full px-4 py-2 text-left text-sm text-foreground transition-colors hover:bg-white/5"
-            >
-              {client.active ? "Deactivate" : "Activate"}
-            </button>
-          </form>
+          <div className="px-1">
+            <ConfirmSubmit
+              action={toggleClientVisibility}
+              hidden={{ id: client.id }}
+              tone="primary"
+              trigger={client.showOnSite ? "Hide from site" : "Show on site"}
+              confirmLabel={client.showOnSite ? "Hide from site" : "Show on site"}
+              title={client.showOnSite ? "Hide from site?" : "Show on site?"}
+              message={
+                client.showOnSite
+                  ? `“${client.name}” will no longer appear in “Our Clients” on the public website.`
+                  : `“${client.name}” will appear in “Our Clients” on the public website.`
+              }
+              triggerClassName="block w-full rounded-lg px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-white/5"
+            />
+            <ConfirmSubmit
+              action={toggleClientActive}
+              hidden={{ id: client.id }}
+              tone="primary"
+              trigger={client.active ? "Deactivate" : "Activate"}
+              confirmLabel={client.active ? "Deactivate" : "Activate"}
+              title={client.active ? "Deactivate company?" : "Activate company?"}
+              message={
+                client.active
+                  ? `Employees at “${client.name}” will no longer be able to sign in to the portal. Its logo stays visible on the site.`
+                  : `Employees at “${client.name}” will be able to sign in to the portal again.`
+              }
+              triggerClassName="block w-full rounded-lg px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-white/5"
+            />
+          </div>
 
           <div className="my-1 border-t border-border" />
 

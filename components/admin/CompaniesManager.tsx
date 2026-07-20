@@ -57,6 +57,9 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
   const [bulkTyped, setBulkTyped] = useState("");
+  const [bulkAction, setBulkAction] = useState<"hide" | "deactivate" | null>(
+    null,
+  );
   const [pending, startTransition] = useTransition();
 
   const toggleFilter = (k: FilterKey) =>
@@ -172,7 +175,7 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
           <button
             type="button"
             disabled={pending}
-            onClick={() => runBulk(() => bulkSetClientVisibility(ids(), false))}
+            onClick={() => setBulkAction("hide")}
             className="text-muted transition-colors hover:text-foreground"
           >
             Hide
@@ -180,7 +183,7 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
           <button
             type="button"
             disabled={pending}
-            onClick={() => runBulk(() => bulkSetClientActive(ids(), false))}
+            onClick={() => setBulkAction("deactivate")}
             className="text-muted transition-colors hover:text-foreground"
           >
             Deactivate
@@ -253,32 +256,44 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
                 >
                   Manage
                 </Link>
-                <form action={toggleClientVisibility}>
-                  <input type="hidden" name="id" value={c.id} />
-                  <button
-                    title={
-                      c.showOnSite
-                        ? "Hide this company's logo from the public website"
-                        : "Show this company's logo on the public website"
-                    }
-                    className="shrink-0 text-sm text-muted transition-colors hover:text-foreground"
-                  >
-                    {c.showOnSite ? "Hide" : "Show"}
-                  </button>
-                </form>
-                <form action={toggleClientActive}>
-                  <input type="hidden" name="id" value={c.id} />
-                  <button
-                    title={
-                      c.active
-                        ? "Deactivate — blocks portal sign-in for this company's employees (its logo stays visible on the site)"
-                        : "Activate — let this company's employees sign in to the portal again"
-                    }
-                    className="shrink-0 text-sm text-muted transition-colors hover:text-foreground"
-                  >
-                    {c.active ? "Deactivate" : "Activate"}
-                  </button>
-                </form>
+                <ConfirmSubmit
+                  action={toggleClientVisibility}
+                  hidden={{ id: c.id }}
+                  tone="primary"
+                  trigger={c.showOnSite ? "Hide" : "Show"}
+                  confirmLabel={c.showOnSite ? "Hide from site" : "Show on site"}
+                  title={c.showOnSite ? "Hide from site?" : "Show on site?"}
+                  message={
+                    c.showOnSite
+                      ? `“${c.name}” will no longer appear in “Our Clients” on the public website.`
+                      : `“${c.name}” will appear in “Our Clients” on the public website.`
+                  }
+                  triggerTitle={
+                    c.showOnSite
+                      ? "Hide this company's logo from the public website"
+                      : "Show this company's logo on the public website"
+                  }
+                  triggerClassName="shrink-0 text-sm text-muted transition-colors hover:text-foreground"
+                />
+                <ConfirmSubmit
+                  action={toggleClientActive}
+                  hidden={{ id: c.id }}
+                  tone="primary"
+                  trigger={c.active ? "Deactivate" : "Activate"}
+                  confirmLabel={c.active ? "Deactivate" : "Activate"}
+                  title={c.active ? "Deactivate company?" : "Activate company?"}
+                  message={
+                    c.active
+                      ? `Employees at “${c.name}” will no longer be able to sign in to the portal. Its logo stays visible on the site.`
+                      : `Employees at “${c.name}” will be able to sign in to the portal again.`
+                  }
+                  triggerTitle={
+                    c.active
+                      ? "Deactivate — blocks portal sign-in for this company's employees (its logo stays visible on the site)"
+                      : "Activate — let this company's employees sign in to the portal again"
+                  }
+                  triggerClassName="shrink-0 text-sm text-muted transition-colors hover:text-foreground"
+                />
                 <ConfirmSubmit
                   action={deleteClient}
                   hidden={{ id: c.id }}
@@ -299,6 +314,53 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
             ))}
           </ul>
         </>
+      )}
+
+      {/* Bulk hide / deactivate confirmation */}
+      {bulkAction && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setBulkAction(null)}
+          />
+          <div className="relative w-full max-w-sm rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+            <h3 className="text-lg font-semibold">
+              {bulkAction === "hide"
+                ? `Hide ${selected.size} compan${selected.size === 1 ? "y" : "ies"} from the site?`
+                : `Deactivate ${selected.size} compan${selected.size === 1 ? "y" : "ies"}?`}
+            </h3>
+            <p className="mt-2 text-sm text-muted">
+              {bulkAction === "hide"
+                ? "Their logos will no longer appear in “Our Clients” on the public website."
+                : "Their employees will no longer be able to sign in to the portal. Logos stay visible on the site."}
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setBulkAction(null)}
+                className="rounded-full border border-white/15 px-4 py-2 text-sm transition-colors hover:border-white/30"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => {
+                  const kind = bulkAction;
+                  setBulkAction(null);
+                  runBulk(() =>
+                    kind === "hide"
+                      ? bulkSetClientVisibility(ids(), false)
+                      : bulkSetClientActive(ids(), false),
+                  );
+                }}
+                className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {bulkAction === "hide" ? "Hide from site" : "Deactivate"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Bulk delete confirmation — requires typing DELETE */}

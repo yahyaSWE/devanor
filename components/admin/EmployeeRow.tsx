@@ -89,12 +89,20 @@ export function EmployeeRow({ user }: { user: EmployeeRowData }) {
         >
           Edit
         </button>
-        <form action={toggleUserActive}>
-          <input type="hidden" name="id" value={user.id} />
-          <button className="shrink-0 text-sm text-muted transition-colors hover:text-foreground">
-            {user.active ? "Deactivate" : "Activate"}
-          </button>
-        </form>
+        <ConfirmSubmit
+          action={toggleUserActive}
+          hidden={{ id: user.id }}
+          tone="primary"
+          trigger={user.active ? "Deactivate" : "Activate"}
+          confirmLabel={user.active ? "Deactivate" : "Activate"}
+          title={user.active ? "Deactivate employee?" : "Activate employee?"}
+          message={
+            user.active
+              ? `${user.name ?? user.email} will no longer be able to sign in to the portal.`
+              : `${user.name ?? user.email} will be able to sign in to the portal again.`
+          }
+          triggerClassName="shrink-0 text-sm text-muted transition-colors hover:text-foreground"
+        />
         <ConfirmSubmit
           action={deleteUser}
           hidden={{ id: user.id }}

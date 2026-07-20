@@ -241,20 +241,25 @@ export function TutorialsManager({
               >
                 Edit
               </button>
-              <form action={toggleTutorialActive}>
-                <input type="hidden" name="id" value={t.id} />
-                <button
-                  type="submit"
-                  title={
-                    t.active
-                      ? "Deactivate — hides this tutorial from customers in the portal"
-                      : "Activate — show this tutorial to customers again"
-                  }
-                  className={actionClass}
-                >
-                  {t.active ? "Deactivate" : "Activate"}
-                </button>
-              </form>
+              <ConfirmSubmit
+                action={toggleTutorialActive}
+                hidden={{ id: t.id }}
+                tone="primary"
+                trigger={t.active ? "Deactivate" : "Activate"}
+                confirmLabel={t.active ? "Deactivate" : "Activate"}
+                title={t.active ? "Deactivate tutorial?" : "Activate tutorial?"}
+                message={
+                  t.active
+                    ? `“${t.title}” will be hidden from customers in the portal.`
+                    : `“${t.title}” will be shown to customers in the portal again.`
+                }
+                triggerTitle={
+                  t.active
+                    ? "Deactivate — hides this tutorial from customers in the portal"
+                    : "Activate — show this tutorial to customers again"
+                }
+                triggerClassName={actionClass}
+              />
               <ConfirmSubmit
                 action={deleteTutorial}
                 hidden={{ id: t.id }}

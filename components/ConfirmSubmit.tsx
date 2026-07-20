@@ -10,15 +10,19 @@ type Props = {
   message: string;
   confirmLabel?: string;
   triggerClassName?: string;
+  /** Native tooltip on the trigger button. */
+  triggerTitle?: string;
   /**
    * When set, the user must type this exact word (e.g. "DELETE") into an input
    * before the confirm button is enabled — an extra guard for destructive actions.
    */
   requireText?: string;
+  /** "danger" (default) styles the confirm button red; "primary" uses the accent. */
+  tone?: "danger" | "primary";
 };
 
 /**
- * A destructive form submit guarded by an "are you sure?" modal.
+ * A form submit guarded by an "are you sure?" modal.
  * The server action is passed in and submitted only after confirmation.
  */
 export function ConfirmSubmit({
@@ -29,7 +33,9 @@ export function ConfirmSubmit({
   message,
   confirmLabel = "Delete",
   triggerClassName,
+  triggerTitle,
   requireText,
+  tone = "danger",
 }: Props) {
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
@@ -46,6 +52,7 @@ export function ConfirmSubmit({
       <button
         type="button"
         onClick={() => setOpen(true)}
+        title={triggerTitle}
         className={triggerClassName ?? "text-sm text-muted hover:text-red-400"}
       >
         {trigger}
@@ -91,7 +98,11 @@ export function ConfirmSubmit({
                 <button
                   type="submit"
                   disabled={!confirmed}
-                  className="rounded-full bg-red-500/90 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-red-500/90"
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                    tone === "primary"
+                      ? "bg-accent text-on-accent hover:brightness-110"
+                      : "bg-red-500/90 text-white hover:bg-red-500 disabled:hover:bg-red-500/90"
+                  }`}
                 >
                   {confirmLabel}
                 </button>
