@@ -44,6 +44,47 @@ export async function addDownload(
   return { ok: true };
 }
 
+export async function updateDownload(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireAdmin();
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { error: "Missing document id." };
+
+  const title = String(formData.get("title") ?? "").trim();
+  if (!title) return { error: "Title is required." };
+
+  await prisma.download.update({
+    where: { id },
+    data: {
+      title,
+      description: String(formData.get("description") ?? "").trim() || null,
+      category: String(formData.get("category") ?? "").trim() || null,
+      clientId: String(formData.get("clientId") ?? "") || null,
+    },
+  });
+
+  revalidatePath("/admin/downloads");
+  revalidatePath("/portal/downloads");
+  return { ok: true };
+}
+
+export async function toggleDownloadActive(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  const download = await prisma.download.findUnique({ where: { id } });
+  if (download) {
+    await prisma.download.update({
+      where: { id },
+      data: { active: !download.active },
+    });
+    revalidatePath("/admin/downloads");
+    revalidatePath("/portal/downloads");
+  }
+}
+
 export async function deleteDownload(formData: FormData): Promise<void> {
   await requireAdmin();
   const id = String(formData.get("id") ?? "");

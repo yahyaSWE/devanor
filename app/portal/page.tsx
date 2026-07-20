@@ -17,11 +17,11 @@ export default async function PortalOverview() {
       ? prisma.license.count({ where: { clientId, status: "ACTIVE" } })
       : Promise.resolve(0),
     prisma.download.findMany({
-      where: filter,
+      where: { AND: [{ active: true }, filter] },
       orderBy: { createdAt: "desc" },
       take: 3,
     }),
-    prisma.tutorial.count({ where: filter }),
+    prisma.tutorial.count({ where: { AND: [{ active: true }, filter] } }),
   ]);
 
   const name = user?.name || session.user.email;

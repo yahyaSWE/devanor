@@ -15,7 +15,9 @@ export default async function PortalDownloadsPage() {
   const user = await getPortalUser(session.user.id);
   const [downloads, seen] = await Promise.all([
     prisma.download.findMany({
-      where: visibilityFilter(user?.clientId ?? null),
+      where: {
+        AND: [{ active: true }, visibilityFilter(user?.clientId ?? null)],
+      },
       orderBy: { createdAt: "desc" },
     }),
     getSeenMap(session.user.id, "DOWNLOAD"),

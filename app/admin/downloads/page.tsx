@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/db";
 import { AddDownloadModal } from "@/components/admin/AddDownloadModal";
-import { deleteDownload } from "@/lib/actions/admin-content";
-import { ConfirmSubmit } from "@/components/ConfirmSubmit";
+import {
+  DownloadsManager,
+  type AdminDownloadRow,
+} from "@/components/admin/DownloadsManager";
 import { formatBytes } from "@/lib/format";
 
 export const metadata = { title: "Admin · Downloads" };
@@ -16,6 +18,22 @@ export default async function AdminDownloadsPage() {
   ]);
 
   const clientOptions = clients.map((c) => ({ id: c.id, name: c.name }));
+  const rows: AdminDownloadRow[] = downloads.map((d) => {
+    const isImage = d.mimeType.startsWith("image/");
+    return {
+      id: d.id,
+      title: d.title,
+      description: d.description,
+      category: d.category,
+      fileName: d.fileName,
+      sizeLabel: formatBytes(d.size),
+      clientId: d.clientId,
+      clientName: d.client ? d.client.name : null,
+      active: d.active,
+      previewable: isImage || d.mimeType === "application/pdf",
+      isImage,
+    };
+  });
 
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-10">
@@ -30,41 +48,7 @@ export default async function AdminDownloadsPage() {
           <h2 className="font-semibold">Files ({downloads.length})</h2>
           <AddDownloadModal clients={clientOptions} />
         </div>
-
-        {downloads.length === 0 ? (
-          <p className="text-sm text-muted">No files yet.</p>
-        ) : (
-          <ul className="divide-y divide-border">
-            {downloads.map((d) => (
-              <li key={d.id} className="flex items-center gap-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="truncate font-medium">{d.title}</p>
-                    {d.category && (
-                      <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted">
-                        {d.category}
-                      </span>
-                    )}
-                  </div>
-                  <p className="truncate text-sm text-muted">
-                    {d.fileName} · {formatBytes(d.size)} ·{" "}
-                    {d.client ? d.client.name : "All customers"}
-                  </p>
-                </div>
-                <ConfirmSubmit
-                  action={deleteDownload}
-                  hidden={{ id: d.id }}
-                  trigger="Remove"
-                  confirmLabel="Delete file"
-                  requireText="DELETE"
-                  title="Delete file?"
-                  message={`This permanently removes "${d.title}". This cannot be undone.`}
-                  triggerClassName="shrink-0 text-sm text-muted transition-colors hover:text-red-400"
-                />
-              </li>
-            ))}
-          </ul>
-        )}
+        <DownloadsManager downloads={rows} clients={clientOptions} />
       </section>
     </div>
   );

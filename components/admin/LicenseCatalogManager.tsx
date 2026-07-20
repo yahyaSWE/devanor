@@ -59,10 +59,10 @@ function ModuleRow({
         </span>
         <button
           type="button"
-          onClick={() => setEditing((v) => !v)}
+          onClick={() => setEditing(true)}
           className="shrink-0 text-sm text-accent hover:underline"
         >
-          {editing ? "Close" : "Edit"}
+          Edit
         </button>
         <ConfirmSubmit
           action={deleteLicenseModule}
@@ -76,20 +76,46 @@ function ModuleRow({
         />
       </div>
       {editing && (
-        <form ref={formRef} action={action} className="mt-2 flex items-center gap-2">
-          <input type="hidden" name="id" value={module.id} />
-          <input
-            name="name"
-            defaultValue={module.name}
-            required
-            className={inputClass}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setEditing(false)}
           />
-          <Button type="submit" disabled={pending} variant="outline">
-            {pending ? "…" : "Save"}
-          </Button>
-        </form>
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="font-semibold">Edit module</h2>
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                aria-label="Close"
+                className="text-muted transition-colors hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+            <form ref={formRef} action={action} className="space-y-3">
+              <input type="hidden" name="id" value={module.id} />
+              <div>
+                <label className="mb-1 block text-xs text-muted">
+                  Module name *
+                </label>
+                <input
+                  name="name"
+                  defaultValue={module.name}
+                  required
+                  className={inputClass}
+                />
+              </div>
+              {state.error && (
+                <p className="text-sm text-red-400">{state.error}</p>
+              )}
+              <Button type="submit" disabled={pending} className="w-full">
+                {pending ? "Saving…" : "Save changes"}
+              </Button>
+            </form>
+          </div>
+        </div>
       )}
-      {state.error && <p className="mt-1 text-sm text-red-400">{state.error}</p>}
     </li>
   );
 }

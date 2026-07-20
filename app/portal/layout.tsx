@@ -20,7 +20,7 @@ export default async function PortalLayout({
   // many are new/edited since they last looked (drives the nav badges).
   const [downloads, tutorials, licenses] = await Promise.all([
     prisma.download.findMany({
-      where: visibilityFilter(clientId),
+      where: { AND: [{ active: true }, visibilityFilter(clientId)] },
       select: { id: true, updatedAt: true },
     }),
     prisma.tutorial.findMany({
