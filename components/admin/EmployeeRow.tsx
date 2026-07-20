@@ -108,6 +108,7 @@ export function EmployeeRow({ user }: { user: EmployeeRowData }) {
           hidden={{ id: user.id }}
           trigger="Remove"
           confirmLabel="Remove employee"
+          requireText="DELETE"
           title="Remove employee?"
           message={`This removes the portal login for ${
             user.name ?? user.email

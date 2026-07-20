@@ -265,6 +265,7 @@ export function TutorialsManager({
                 hidden={{ id: t.id }}
                 trigger="Remove"
                 confirmLabel="Delete tutorial"
+                requireText="DELETE"
                 title="Delete tutorial?"
                 message={`This permanently removes "${t.title}". This cannot be undone.`}
                 triggerClassName="shrink-0 text-sm text-muted hover:text-red-400"

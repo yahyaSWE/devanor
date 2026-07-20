@@ -69,6 +69,7 @@ function ModuleRow({
           hidden={{ id: module.id }}
           trigger="Remove"
           confirmLabel="Delete module"
+          requireText="DELETE"
           title="Delete module?"
           message={`Delete "${module.name}" from the catalog? Existing assignments keep working.`}
           triggerClassName="shrink-0 text-sm text-muted transition-colors hover:text-red-400"

@@ -79,6 +79,7 @@ export function LicenseRow({
           hidden={{ id: license.id }}
           trigger="Remove"
           confirmLabel="Delete license"
+          requireText="DELETE"
           title="Delete license?"
           message="Are you sure you want to delete this license? This cannot be undone."
           triggerClassName="shrink-0 text-sm text-muted transition-colors hover:text-red-400"

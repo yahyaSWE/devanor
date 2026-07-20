@@ -409,7 +409,7 @@ export function CompaniesManager({ clients }: { clients: CompanyRow[] }) {
               </button>
               <button
                 type="button"
-                disabled={pending || bulkTyped !== "DELETE"}
+                disabled={pending || bulkTyped.trim().toLowerCase() !== "delete"}
                 onClick={() => {
                   setConfirmBulkDelete(false);
                   setBulkTyped("");

@@ -45,7 +45,10 @@ export function ConfirmSubmit({
     setTyped("");
   };
 
-  const confirmed = !requireText || typed === requireText;
+  // Case-insensitive on purpose: "delete" is as deliberate as "DELETE".
+  const confirmed =
+    !requireText ||
+    typed.trim().toLowerCase() === requireText.trim().toLowerCase();
 
   return (
     <>

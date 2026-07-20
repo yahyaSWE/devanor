@@ -56,6 +56,7 @@ export default async function AdminDownloadsPage() {
                   hidden={{ id: d.id }}
                   trigger="Remove"
                   confirmLabel="Delete file"
+                  requireText="DELETE"
                   title="Delete file?"
                   message={`This permanently removes "${d.title}". This cannot be undone.`}
                   triggerClassName="shrink-0 text-sm text-muted transition-colors hover:text-red-400"
