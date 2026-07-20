@@ -8,6 +8,7 @@ import {
 } from "@/lib/actions/admin-content";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
 import { AddDownloadForm, type DownloadFormData } from "./AddDownloadForm";
+import type { AudienceCompany } from "./AudiencePicker";
 
 export type AdminDownloadRow = {
   id: string;
@@ -16,8 +17,9 @@ export type AdminDownloadRow = {
   category: string | null;
   fileName: string;
   sizeLabel: string;
-  clientId: string | null;
-  clientName: string | null;
+  clientIds: string[];
+  userIds: string[];
+  audience: string;
   active: boolean;
   /** PDFs and images can be shown inline; anything else has nothing to preview. */
   previewable: boolean;
@@ -52,10 +54,10 @@ function FilterChip({
 
 export function DownloadsManager({
   downloads,
-  clients,
+  companies,
 }: {
   downloads: AdminDownloadRow[];
-  clients: { id: string; name: string }[];
+  companies: AudienceCompany[];
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -81,11 +83,10 @@ export function DownloadsManager({
           return false;
       }
       if (q) {
-        const company = d.clientName ?? "all customers";
         const cat = d.category ?? "";
         if (
           !d.title.toLowerCase().includes(q) &&
-          !company.toLowerCase().includes(q) &&
+          !d.audience.toLowerCase().includes(q) &&
           !cat.toLowerCase().includes(q)
         )
           return false;
@@ -170,8 +171,7 @@ export function DownloadsManager({
                   )}
                 </div>
                 <p className="truncate text-sm text-muted">
-                  {d.fileName} · {d.sizeLabel} ·{" "}
-                  {d.clientName ? d.clientName : "All customers"}
+                  {d.fileName} · {d.sizeLabel} · {d.audience}
                 </p>
               </div>
 
@@ -291,14 +291,15 @@ export function DownloadsManager({
               </button>
             </div>
             <AddDownloadForm
-              clients={clients}
+              companies={companies}
               download={
                 {
                   id: editing.id,
                   title: editing.title,
                   description: editing.description,
                   category: editing.category,
-                  clientId: editing.clientId,
+                  clientIds: editing.clientIds,
+                  userIds: editing.userIds,
                 } satisfies DownloadFormData
               }
               onSuccess={() => {

@@ -1,6 +1,6 @@
 import { requireUser } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
-import { getPortalUser, visibilityFilter } from "@/lib/portal";
+import { getPortalUser, tutorialAudience } from "@/lib/portal";
 import { getSeenMap, isUnread } from "@/lib/portal-reads";
 import { getEmbedUrl, getVideoThumbnail, getLoomThumbnail } from "@/lib/video";
 import {
@@ -15,7 +15,12 @@ export default async function PortalTutorialsPage() {
   const user = await getPortalUser(session.user.id);
   const [tutorials, seen] = await Promise.all([
     prisma.tutorial.findMany({
-      where: { AND: [{ active: true }, visibilityFilter(user?.clientId ?? null)] },
+      where: {
+        AND: [
+          { active: true },
+          tutorialAudience(user?.clientId ?? null, session.user.id),
+        ],
+      },
       orderBy: { createdAt: "desc" },
     }),
     getSeenMap(session.user.id, "TUTORIAL"),

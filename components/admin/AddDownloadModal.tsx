@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AddDownloadForm } from "./AddDownloadForm";
+import type { AudienceCompany } from "./AudiencePicker";
 import { Button } from "@/components/Button";
 
 export function AddDownloadModal({
-  clients,
+  companies,
 }: {
-  clients: { id: string; name: string }[];
+  companies: AudienceCompany[];
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -50,7 +51,7 @@ export function AddDownloadModal({
               Files are private and only served to signed-in users with access.
             </p>
             <AddDownloadForm
-              clients={clients}
+              companies={companies}
               onSuccess={() => {
                 setOpen(false);
                 router.refresh();

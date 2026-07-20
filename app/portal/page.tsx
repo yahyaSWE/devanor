@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
-import { getPortalUser, visibilityFilter } from "@/lib/portal";
+import { getPortalUser, downloadAudience, tutorialAudience } from "@/lib/portal";
 import { formatBytes } from "@/lib/format";
 
 export const metadata = { title: "Support Portal" };
@@ -10,18 +10,23 @@ export default async function PortalOverview() {
   const session = await requireUser();
   const user = await getPortalUser(session.user.id);
   const clientId = user?.clientId ?? null;
-  const filter = visibilityFilter(clientId);
 
   const [activeLicenses, downloads, tutorialCount] = await Promise.all([
     clientId
       ? prisma.license.count({ where: { clientId, status: "ACTIVE" } })
       : Promise.resolve(0),
     prisma.download.findMany({
-      where: { AND: [{ active: true }, filter] },
+      where: {
+        AND: [{ active: true }, downloadAudience(clientId, session.user.id)],
+      },
       orderBy: { createdAt: "desc" },
       take: 3,
     }),
-    prisma.tutorial.count({ where: { AND: [{ active: true }, filter] } }),
+    prisma.tutorial.count({
+      where: {
+        AND: [{ active: true }, tutorialAudience(clientId, session.user.id)],
+      },
+    }),
   ]);
 
   const name = user?.name || session.user.email;

@@ -1,6 +1,6 @@
 import { requireUser } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
-import { getPortalUser, visibilityFilter } from "@/lib/portal";
+import { getPortalUser, downloadAudience, tutorialAudience } from "@/lib/portal";
 import { unreadCount } from "@/lib/portal-reads";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { SubNav, type SubNavItem } from "@/components/SubNav";
@@ -20,11 +20,15 @@ export default async function PortalLayout({
   // many are new/edited since they last looked (drives the nav badges).
   const [downloads, tutorials, licenses] = await Promise.all([
     prisma.download.findMany({
-      where: { AND: [{ active: true }, visibilityFilter(clientId)] },
+      where: {
+        AND: [{ active: true }, downloadAudience(clientId, session.user.id)],
+      },
       select: { id: true, updatedAt: true },
     }),
     prisma.tutorial.findMany({
-      where: { AND: [{ active: true }, visibilityFilter(clientId)] },
+      where: {
+        AND: [{ active: true }, tutorialAudience(clientId, session.user.id)],
+      },
       select: { id: true, updatedAt: true },
     }),
     clientId

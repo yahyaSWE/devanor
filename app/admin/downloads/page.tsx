@@ -4,20 +4,38 @@ import {
   DownloadsManager,
   type AdminDownloadRow,
 } from "@/components/admin/DownloadsManager";
+import type { AudienceCompany } from "@/components/admin/AudiencePicker";
+import { audienceLabel } from "@/lib/portal";
 import { formatBytes } from "@/lib/format";
 
 export const metadata = { title: "Admin · Downloads" };
 
 export default async function AdminDownloadsPage() {
   const [clients, downloads] = await Promise.all([
-    prisma.client.findMany({ orderBy: { name: "asc" } }),
+    prisma.client.findMany({
+      orderBy: { name: "asc" },
+      include: {
+        users: {
+          orderBy: { createdAt: "asc" },
+          select: { id: true, name: true, email: true },
+        },
+      },
+    }),
     prisma.download.findMany({
       orderBy: { createdAt: "desc" },
-      include: { client: true },
+      include: {
+        clients: { select: { id: true, name: true } },
+        users: { select: { id: true, name: true, email: true } },
+      },
     }),
   ]);
 
-  const clientOptions = clients.map((c) => ({ id: c.id, name: c.name }));
+  const companies: AudienceCompany[] = clients.map((c) => ({
+    id: c.id,
+    name: c.name,
+    users: c.users.map((u) => ({ id: u.id, label: u.name ?? u.email })),
+  }));
+
   const rows: AdminDownloadRow[] = downloads.map((d) => {
     const isImage = d.mimeType.startsWith("image/");
     return {
@@ -27,8 +45,9 @@ export default async function AdminDownloadsPage() {
       category: d.category,
       fileName: d.fileName,
       sizeLabel: formatBytes(d.size),
-      clientId: d.clientId,
-      clientName: d.client ? d.client.name : null,
+      clientIds: d.clients.map((c) => c.id),
+      userIds: d.users.map((u) => u.id),
+      audience: audienceLabel(d),
       active: d.active,
       previewable: isImage || d.mimeType === "application/pdf",
       isImage,
@@ -46,9 +65,9 @@ export default async function AdminDownloadsPage() {
       <section className="mt-8 rounded-2xl border border-border bg-surface/40 p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-semibold">Files ({downloads.length})</h2>
-          <AddDownloadModal clients={clientOptions} />
+          <AddDownloadModal companies={companies} />
         </div>
-        <DownloadsManager downloads={rows} clients={clientOptions} />
+        <DownloadsManager downloads={rows} companies={companies} />
       </section>
     </div>
   );

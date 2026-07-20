@@ -8,6 +8,7 @@ import {
 } from "@/lib/actions/admin-content";
 import { uploadFileToStorage } from "@/lib/upload-client";
 import { Button } from "@/components/Button";
+import { AudiencePicker, type AudienceCompany } from "./AudiencePicker";
 
 const initial: ActionState = {};
 const inputClass =
@@ -18,15 +19,16 @@ export type DownloadFormData = {
   title: string;
   description: string | null;
   category: string | null;
-  clientId: string | null;
+  clientIds: string[];
+  userIds: string[];
 };
 
 export function AddDownloadForm({
-  clients,
+  companies,
   download,
   onSuccess,
 }: {
-  clients: { id: string; name: string }[];
+  companies: AudienceCompany[];
   download?: DownloadFormData;
   onSuccess?: () => void;
 }) {
@@ -122,21 +124,11 @@ export function AddDownloadForm({
           />
         </div>
       )}
-      <div>
-        <label className="mb-1 block text-xs text-muted">Visible to</label>
-        <select
-          name="clientId"
-          className={inputClass}
-          defaultValue={download?.clientId ?? ""}
-        >
-          <option value="">All customers</option>
-          {clients.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name} only
-            </option>
-          ))}
-        </select>
-      </div>
+      <AudiencePicker
+        companies={companies}
+        defaultClientIds={download?.clientIds}
+        defaultUserIds={download?.userIds}
+      />
 
       {err && <p className="text-sm text-red-400">{err}</p>}
       {state.error && <p className="text-sm text-red-400">{state.error}</p>}

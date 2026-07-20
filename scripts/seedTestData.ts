@@ -21,7 +21,7 @@ async function main() {
       storedName,
       mimeType: "text/plain",
       size: Buffer.byteLength(content),
-      clientId: null,
+      // No companies/employees selected = visible to all customers.
     },
   });
 
@@ -31,7 +31,7 @@ async function main() {
       description: "Gated walkthrough for signed-in customers.",
       level: "Advanced",
       url: "https://example.com/advanced-automation",
-      clientId: null,
+      // No companies/employees selected = visible to all customers.
     },
   });
 

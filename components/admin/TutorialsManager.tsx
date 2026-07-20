@@ -8,6 +8,7 @@ import {
 } from "@/lib/actions/admin-content";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
 import { AddTutorialForm, type TutorialFormData } from "./AddTutorialForm";
+import type { AudienceCompany } from "./AudiencePicker";
 
 export type TutorialRow = {
   id: string;
@@ -15,8 +16,9 @@ export type TutorialRow = {
   description: string | null;
   level: string;
   url: string;
-  clientId: string | null;
-  clientName: string | null;
+  clientIds: string[];
+  userIds: string[];
+  audience: string;
   active: boolean;
   isVideo: boolean;
   embedUrl: string | null;
@@ -51,10 +53,10 @@ function FilterChip({
 
 export function TutorialsManager({
   tutorials,
-  clients,
+  companies,
 }: {
   tutorials: TutorialRow[];
-  clients: { id: string; name: string }[];
+  companies: AudienceCompany[];
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -88,10 +90,9 @@ export function TutorialsManager({
           return false;
       }
       if (q) {
-        const company = t.clientName ?? "all customers";
         if (
           !t.title.toLowerCase().includes(q) &&
-          !company.toLowerCase().includes(q)
+          !t.audience.toLowerCase().includes(q)
         )
           return false;
       }
@@ -222,9 +223,7 @@ export function TutorialsManager({
                     </span>
                   )}
                 </div>
-                <p className="truncate text-sm text-muted">
-                  {t.clientName ? t.clientName : "All customers"}
-                </p>
+                <p className="truncate text-sm text-muted">{t.audience}</p>
               </div>
 
               <button
@@ -328,7 +327,7 @@ export function TutorialsManager({
               </button>
             </div>
             <AddTutorialForm
-              clients={clients}
+              companies={companies}
               tutorial={
                 {
                   id: editing.id,
@@ -336,7 +335,8 @@ export function TutorialsManager({
                   description: editing.description,
                   level: editing.level,
                   url: editing.url,
-                  clientId: editing.clientId,
+                  clientIds: editing.clientIds,
+                  userIds: editing.userIds,
                 } satisfies TutorialFormData
               }
               onSuccess={() => {

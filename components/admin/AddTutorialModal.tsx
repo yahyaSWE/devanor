@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AddTutorialForm } from "./AddTutorialForm";
+import type { AudienceCompany } from "./AudiencePicker";
 import { Button } from "@/components/Button";
 
 export function AddTutorialModal({
-  clients,
+  companies,
 }: {
-  clients: { id: string; name: string }[];
+  companies: AudienceCompany[];
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -51,7 +52,7 @@ export function AddTutorialModal({
               in a new tab.
             </p>
             <AddTutorialForm
-              clients={clients}
+              companies={companies}
               onSuccess={() => {
                 setOpen(false);
                 router.refresh();

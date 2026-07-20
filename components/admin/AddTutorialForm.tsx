@@ -7,6 +7,7 @@ import {
   type ActionState,
 } from "@/lib/actions/admin-content";
 import { Button } from "@/components/Button";
+import { AudiencePicker, type AudienceCompany } from "./AudiencePicker";
 
 const initial: ActionState = {};
 const inputClass =
@@ -18,15 +19,16 @@ export type TutorialFormData = {
   description: string | null;
   level: string;
   url: string;
-  clientId: string | null;
+  clientIds: string[];
+  userIds: string[];
 };
 
 export function AddTutorialForm({
-  clients,
+  companies,
   tutorial,
   onSuccess,
 }: {
-  clients: { id: string; name: string }[];
+  companies: AudienceCompany[];
   tutorial?: TutorialFormData;
   onSuccess?: () => void;
 }) {
@@ -87,21 +89,11 @@ export function AddTutorialForm({
           className={inputClass}
         />
       </div>
-      <div>
-        <label className="mb-1 block text-xs text-muted">Visible to</label>
-        <select
-          name="clientId"
-          className={inputClass}
-          defaultValue={tutorial?.clientId ?? ""}
-        >
-          <option value="">All customers</option>
-          {clients.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name} only
-            </option>
-          ))}
-        </select>
-      </div>
+      <AudiencePicker
+        companies={companies}
+        defaultClientIds={tutorial?.clientIds}
+        defaultUserIds={tutorial?.userIds}
+      />
 
       {state.error && <p className="text-sm text-red-400">{state.error}</p>}
       {state.ok && !isEdit && (

@@ -4,33 +4,51 @@ import {
   TutorialsManager,
   type TutorialRow,
 } from "@/components/admin/TutorialsManager";
+import type { AudienceCompany } from "@/components/admin/AudiencePicker";
+import { audienceLabel } from "@/lib/portal";
 import { getEmbedUrl, getVideoThumbnail, getLoomThumbnail } from "@/lib/video";
 
 export const metadata = { title: "Admin · Tutorials" };
 
 export default async function AdminTutorialsPage() {
   const [clients, tutorials] = await Promise.all([
-    prisma.client.findMany({ orderBy: { name: "asc" } }),
+    prisma.client.findMany({
+      orderBy: { name: "asc" },
+      include: {
+        users: {
+          orderBy: { createdAt: "asc" },
+          select: { id: true, name: true, email: true },
+        },
+      },
+    }),
     prisma.tutorial.findMany({
       orderBy: { createdAt: "desc" },
-      include: { client: true },
+      include: {
+        clients: { select: { id: true, name: true } },
+        users: { select: { id: true, name: true, email: true } },
+      },
     }),
   ]);
 
-  const clientOptions = clients.map((c) => ({ id: c.id, name: c.name }));
+  const companies: AudienceCompany[] = clients.map((c) => ({
+    id: c.id,
+    name: c.name,
+    users: c.users.map((u) => ({ id: u.id, label: u.name ?? u.email })),
+  }));
+
   const rows: TutorialRow[] = await Promise.all(
     tutorials.map(async (t) => {
       const embedUrl = getEmbedUrl(t.url);
-      const thumb =
-        getVideoThumbnail(t.url) ?? (await getLoomThumbnail(t.url));
+      const thumb = getVideoThumbnail(t.url) ?? (await getLoomThumbnail(t.url));
       return {
         id: t.id,
         title: t.title,
         description: t.description,
         level: t.level,
         url: t.url,
-        clientId: t.clientId,
-        clientName: t.client ? t.client.name : null,
+        clientIds: t.clients.map((c) => c.id),
+        userIds: t.users.map((u) => u.id),
+        audience: audienceLabel(t),
         active: t.active,
         isVideo: Boolean(embedUrl),
         embedUrl,
@@ -50,9 +68,9 @@ export default async function AdminTutorialsPage() {
       <section className="mt-8 rounded-2xl border border-border bg-surface/40 p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-semibold">Tutorials ({tutorials.length})</h2>
-          <AddTutorialModal clients={clientOptions} />
+          <AddTutorialModal companies={companies} />
         </div>
-        <TutorialsManager tutorials={rows} clients={clientOptions} />
+        <TutorialsManager tutorials={rows} companies={companies} />
       </section>
     </div>
   );

@@ -1,6 +1,6 @@
 import { requireUser } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
-import { getPortalUser, visibilityFilter } from "@/lib/portal";
+import { getPortalUser, downloadAudience } from "@/lib/portal";
 import { getSeenMap, isUnread } from "@/lib/portal-reads";
 import { formatBytes, formatDate } from "@/lib/format";
 import {
@@ -16,7 +16,10 @@ export default async function PortalDownloadsPage() {
   const [downloads, seen] = await Promise.all([
     prisma.download.findMany({
       where: {
-        AND: [{ active: true }, visibilityFilter(user?.clientId ?? null)],
+        AND: [
+          { active: true },
+          downloadAudience(user?.clientId ?? null, session.user.id),
+        ],
       },
       orderBy: { createdAt: "desc" },
     }),

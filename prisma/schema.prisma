@@ -31,6 +31,9 @@ model User {
   clientId     String?
   resetTokens  PasswordResetToken[]
   views        ItemView[]
+  // Content targeted at this employee specifically (see Download/Tutorial).
+  downloads    Download[] @relation("DownloadUsers")
+  tutorials    Tutorial[] @relation("TutorialUsers")
   createdAt    DateTime @default(now())
 }
 
@@ -73,8 +76,8 @@ model Client {
   active     Boolean    @default(true)
   showOnSite Boolean    @default(true)
   users      User[]
-  downloads  Download[]
-  tutorials  Tutorial[]
+  downloads  Download[] @relation("DownloadClients")
+  tutorials  Tutorial[] @relation("TutorialClients")
   licenses   License[]
   createdAt  DateTime   @default(now())
 }
@@ -101,8 +104,9 @@ model Download {
   mimeType    String
   size        Int
   active      Boolean  @default(true) // false = hidden from customers in the portal
-  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  clientId    String? // null = available to all customers
+  // Audience (union): no companies and no employees selected = all customers.
+  clients     Client[] @relation("DownloadClients")
+  users       User[]   @relation("DownloadUsers")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -115,8 +119,9 @@ model Tutorial {
   level       String   @default("Beginner")
   url         String
   active      Boolean  @default(true) // false = hidden from customers in the portal
-  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  clientId    String? // null = available to all customers
+  // Audience (union): no companies and no employees selected = all customers.
+  clients     Client[] @relation("TutorialClients")
+  users       User[]   @relation("TutorialUsers")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

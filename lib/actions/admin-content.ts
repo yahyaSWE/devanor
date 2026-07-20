@@ -9,6 +9,25 @@ import { deleteUpload } from "@/lib/storage";
 
 export type ActionState = { ok?: boolean; error?: string };
 
+/**
+ * Reads the audience checkboxes. No companies and no employees selected means
+ * the item is visible to all customers.
+ */
+function readAudience(formData: FormData) {
+  const clientIds = formData.getAll("clientIds").map(String).filter(Boolean);
+  const userIds = formData.getAll("userIds").map(String).filter(Boolean);
+  return {
+    connect: {
+      clients: { connect: clientIds.map((id) => ({ id })) },
+      users: { connect: userIds.map((id) => ({ id })) },
+    },
+    set: {
+      clients: { set: clientIds.map((id) => ({ id })) },
+      users: { set: userIds.map((id) => ({ id })) },
+    },
+  };
+}
+
 // ─────────────────────────── Downloads ───────────────────────────
 
 // The file is uploaded to Supabase directly from the browser (see
@@ -31,7 +50,7 @@ export async function addDownload(
       title,
       description: String(formData.get("description") ?? "").trim() || null,
       category: String(formData.get("category") ?? "").trim() || null,
-      clientId: String(formData.get("clientId") ?? "") || null,
+      ...readAudience(formData).connect,
       storedName,
       fileName,
       mimeType: String(formData.get("mimeType") ?? "") || "application/octet-stream",
@@ -62,7 +81,7 @@ export async function updateDownload(
       title,
       description: String(formData.get("description") ?? "").trim() || null,
       category: String(formData.get("category") ?? "").trim() || null,
-      clientId: String(formData.get("clientId") ?? "") || null,
+      ...readAudience(formData).set,
     },
   });
 
@@ -104,7 +123,6 @@ const tutorialSchema = z.object({
   description: z.string().optional(),
   level: z.string().min(1),
   url: z.string().url("Enter a valid URL (including https://)."),
-  clientId: z.string().optional(),
 });
 
 export async function addTutorial(
@@ -118,7 +136,6 @@ export async function addTutorial(
     description: formData.get("description") || undefined,
     level: formData.get("level") || "Beginner",
     url: formData.get("url"),
-    clientId: formData.get("clientId") || undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -130,7 +147,7 @@ export async function addTutorial(
       description: parsed.data.description || null,
       level: parsed.data.level,
       url: parsed.data.url,
-      clientId: parsed.data.clientId || null,
+      ...readAudience(formData).connect,
     },
   });
 
@@ -153,7 +170,6 @@ export async function updateTutorial(
     description: formData.get("description") || undefined,
     level: formData.get("level") || "Beginner",
     url: formData.get("url"),
-    clientId: formData.get("clientId") || undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -166,7 +182,7 @@ export async function updateTutorial(
       description: parsed.data.description || null,
       level: parsed.data.level,
       url: parsed.data.url,
-      clientId: parsed.data.clientId || null,
+      ...readAudience(formData).set,
     },
   });
 

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { readUpload } from "@/lib/storage";
+import { canSee } from "@/lib/portal";
 
 export async function GET(
   req: NextRequest,
@@ -11,7 +12,13 @@ export async function GET(
   if (!session?.user) return new Response("Unauthorized", { status: 401 });
 
   const { id } = await params;
-  const download = await prisma.download.findUnique({ where: { id } });
+  const download = await prisma.download.findUnique({
+    where: { id },
+    include: {
+      clients: { select: { id: true } },
+      users: { select: { id: true } },
+    },
+  });
   if (!download) return new Response("Not found", { status: 404 });
 
   // Deactivated documents stay available to admins (for preview) only.
@@ -19,14 +26,14 @@ export async function GET(
     return new Response("Not found", { status: 404 });
   }
 
-  // Access control: admins see everything; customers see global files
-  // (clientId null) and files assigned to their own client.
-  if (session.user.role !== "ADMIN" && download.clientId) {
+  // Access control: admins see everything; customers see files targeted at
+  // nobody (all customers), at their company, or at them personally.
+  if (session.user.role !== "ADMIN") {
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { clientId: true },
     });
-    if (user?.clientId !== download.clientId) {
+    if (!canSee(download, user?.clientId ?? null, session.user.id)) {
       return new Response("Forbidden", { status: 403 });
     }
   }
