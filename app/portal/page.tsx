@@ -40,21 +40,21 @@ export default async function PortalOverview() {
       <div className="grid gap-4 sm:grid-cols-3">
         <Link
           href="/portal/licenses"
-          className="rounded-2xl border border-border bg-surface/40 p-5 transition-colors hover:border-accent/40"
+          className="rounded-2xl border border-border bg-surface/40 p-5 transition-all hover:border-accent/50 hover:bg-surface/60 hover:shadow-[0_0_24px_-10px_var(--color-accent)]"
         >
           <p className="text-2xl font-semibold">{activeLicenses}</p>
           <p className="text-sm text-muted">Active licenses</p>
         </Link>
         <Link
           href="/portal/downloads"
-          className="rounded-2xl border border-border bg-surface/40 p-5 transition-colors hover:border-accent/40"
+          className="rounded-2xl border border-border bg-surface/40 p-5 transition-all hover:border-accent/50 hover:bg-surface/60 hover:shadow-[0_0_24px_-10px_var(--color-accent)]"
         >
           <p className="text-2xl font-semibold">{downloads.length}</p>
           <p className="text-sm text-muted">Recent downloads</p>
         </Link>
         <Link
           href="/portal/tutorials"
-          className="rounded-2xl border border-border bg-surface/40 p-5 transition-colors hover:border-accent/40"
+          className="rounded-2xl border border-border bg-surface/40 p-5 transition-all hover:border-accent/50 hover:bg-surface/60 hover:shadow-[0_0_24px_-10px_var(--color-accent)]"
         >
           <p className="text-2xl font-semibold">{tutorialCount}</p>
           <p className="text-sm text-muted">Tutorials available</p>
@@ -64,7 +64,7 @@ export default async function PortalOverview() {
       <section className="rounded-2xl border border-border bg-surface/40 p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-semibold">Latest downloads</h2>
-          <Link href="/portal/downloads" className="text-sm text-accent hover:underline">
+          <Link href="/portal/downloads" className="text-sm text-accent transition-all hover:brightness-125 hover:underline">
             View all
           </Link>
         </div>
@@ -82,7 +82,7 @@ export default async function PortalOverview() {
                 </div>
                 <a
                   href={`/api/downloads/${d.id}`}
-                  className="shrink-0 text-sm text-accent hover:underline"
+                  className="shrink-0 text-sm text-accent transition-all hover:brightness-125 hover:underline"
                 >
                   Download
                 </a>
@@ -99,7 +99,7 @@ export default async function PortalOverview() {
         </p>
         <Link
           href="/portal/support"
-          className="mt-4 inline-block text-sm text-accent hover:underline"
+          className="mt-4 inline-block text-sm text-accent transition-all hover:brightness-125 hover:underline"
         >
           Go to support →
         </Link>

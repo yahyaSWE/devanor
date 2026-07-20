@@ -10,7 +10,7 @@ const variants: Record<Variant, string> = {
   primary:
     "bg-accent text-on-accent hover:brightness-110 hover:shadow-[0_0_30px_-5px_var(--color-accent)]",
   outline:
-    "border border-white/15 text-foreground hover:border-accent/60 hover:text-accent",
+    "border border-white/15 text-foreground hover:border-accent/60 hover:text-accent hover:shadow-[0_0_20px_-8px_var(--color-accent)]",
   ghost: "text-muted hover:text-foreground",
   white: "bg-white text-on-accent hover:bg-accent hover:text-on-accent",
   whiteGhost: "text-white hover:text-accent",

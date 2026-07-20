@@ -91,7 +91,7 @@ export default async function PortalLicensesPage() {
                     {l.keyStoredName ? (
                       <a
                         href={`/api/licenses/${l.id}/key`}
-                        className="text-sm text-accent hover:underline"
+                        className="text-sm text-accent transition-all hover:brightness-125 hover:underline"
                       >
                         Download
                       </a>

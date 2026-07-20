@@ -41,7 +41,7 @@ function FilterChip({
       className={`rounded-full border px-3 py-1 text-xs transition-colors ${
         active
           ? "border-accent/60 bg-accent/10 text-accent"
-          : "border-border text-muted hover:text-foreground"
+          : "border-border text-muted hover:border-accent/40 hover:bg-accent/5 hover:text-foreground"
       }`}
     >
       {label}

@@ -33,7 +33,7 @@ function FilterChip({
       className={`rounded-full border px-3 py-1 text-xs transition-colors ${
         active
           ? "border-accent/60 bg-accent/10 text-accent"
-          : "border-border text-muted hover:text-foreground"
+          : "border-border text-muted hover:border-accent/40 hover:bg-accent/5 hover:text-foreground"
       }`}
     >
       {label}
@@ -161,7 +161,7 @@ export function PortalDownloadsList({ downloads }: { downloads: DownloadRow[] })
               <button
                 type="button"
                 onClick={() => onDownload(d.id)}
-                className="shrink-0 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110"
+                className="shrink-0 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-all duration-200 hover:brightness-110 hover:shadow-[0_0_30px_-5px_var(--color-accent)]"
               >
                 Download
               </button>

@@ -22,7 +22,7 @@ export function SubNav({ items, base }: { items: SubNavItem[]; base: string }) {
               className={`flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-3 text-sm transition-colors ${
                 active
                   ? "border-accent text-foreground"
-                  : "border-transparent text-muted hover:text-foreground"
+                  : "border-transparent text-muted hover:border-accent/40 hover:bg-white/5 hover:text-foreground"
               }`}
             >
               {item.label}

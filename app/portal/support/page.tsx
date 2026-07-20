@@ -45,19 +45,19 @@ export default function PortalSupportPage() {
         <div className="mt-4 grid gap-4 text-sm sm:grid-cols-3">
           <div>
             <p className="text-muted">Email</p>
-            <a href={site.contact.emailHref} className="hover:text-accent">
+            <a href={site.contact.emailHref} className="transition-colors hover:text-accent">
               {site.contact.email}
             </a>
           </div>
           <div>
             <p className="text-muted">Phone</p>
-            <a href={site.contact.phoneHref} className="hover:text-accent">
+            <a href={site.contact.phoneHref} className="transition-colors hover:text-accent">
               {site.contact.phone}
             </a>
           </div>
           <div>
             <p className="text-muted">WhatsApp</p>
-            <a href={site.contact.whatsappHref} className="hover:text-accent">
+            <a href={site.contact.whatsappHref} className="transition-colors hover:text-accent">
               {site.contact.whatsapp}
             </a>
           </div>
