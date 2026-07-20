@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Section, SectionHeading } from "@/components/Section";
 import { ButtonLink } from "@/components/Button";
+import { HeroVideo } from "@/components/HeroVideo";
 import { Reveal } from "@/components/Reveal";
 import { CTASection } from "@/components/CTASection";
 import { Stats } from "@/components/Stats";
@@ -21,28 +22,9 @@ export default function HomePage() {
     <>
       {/* Hero — full screen video, text bottom-left, badge bottom-right (in line w/ content) */}
       <section className="relative h-screen min-h-[640px] w-full overflow-hidden">
-        {/* Always-visible fallback: an <img> renders the poster even on phones
-            that block autoplay (iOS Low Power/Data Mode) or won't paint an SVG
-            video poster. The video plays on top when it can. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/hero-poster.svg"
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        {/* Background video — drop the real file at /public/hero.mp4 */}
-        <video
-          className="absolute inset-0 h-full w-full object-cover opacity-65"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          poster="/hero-poster.svg"
-        >
-          <source src="/hero.mp4" type="video/mp4" />
-        </video>
+        {/* Background video (file at /public/hero.mp4) with a poster fallback
+            that only shows until playback starts. */}
+        <HeroVideo />
         {/* Legibility gradient — original/light at the top, fading to solid black at the bottom */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/35 to-background" />
 
