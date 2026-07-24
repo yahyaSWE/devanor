@@ -3,61 +3,92 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-helpers";
-import { sendWelcomeEmailToUser } from "@/lib/welcome";
+import { sendWelcomeEmailWithContent } from "@/lib/welcome";
 
 export type ActionState = { ok?: boolean; error?: string };
 
-/** Save the editable welcome-email template (subject + body). */
-export async function updateWelcomeTemplate(
+/** Create a new named email template. */
+export async function createTemplate(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   await requireAdmin();
+  const name = String(formData.get("name") ?? "").trim();
   const subject = String(formData.get("subject") ?? "").trim();
   const body = String(formData.get("body") ?? "").trim();
-  if (!subject || !body) return { error: "Subject and body are required." };
+  if (!name || !subject || !body)
+    return { error: "Name, subject and body are required." };
 
-  await prisma.emailTemplate.upsert({
-    where: { key: "welcome" },
-    update: { subject, body },
-    create: { key: "welcome", subject, body },
+  await prisma.emailTemplate.create({
+    // A generated key keeps `key` unique; only the built-in one is "welcome".
+    data: { key: `tpl_${crypto.randomUUID()}`, name, subject, body },
   });
 
   revalidatePath("/admin/account");
   return { ok: true };
 }
 
-/** Manually send the welcome email to selected employees, with optional CC. */
-export async function sendWelcomeEmails(
-  clientId: string,
-  userIds: string[],
+/** Edit an existing template (name + subject + body). */
+export async function updateTemplate(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const subject = String(formData.get("subject") ?? "").trim();
+  const body = String(formData.get("body") ?? "").trim();
+  if (!id) return { error: "Missing template id." };
+  if (!name || !subject || !body)
+    return { error: "Name, subject and body are required." };
+
+  await prisma.emailTemplate.update({
+    where: { id },
+    data: { name, subject, body },
+  });
+
+  revalidatePath("/admin/account");
+  return { ok: true };
+}
+
+/** Delete a template. The built-in "welcome" template cannot be removed. */
+export async function deleteTemplate(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  const tpl = await prisma.emailTemplate.findUnique({ where: { id } });
+  if (tpl && tpl.key !== "welcome") {
+    await prisma.emailTemplate.delete({ where: { id } });
+    revalidatePath("/admin/account");
+  }
+}
+
+/** Send the (possibly edited) welcome email to one employee, with optional CC. */
+export async function sendWelcomeEmail(
+  userId: string,
+  subject: string,
+  body: string,
   cc: string,
 ): Promise<ActionState> {
   await requireAdmin();
-  if (!userIds.length) return { error: "Select at least one recipient." };
+  if (!subject.trim() || !body.trim())
+    return { error: "Subject and body are required." };
 
   const ccList = cc
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
 
-  // Only send to users actually belonging to this company.
-  const users = await prisma.user.findMany({
-    where: { id: { in: userIds }, clientId },
-    select: { id: true },
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { clientId: true },
   });
+  if (!user) return { error: "Employee not found." };
 
-  let sent = 0;
-  for (const u of users) {
-    const r = await sendWelcomeEmailToUser(u.id, ccList);
-    if (r.ok) sent++;
-  }
+  const res = await sendWelcomeEmailWithContent(userId, subject, body, ccList);
+  if (user.clientId) revalidatePath(`/admin/clients/${user.clientId}`);
 
-  revalidatePath(`/admin/clients/${clientId}`);
-  if (sent === 0) {
-    return {
-      error: "No emails were sent — check that Resend is configured.",
-    };
+  if (!res.ok) {
+    return { error: "Email was not sent — check that Resend is configured." };
   }
   return { ok: true };
 }

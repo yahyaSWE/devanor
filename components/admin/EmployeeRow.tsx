@@ -9,6 +9,8 @@ import {
 } from "@/lib/actions/admin";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
 import { Button } from "@/components/Button";
+import { SendWelcomeMail } from "./SendWelcomeMail";
+import type { NamedTemplate } from "@/lib/welcome";
 
 const inputClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent/60";
@@ -25,7 +27,17 @@ export type EmployeeRowData = {
   addedLabel: string;
 };
 
-export function EmployeeRow({ user }: { user: EmployeeRowData }) {
+export function EmployeeRow({
+  user,
+  templates,
+  companyName,
+  loginUrl,
+}: {
+  user: EmployeeRowData;
+  templates: NamedTemplate[];
+  companyName: string;
+  loginUrl: string;
+}) {
   const [editing, setEditing] = useState(false);
   const [state, action, pending] = useActionState<ActionState, FormData>(
     updateUser,
@@ -82,6 +94,12 @@ export function EmployeeRow({ user }: { user: EmployeeRowData }) {
           </p>
         </div>
 
+        <SendWelcomeMail
+          user={{ id: user.id, name: user.name, email: user.email }}
+          templates={templates}
+          companyName={companyName}
+          loginUrl={loginUrl}
+        />
         <button
           type="button"
           onClick={() => setEditing(true)}

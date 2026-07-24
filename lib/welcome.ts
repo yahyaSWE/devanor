@@ -2,6 +2,12 @@ import { prisma } from "@/lib/db";
 import { sendEmail, appUrl } from "@/lib/email";
 
 export type WelcomeTemplate = { subject: string; body: string };
+export type NamedTemplate = {
+  id: string;
+  name: string;
+  subject: string;
+  body: string;
+};
 
 // Default welcome email. Placeholders: {{name}}, {{company}}, {{loginUrl}}.
 export const DEFAULT_WELCOME: WelcomeTemplate = {
@@ -15,14 +21,38 @@ export const DEFAULT_WELCOME: WelcomeTemplate = {
   ].join("\n"),
 };
 
-/** The editable welcome template from the DB, or the built-in default. */
+/** The built-in default template (key "welcome"), or the hard-coded fallback. */
 export async function getWelcomeTemplate(): Promise<WelcomeTemplate> {
   const row = await prisma.emailTemplate.findUnique({
     where: { key: "welcome" },
   });
-  return row
-    ? { subject: row.subject, body: row.body }
-    : DEFAULT_WELCOME;
+  return row ? { subject: row.subject, body: row.body } : DEFAULT_WELCOME;
+}
+
+/** Make sure the built-in "welcome" template row exists, then return all. */
+export async function listTemplates(): Promise<NamedTemplate[]> {
+  const existing = await prisma.emailTemplate.findUnique({
+    where: { key: "welcome" },
+  });
+  if (!existing) {
+    await prisma.emailTemplate.create({
+      data: {
+        key: "welcome",
+        name: "Welcome",
+        subject: DEFAULT_WELCOME.subject,
+        body: DEFAULT_WELCOME.body,
+      },
+    });
+  }
+  const rows = await prisma.emailTemplate.findMany({
+    orderBy: { name: "asc" },
+  });
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    subject: r.subject,
+    body: r.body,
+  }));
 }
 
 export function renderTemplate(
@@ -33,11 +63,14 @@ export function renderTemplate(
 }
 
 /**
- * Send the welcome email to one user. Marks `welcomeEmailSentAt` only when the
- * email was actually sent (Resend configured).
+ * Send a welcome email to one user with an explicit subject/body (the admin's
+ * edited copy). Renders {{name}}/{{company}}/{{loginUrl}} and stamps
+ * welcomeEmailSentAt on success.
  */
-export async function sendWelcomeEmailToUser(
+export async function sendWelcomeEmailWithContent(
   userId: string,
+  subject: string,
+  body: string,
   cc?: string[],
 ): Promise<{ ok: boolean; skipped?: boolean }> {
   const user = await prisma.user.findUnique({
@@ -46,7 +79,6 @@ export async function sendWelcomeEmailToUser(
   });
   if (!user) return { ok: false };
 
-  const tpl = await getWelcomeTemplate();
   const vars = {
     name: user.name || user.email,
     company: user.client?.name ?? "",
@@ -55,8 +87,8 @@ export async function sendWelcomeEmailToUser(
 
   const res = await sendEmail({
     to: user.email,
-    subject: renderTemplate(tpl.subject, vars),
-    html: renderTemplate(tpl.body, vars),
+    subject: renderTemplate(subject, vars),
+    html: renderTemplate(body, vars),
     cc,
   });
 

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { CompanyManageMenu } from "@/components/admin/CompanyManageMenu";
 import { EmployeeRow } from "@/components/admin/EmployeeRow";
 import { LicenseRow, type LicenseRowData } from "@/components/admin/LicenseRow";
-import { getWelcomeTemplate } from "@/lib/welcome";
+import { listTemplates } from "@/lib/welcome";
 import { appUrl } from "@/lib/email";
 import { formatDate } from "@/lib/format";
 
@@ -37,7 +37,8 @@ export default async function AdminClientDetailPage({
   ]);
   if (!client) notFound();
 
-  const welcomeTemplate = await getWelcomeTemplate();
+  const templates = await listTemplates();
+  const loginUrl = `${appUrl()}/login`;
 
   const licenseCount = client.licenses.filter(
     (l) => l.contractType !== "MAINTENANCE",
@@ -138,8 +139,6 @@ export default async function AdminClientDetailPage({
               name: u.name,
               email: u.email,
             }))}
-            welcomeTemplate={welcomeTemplate}
-            loginUrl={`${appUrl()}/login`}
           />
         </div>
       </div>
@@ -176,6 +175,9 @@ export default async function AdminClientDetailPage({
                   welcomeEmailSent: !!u.welcomeEmailSentAt,
                   addedLabel: formatDate(u.createdAt),
                 }}
+                templates={templates}
+                companyName={client.name}
+                loginUrl={loginUrl}
               />
             ))}
           </ul>

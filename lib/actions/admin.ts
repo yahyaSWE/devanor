@@ -9,7 +9,6 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-helpers";
-import { sendWelcomeEmailToUser } from "@/lib/welcome";
 import {
   isStorageConfigured,
   uploadToBucket,
@@ -269,14 +268,9 @@ export async function createCustomer(
     return { error: "Could not create the account. Please try again." };
   }
 
-  // Auto-send the welcome email (best-effort; no-op if Resend isn't configured).
-  if (createdId) {
-    try {
-      await sendWelcomeEmailToUser(createdId);
-    } catch {
-      // Don't fail account creation if the email can't be sent.
-    }
-  }
+  // The welcome email is sent manually per employee (with an editable preview),
+  // not automatically on creation.
+  void createdId;
 
   revalidatePath("/admin");
   if (parsed.data.clientId) revalidatePath(`/admin/clients/${parsed.data.clientId}`);

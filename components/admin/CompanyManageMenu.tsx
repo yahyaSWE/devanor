@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { AddEmployeeForm } from "./AddEmployeeForm";
 import { EditCompanyForm } from "./EditCompanyForm";
 import { LicenseForm } from "./LicenseForm";
-import { SendWelcomeMail } from "./SendWelcomeMail";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
 import {
   deleteClientAndRedirect,
@@ -13,7 +12,7 @@ import {
   toggleClientVisibility,
 } from "@/lib/actions/admin";
 
-type Panel = "edit" | "employee" | "license" | "welcome";
+type Panel = "edit" | "employee" | "license";
 
 type Props = {
   client: {
@@ -26,8 +25,6 @@ type Props = {
   };
   modules: { id: string; name: string }[];
   employees: { id: string; name: string | null; email: string }[];
-  welcomeTemplate: { subject: string; body: string };
-  loginUrl: string;
 };
 
 function MenuButton({
@@ -52,8 +49,6 @@ export function CompanyManageMenu({
   client,
   modules,
   employees,
-  welcomeTemplate,
-  loginUrl,
 }: Props) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -102,7 +97,6 @@ export function CompanyManageMenu({
     edit: "Edit company",
     employee: "Add an employee",
     license: "Assign a license",
-    welcome: "Send welcome mail",
   };
 
   return (
@@ -126,7 +120,6 @@ export function CompanyManageMenu({
           <MenuButton onClick={() => open("edit")}>Edit company</MenuButton>
           <MenuButton onClick={() => open("employee")}>Add an employee</MenuButton>
           <MenuButton onClick={() => open("license")}>Assign a license</MenuButton>
-          <MenuButton onClick={() => open("welcome")}>Send welcome mail</MenuButton>
 
           <div className="my-1 border-t border-border" />
 
@@ -237,17 +230,6 @@ export function CompanyManageMenu({
                   onDone={onSuccess}
                 />
               </>
-            )}
-
-            {panel === "welcome" && (
-              <SendWelcomeMail
-                clientId={client.id}
-                employees={employees}
-                template={welcomeTemplate}
-                companyName={client.name}
-                loginUrl={loginUrl}
-                embedded
-              />
             )}
           </div>
         </div>
