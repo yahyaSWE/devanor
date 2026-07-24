@@ -16,7 +16,7 @@ export default async function PortalLicensesPage() {
 
   const licenses = user?.clientId
     ? await prisma.license.findMany({
-        where: { clientId: user.clientId },
+        where: { clientId: user.clientId, active: true },
         orderBy: { createdAt: "desc" },
         include: { modules: true },
       })
@@ -52,6 +52,7 @@ export default async function PortalLicensesPage() {
                 <th className="px-5 py-3 font-medium">Version</th>
                 <th className="px-5 py-3 font-medium">Seats</th>
                 <th className="px-5 py-3 font-medium">Status</th>
+                <th className="px-5 py-3 font-medium">Valid from</th>
                 <th className="px-5 py-3 font-medium">Renews / expires</th>
                 <th className="px-5 py-3 font-medium">Key</th>
               </tr>
@@ -83,6 +84,9 @@ export default async function PortalLicensesPage() {
                   <td className="px-5 py-3 text-muted">{l.seats ?? "—"}</td>
                   <td className="px-5 py-3">
                     <LicenseStatusBadge status={l.status} />
+                  </td>
+                  <td className="px-5 py-3 text-muted">
+                    {formatDate(l.validFrom)}
                   </td>
                   <td className="px-5 py-3 text-muted">
                     {l.permanent ? "Permanent" : formatDate(l.expiresAt)}

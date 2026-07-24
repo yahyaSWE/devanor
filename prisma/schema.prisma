@@ -163,7 +163,9 @@ model License {
   macIds       String[] // one or more MAC IDs
   seats        Int?
   status       LicenseStatus   @default(ACTIVE)
+  active       Boolean         @default(true) // false = hidden from the customer portal
   permanent    Boolean         @default(false) // no expiry when true
+  validFrom    DateTime? // when the license becomes valid
   expiresAt    DateTime?
   // Uploaded license key file (served via /api/licenses/[id]/key)
   keyFileName   String?
@@ -176,10 +178,12 @@ model License {
   updatedAt DateTime @updatedAt
 }
 
-// Editable email templates (e.g. the welcome email). Keyed by purpose.
+// Editable email templates. Several named welcome templates can coexist; the
+// built-in default keeps key "welcome". New templates get a generated key.
 model EmailTemplate {
   id        String   @id @default(cuid())
   key       String   @unique
+  name      String   @default("Welcome")
   subject   String
   body      String
   updatedAt DateTime @updatedAt

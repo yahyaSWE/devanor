@@ -277,6 +277,7 @@ const licenseFieldsSchema = z.object({
   version: z.string().optional(),
   seats: z.coerce.number().int().positive().optional(),
   status: z.enum(["ACTIVE", "TRIAL", "EXPIRED"]),
+  validFrom: z.string().optional(),
   expiresAt: z.string().optional(),
 });
 
@@ -296,6 +297,7 @@ function parseLicenseFields(formData: FormData) {
     version: formData.get("version") || undefined,
     seats: formData.get("seats") || undefined,
     status: formData.get("status") || "ACTIVE",
+    validFrom: formData.get("validFrom") || undefined,
     expiresAt: formData.get("expiresAt") || undefined,
   });
   if (!parsed.success) {
@@ -320,6 +322,10 @@ function parseLicenseFields(formData: FormData) {
       seats: parsed.data.seats ?? null,
       status: parsed.data.status,
       permanent,
+      // Valid From is independent of permanent (perpetual keeps a start date).
+      validFrom: parsed.data.validFrom
+        ? new Date(parsed.data.validFrom)
+        : null,
       expiresAt:
         permanent || !parsed.data.expiresAt
           ? null
@@ -422,6 +428,24 @@ export async function updateLicense(
   revalidatePath("/admin/licenses");
   revalidatePath("/portal/licenses");
   return { ok: true };
+}
+
+export async function toggleLicenseActive(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  const lic = await prisma.license.findUnique({
+    where: { id },
+    select: { active: true, clientId: true },
+  });
+  if (lic) {
+    await prisma.license.update({
+      where: { id },
+      data: { active: !lic.active },
+    });
+    revalidatePath("/admin/licenses");
+    revalidatePath("/portal/licenses");
+    revalidatePath(`/admin/clients/${lic.clientId}`);
+  }
 }
 
 export async function deleteLicense(formData: FormData): Promise<void> {

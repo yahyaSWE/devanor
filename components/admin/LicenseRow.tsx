@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { LicenseForm } from "./LicenseForm";
-import { deleteLicense } from "@/lib/actions/admin-content";
+import {
+  deleteLicense,
+  toggleLicenseActive,
+} from "@/lib/actions/admin-content";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
 import { ContractTypeBadge } from "@/components/ContractTypeBadge";
 import { LockTypeBadge } from "@/components/LockTypeBadge";
@@ -18,7 +21,10 @@ export type LicenseRowData = {
   macIds: string[];
   seats: number | null;
   status: string;
+  active: boolean;
   permanent: boolean;
+  validFrom: string | null; // yyyy-mm-dd, for the edit form
+  validFromLabel: string; // display
   expiresAt: string | null; // yyyy-mm-dd, for the edit form
   expiresLabel: string; // display
   hasKey: boolean;
@@ -57,10 +63,16 @@ export function LicenseRow({
             <ContractTypeBadge type={license.contractType} />
             <LockTypeBadge type={license.lockType} />
             <LicenseStatusBadge status={license.status} />
+            {!license.active && (
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs text-amber-400">
+                Inactive
+              </span>
+            )}
           </div>
           <p className="truncate text-sm text-muted">
             {license.seats ? `${license.seats} seats · ` : ""}
             {license.version ? `v${license.version} · ` : ""}
+            {license.validFrom ? `from ${license.validFromLabel} · ` : ""}
             {license.permanent
               ? "permanent"
               : `expires ${license.expiresLabel}`}
@@ -74,6 +86,20 @@ export function LicenseRow({
         >
           Edit
         </button>
+        <ConfirmSubmit
+          action={toggleLicenseActive}
+          hidden={{ id: license.id }}
+          tone="primary"
+          trigger={license.active ? "Deactivate" : "Activate"}
+          confirmLabel={license.active ? "Deactivate" : "Activate"}
+          title={license.active ? "Deactivate license?" : "Activate license?"}
+          message={
+            license.active
+              ? "This license will be hidden from the customer in the portal."
+              : "This license will be visible to the customer again."
+          }
+          triggerClassName="shrink-0 text-sm text-muted transition-colors hover:text-foreground"
+        />
         <ConfirmSubmit
           action={deleteLicense}
           hidden={{ id: license.id }}
@@ -119,6 +145,7 @@ export function LicenseRow({
                 seats: license.seats,
                 status: license.status,
                 permanent: license.permanent,
+                validFrom: license.validFrom,
                 expiresAt: license.expiresAt,
                 hasKey: license.hasKey,
               }}

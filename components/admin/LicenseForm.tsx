@@ -22,6 +22,7 @@ export type LicenseFormData = {
   seats: number | null;
   status: string;
   permanent: boolean;
+  validFrom: string | null; // yyyy-mm-dd
   expiresAt: string | null; // yyyy-mm-dd
   hasKey: boolean;
 };
@@ -225,6 +226,15 @@ export function LicenseForm({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="mb-1 block text-xs text-muted">Valid from</label>
+          <input
+            name="validFrom"
+            type="date"
+            defaultValue={license?.validFrom ?? ""}
+            className={`${inputClass} [color-scheme:dark]`}
+          />
+        </div>
         <div>
           <label className="mb-1 block text-xs text-muted">License version</label>
           <select

@@ -13,7 +13,9 @@ export default async function PortalOverview() {
 
   const [activeLicenses, downloads, tutorialCount] = await Promise.all([
     clientId
-      ? prisma.license.count({ where: { clientId, status: "ACTIVE" } })
+      ? prisma.license.count({
+          where: { clientId, status: "ACTIVE", active: true },
+        })
       : Promise.resolve(0),
     prisma.download.findMany({
       where: {
