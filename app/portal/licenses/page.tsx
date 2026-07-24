@@ -23,10 +23,14 @@ export default async function PortalLicensesPage() {
     : [];
 
   const seen = await getSeenMap(session.user.id, "LICENSE");
+  const hasUnread = licenses.some((l) => isUnread(l, seen));
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-6 py-10">
-      <MarkLicensesRead ids={licenses.map((l) => l.id)} />
+      <MarkLicensesRead
+        ids={licenses.map((l) => l.id)}
+        hasUnread={hasUnread}
+      />
       <div>
         <h1 className="text-3xl font-semibold">Licenses</h1>
         <p className="mt-2 text-muted">
@@ -52,8 +56,7 @@ export default async function PortalLicensesPage() {
                 <th className="px-5 py-3 font-medium">Version</th>
                 <th className="px-5 py-3 font-medium">Seats</th>
                 <th className="px-5 py-3 font-medium">Status</th>
-                <th className="px-5 py-3 font-medium">Valid from</th>
-                <th className="px-5 py-3 font-medium">Renews / expires</th>
+                <th className="px-5 py-3 font-medium">Validity</th>
                 <th className="px-5 py-3 font-medium">Key</th>
               </tr>
             </thead>
@@ -85,10 +88,8 @@ export default async function PortalLicensesPage() {
                   <td className="px-5 py-3">
                     <LicenseStatusBadge status={l.status} />
                   </td>
-                  <td className="px-5 py-3 text-muted">
-                    {formatDate(l.validFrom)}
-                  </td>
-                  <td className="px-5 py-3 text-muted">
+                  <td className="px-5 py-3 whitespace-nowrap text-muted">
+                    {l.validFrom ? `from ${formatDate(l.validFrom)} → ` : ""}
                     {l.permanent ? "Permanent" : formatDate(l.expiresAt)}
                   </td>
                   <td className="px-5 py-3">

@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
@@ -9,6 +9,12 @@ const credentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
+
+// Thrown when the password is correct but the account (or its company) has been
+// deactivated — surfaced to the login form with a specific message.
+class InactiveAccountError extends CredentialsSignin {
+  code = "account_inactive";
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -32,11 +38,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!valid) return null;
 
         // Block deactivated user accounts.
-        if (!user.active) return null;
+        if (!user.active) throw new InactiveAccountError();
 
         // Block employees whose company has been deactivated.
         if (user.role === "CUSTOMER" && user.client && !user.client.active) {
-          return null;
+          throw new InactiveAccountError();
         }
 
         return {

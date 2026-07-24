@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { markItemsRead } from "@/lib/actions/portal";
 
@@ -13,6 +13,8 @@ export type DownloadRow = {
   sizeLabel: string;
   dateLabel: string;
   isNew: boolean;
+  previewable: boolean;
+  isImage: boolean;
 };
 
 type FilterKey = "new" | "read";
@@ -46,6 +48,7 @@ export function PortalDownloadsList({ downloads }: { downloads: DownloadRow[] })
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<Set<FilterKey>>(new Set());
   const [read, setRead] = useState<Set<string>>(new Set());
+  const [preview, setPreview] = useState<DownloadRow | null>(null);
 
   const toggleFilter = (k: FilterKey) =>
     setFilters((prev) => {
@@ -79,9 +82,28 @@ export function PortalDownloadsList({ downloads }: { downloads: DownloadRow[] })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [downloads, search, filters, read]);
 
-  const onDownload = (id: string) => {
+  // Close the preview modal on Escape.
+  useEffect(() => {
+    if (!preview) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPreview(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [preview]);
+
+  const markRead = (id: string) => {
     setRead((prev) => new Set(prev).add(id));
     markItemsRead("DOWNLOAD", [id]).then(() => router.refresh());
+  };
+
+  const onView = (d: DownloadRow) => {
+    markRead(d.id);
+    setPreview(d);
+  };
+
+  const onDownload = (id: string) => {
+    markRead(id);
     // Content-Disposition: attachment → downloads without leaving the page.
     window.location.assign(`/api/downloads/${id}`);
   };
@@ -160,14 +182,54 @@ export function PortalDownloadsList({ downloads }: { downloads: DownloadRow[] })
               </div>
               <button
                 type="button"
-                onClick={() => onDownload(d.id)}
+                onClick={() => (d.previewable ? onView(d) : onDownload(d.id))}
                 className="shrink-0 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-all duration-200 hover:brightness-110 hover:shadow-[0_0_30px_-5px_var(--color-accent)]"
               >
-                Download
+                {d.previewable ? "View" : "Download"}
               </button>
             </li>
           ))}
         </ul>
+      )}
+
+      {/* Preview modal (PDFs / images render inline; the viewer's own toolbar
+          has a download button). */}
+      {preview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setPreview(null)}
+          />
+          <div className="relative z-10 flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
+            <div className="flex items-center justify-between gap-3 p-4">
+              <h2 className="truncate font-semibold">{preview.title}</h2>
+              <button
+                type="button"
+                onClick={() => setPreview(null)}
+                aria-label="Close"
+                className="text-muted transition-colors hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="grid flex-1 place-items-center overflow-auto bg-black/40">
+              {preview.isImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={`/api/downloads/${preview.id}?inline=1`}
+                  alt={preview.title}
+                  className="max-h-full max-w-full object-contain"
+                />
+              ) : (
+                <iframe
+                  src={`/api/downloads/${preview.id}?inline=1`}
+                  title={preview.title}
+                  className="h-full w-full"
+                />
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

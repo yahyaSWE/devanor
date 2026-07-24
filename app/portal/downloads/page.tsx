@@ -26,16 +26,21 @@ export default async function PortalDownloadsPage() {
     getSeenMap(session.user.id, "DOWNLOAD"),
   ]);
 
-  const rows: DownloadRow[] = downloads.map((d) => ({
-    id: d.id,
-    title: d.title,
-    description: d.description,
-    category: d.category,
-    fileName: d.fileName,
-    sizeLabel: formatBytes(d.size),
-    dateLabel: formatDate(d.createdAt),
-    isNew: isUnread(d, seen),
-  }));
+  const rows: DownloadRow[] = downloads.map((d) => {
+    const isImage = d.mimeType.startsWith("image/");
+    return {
+      id: d.id,
+      title: d.title,
+      description: d.description,
+      category: d.category,
+      fileName: d.fileName,
+      sizeLabel: formatBytes(d.size),
+      dateLabel: formatDate(d.createdAt),
+      isNew: isUnread(d, seen),
+      previewable: isImage || d.mimeType === "application/pdf",
+      isImage,
+    };
+  });
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-6 py-10">
