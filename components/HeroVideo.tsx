@@ -17,7 +17,7 @@ export function HeroVideo() {
       {!playing && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src="/hero-poster.svg"
+          src="/hero-poster.jpg"
           alt=""
           aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover"
@@ -30,7 +30,7 @@ export function HeroVideo() {
         loop
         playsInline
         preload="auto"
-        poster="/hero-poster.svg"
+        poster="/hero-poster.jpg"
         onPlaying={() => setPlaying(true)}
       >
         <source src="/hero.mp4" type="video/mp4" />
