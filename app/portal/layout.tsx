@@ -34,16 +34,23 @@ export default async function PortalLayout({
     clientId
       ? prisma.license.findMany({
           where: { clientId },
-          select: { id: true, updatedAt: true },
+          select: { id: true, updatedAt: true, active: true },
         })
       : Promise.resolve([]),
   ]);
 
-  const [downloadNew, tutorialNew, licenseNew] = await Promise.all([
+  // Deactivated licenses stay flagged (persistent red badge); newly added/edited
+  // active ones count as unread until the customer opens the tab. Counting unread
+  // only among active licenses avoids double-counting a just-deactivated one.
+  const activeLicenses = licenses.filter((l) => l.active);
+  const deactivatedCount = licenses.length - activeLicenses.length;
+
+  const [downloadNew, tutorialNew, licenseUnread] = await Promise.all([
     unreadCount(session.user.id, "DOWNLOAD", downloads),
     unreadCount(session.user.id, "TUTORIAL", tutorials),
-    unreadCount(session.user.id, "LICENSE", licenses),
+    unreadCount(session.user.id, "LICENSE", activeLicenses),
   ]);
+  const licenseNew = licenseUnread + deactivatedCount;
 
   const portalNav: SubNavItem[] = [
     { label: "Overview", href: "/portal" },

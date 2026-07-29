@@ -126,18 +126,33 @@ export function AudiencePicker({
         )}
       </div>
 
-      {(clientIds.size > 0 || userIds.size > 0) && (
-        <button
-          type="button"
-          onClick={() => {
-            setClientIds(new Set());
-            setUserIds(new Set());
-          }}
-          className="mt-2 text-xs text-muted underline transition-colors hover:text-foreground"
-        >
-          Clear — show to all customers
-        </button>
-      )}
+      <div className="mt-2 flex flex-wrap items-center gap-4">
+        {clientIds.size < companies.length && (
+          <button
+            type="button"
+            onClick={() => {
+              // Whole-company selections supersede individual employees.
+              setClientIds(new Set(companies.map((c) => c.id)));
+              setUserIds(new Set());
+            }}
+            className="text-xs text-accent underline transition-colors hover:brightness-125"
+          >
+            Select all companies
+          </button>
+        )}
+        {(clientIds.size > 0 || userIds.size > 0) && (
+          <button
+            type="button"
+            onClick={() => {
+              setClientIds(new Set());
+              setUserIds(new Set());
+            }}
+            className="text-xs text-muted underline transition-colors hover:text-foreground"
+          >
+            Clear — show to all customers
+          </button>
+        )}
+      </div>
     </div>
   );
 }

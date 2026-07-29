@@ -7,6 +7,7 @@ import { LicenseStatusBadge } from "@/components/LicenseStatusBadge";
 import { ContractTypeBadge } from "@/components/ContractTypeBadge";
 import { LockTypeBadge } from "@/components/LockTypeBadge";
 import { MarkLicensesRead } from "@/components/portal/MarkLicensesRead";
+import { LicenseModulesCell } from "@/components/portal/LicenseModulesCell";
 
 export const metadata = { title: "Licenses" };
 
@@ -16,7 +17,7 @@ export default async function PortalLicensesPage() {
 
   const licenses = user?.clientId
     ? await prisma.license.findMany({
-        where: { clientId: user.clientId, active: true },
+        where: { clientId: user.clientId },
         orderBy: { createdAt: "desc" },
         include: { modules: true },
       })
@@ -46,7 +47,7 @@ export default async function PortalLicensesPage() {
           looks wrong.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-border">
+        <div className="overflow-hidden rounded-2xl border border-border">
           <table className="w-full text-left text-sm">
             <thead className="bg-surface/60 text-muted">
               <tr>
@@ -57,21 +58,20 @@ export default async function PortalLicensesPage() {
                 <th className="px-5 py-3 font-medium">Seats</th>
                 <th className="px-5 py-3 font-medium">Status</th>
                 <th className="px-5 py-3 font-medium">Validity</th>
-                <th className="px-5 py-3 font-medium">Key</th>
+                <th className="px-5 py-3 font-medium">License</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {licenses.map((l) => (
-                <tr key={l.id} className="bg-surface/30">
+                <tr
+                  key={l.id}
+                  className={`bg-surface/30 ${l.active ? "" : "opacity-70"}`}
+                >
                   <td className="px-5 py-3 font-medium">
-                    <span className="flex flex-wrap items-center gap-2">
-                      {l.modules.map((m) => m.name).join(", ") || "—"}
-                      {isUnread(l, seen) && (
-                        <span className="rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-semibold text-white">
-                          NEW
-                        </span>
-                      )}
-                    </span>
+                    <LicenseModulesCell
+                      modules={l.modules.map((m) => m.name)}
+                      isNew={isUnread(l, seen)}
+                    />
                   </td>
                   <td className="px-5 py-3">
                     <ContractTypeBadge type={l.contractType} />
@@ -86,11 +86,22 @@ export default async function PortalLicensesPage() {
                   <td className="px-5 py-3 text-muted">{l.version ?? "—"}</td>
                   <td className="px-5 py-3 text-muted">{l.seats ?? "—"}</td>
                   <td className="px-5 py-3">
-                    <LicenseStatusBadge status={l.status} />
+                    {l.active ? (
+                      <LicenseStatusBadge status={l.status} />
+                    ) : (
+                      <span className="rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400">
+                        Deactivated
+                      </span>
+                    )}
                   </td>
-                  <td className="px-5 py-3 whitespace-nowrap text-muted">
-                    {l.validFrom ? `from ${formatDate(l.validFrom)} → ` : ""}
-                    {l.permanent ? "Permanent" : formatDate(l.expiresAt)}
+                  <td className="px-5 py-3 text-muted">
+                    {l.permanent
+                      ? l.validFrom
+                        ? `from ${formatDate(l.validFrom)} →`
+                        : "Perpetual"
+                      : `${
+                          l.validFrom ? `from ${formatDate(l.validFrom)} → ` : ""
+                        }${formatDate(l.expiresAt)}`}
                   </td>
                   <td className="px-5 py-3">
                     {l.keyStoredName ? (

@@ -97,7 +97,13 @@ export function EmployeeRow({
         </div>
 
         <SendWelcomeMail
-          user={{ id: user.id, name: user.name, email: user.email }}
+          user={{
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            zgsUsername: user.zgsUsername,
+            zgsTempPassword: user.zgsTempPassword,
+          }}
           templates={templates}
           companyName={companyName}
           loginUrl={loginUrl}

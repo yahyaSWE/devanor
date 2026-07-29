@@ -83,6 +83,9 @@ export async function sendWelcomeEmailWithContent(
     name: user.name || user.email,
     company: user.client?.name ?? "",
     loginUrl: `${appUrl()}/login`,
+    email: user.email,
+    username: user.zgsUsername ?? "",
+    password: user.zgsTempPassword ?? "",
   };
 
   const res = await sendEmail({

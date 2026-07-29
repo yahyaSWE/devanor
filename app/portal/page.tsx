@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
 import { getPortalUser, downloadAudience, tutorialAudience } from "@/lib/portal";
-import { formatBytes } from "@/lib/format";
+import { formatBytes, formatDate } from "@/lib/format";
 
 export const metadata = { title: "Support Portal" };
 
@@ -11,7 +11,10 @@ export default async function PortalOverview() {
   const user = await getPortalUser(session.user.id);
   const clientId = user?.clientId ?? null;
 
-  const [activeLicenses, downloads, tutorialCount] = await Promise.all([
+  const soon = new Date();
+  soon.setDate(soon.getDate() + 30);
+
+  const [activeLicenses, downloads, tutorialCount, expiring] = await Promise.all([
     clientId
       ? prisma.license.count({
           where: { clientId, status: "ACTIVE", active: true },
@@ -29,6 +32,20 @@ export default async function PortalOverview() {
         AND: [{ active: true }, tutorialAudience(clientId, session.user.id)],
       },
     }),
+    // Real expiries only — the admin-only reminderAt is never surfaced to the
+    // customer.
+    clientId
+      ? prisma.license.findMany({
+          where: {
+            clientId,
+            active: true,
+            permanent: false,
+            expiresAt: { not: null, gte: new Date(), lte: soon },
+          },
+          orderBy: { expiresAt: "asc" },
+          include: { modules: true },
+        })
+      : Promise.resolve([]),
   ]);
 
   const name = user?.name || session.user.email;
@@ -43,6 +60,29 @@ export default async function PortalOverview() {
             : "Devanor support portal"}
         </p>
       </div>
+
+      {expiring.length > 0 && (
+        <section className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-6">
+          <h2 className="flex items-center gap-2 font-semibold text-amber-300">
+            ⚠️ Expiring within 30 days ({expiring.length})
+          </h2>
+          <ul className="mt-3 divide-y divide-amber-500/20">
+            {expiring.map((l) => (
+              <li
+                key={l.id}
+                className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2 text-sm"
+              >
+                <span className="font-medium">
+                  {l.modules.map((m) => m.name).join(", ") || "License"}
+                </span>
+                <span className="text-amber-300">
+                  expires {formatDate(l.expiresAt)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Link
