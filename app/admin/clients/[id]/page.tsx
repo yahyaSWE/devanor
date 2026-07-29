@@ -64,6 +64,8 @@ export default async function AdminClientDetailPage({
     validFromLabel: formatDate(l.validFrom),
     expiresAt: l.expiresAt ? l.expiresAt.toISOString().slice(0, 10) : null,
     expiresLabel: formatDate(l.expiresAt),
+    reminderAt: l.reminderAt ? l.reminderAt.toISOString().slice(0, 10) : null,
+    reminderLabel: formatDate(l.reminderAt),
     hasKey: !!l.keyStoredName,
   }));
   const licenseGroups = [
@@ -169,6 +171,7 @@ export default async function AdminClientDetailPage({
                   name: u.name,
                   email: u.email,
                   title: u.title,
+                  phone: u.phone,
                   active: u.active,
                   zgsUsername: u.zgsUsername,
                   zgsTempPassword: u.zgsTempPassword,

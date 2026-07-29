@@ -24,6 +24,7 @@ export type LicenseFormData = {
   permanent: boolean;
   validFrom: string | null; // yyyy-mm-dd
   expiresAt: string | null; // yyyy-mm-dd
+  reminderAt: string | null; // yyyy-mm-dd (admin-only renewal reminder)
   hasKey: boolean;
 };
 
@@ -274,6 +275,27 @@ export function LicenseForm({
         name="permanent"
         value={isPerpetual ? "on" : ""}
       />
+
+      {/* Admin-only renewal reminder — mainly for perpetual licenses that never
+          expire but some customers still need renewing. Never shown to the
+          customer. */}
+      {isPerpetual && (
+        <div className="rounded-lg border border-border bg-background/40 p-3">
+          <label className="mb-1 block text-xs font-medium text-muted">
+            Reminder date (admin only)
+          </label>
+          <input
+            name="reminderAt"
+            type="date"
+            defaultValue={license?.reminderAt ?? ""}
+            className={`${inputClass} [color-scheme:dark]`}
+          />
+          <p className="mt-1 text-xs text-muted">
+            We&apos;ll be reminded to renew this license — the customer never sees
+            this.
+          </p>
+        </div>
+      )}
 
       {err && <p className="text-sm text-red-400">{err}</p>}
       {state.error && <p className="text-sm text-red-400">{state.error}</p>}

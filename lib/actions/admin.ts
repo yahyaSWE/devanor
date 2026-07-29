@@ -221,6 +221,7 @@ const customerSchema = z.object({
   email: z.string().email("Enter a valid email."),
   name: z.string().optional(),
   title: z.string().optional(),
+  phone: z.string().optional(),
   password: z.string().min(8, "Password must be at least 8 characters."),
   clientId: z.string().optional(),
   zgsUsername: z.string().optional(),
@@ -237,8 +238,11 @@ export async function createCustomer(
     email: formData.get("email"),
     name: formData.get("name") || undefined,
     title: formData.get("title") || undefined,
+    phone: formData.get("phone") || undefined,
     password: formData.get("password"),
     clientId: formData.get("clientId") || undefined,
+    zgsUsername: formData.get("zgsUsername") || undefined,
+    zgsTempPassword: formData.get("zgsTempPassword") || undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -253,6 +257,7 @@ export async function createCustomer(
         email: parsed.data.email,
         name: parsed.data.name,
         title: parsed.data.title || null,
+        phone: parsed.data.phone || null,
         passwordHash,
         role: "CUSTOMER",
         clientId: parsed.data.clientId || null,
@@ -297,6 +302,7 @@ const updateUserSchema = z.object({
   email: z.string().email("Enter a valid email."),
   name: z.string().optional(),
   title: z.string().optional(),
+  phone: z.string().optional(),
   zgsUsername: z.string().optional(),
   zgsTempPassword: z.string().optional(),
 });
@@ -313,6 +319,7 @@ export async function updateUser(
     email: formData.get("email"),
     name: formData.get("name") || undefined,
     title: formData.get("title") || undefined,
+    phone: formData.get("phone") || undefined,
     zgsUsername: formData.get("zgsUsername") || undefined,
     zgsTempPassword: formData.get("zgsTempPassword") || undefined,
   });
@@ -335,6 +342,7 @@ export async function updateUser(
         email: parsed.data.email,
         name: parsed.data.name || null,
         title: parsed.data.title || null,
+        phone: parsed.data.phone || null,
         zgsUsername: parsed.data.zgsUsername || null,
         zgsTempPassword: parsed.data.zgsTempPassword || null,
       },

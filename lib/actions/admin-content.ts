@@ -279,6 +279,7 @@ const licenseFieldsSchema = z.object({
   status: z.enum(["ACTIVE", "TRIAL", "EXPIRED"]),
   validFrom: z.string().optional(),
   expiresAt: z.string().optional(),
+  reminderAt: z.string().optional(),
 });
 
 type LicenseKeyFields = {
@@ -299,6 +300,7 @@ function parseLicenseFields(formData: FormData) {
     status: formData.get("status") || "ACTIVE",
     validFrom: formData.get("validFrom") || undefined,
     expiresAt: formData.get("expiresAt") || undefined,
+    reminderAt: formData.get("reminderAt") || undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." } as const;
@@ -330,6 +332,10 @@ function parseLicenseFields(formData: FormData) {
         permanent || !parsed.data.expiresAt
           ? null
           : new Date(parsed.data.expiresAt),
+      // Admin-only renewal reminder (mainly for perpetual licenses).
+      reminderAt: parsed.data.reminderAt
+        ? new Date(parsed.data.reminderAt)
+        : null,
     },
     isMaint,
   } as const;
@@ -421,6 +427,8 @@ export async function updateLicense(
       modules: { set: moduleIds.map((mid) => ({ id: mid })) },
       ...fields.data,
       ...key,
+      // Editing usually means a renewal — re-arm the reminder email.
+      reminderSentAt: null,
     },
   });
 

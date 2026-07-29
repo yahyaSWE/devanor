@@ -20,6 +20,7 @@ export type EmployeeRowData = {
   name: string | null;
   email: string;
   title: string | null;
+  phone: string | null;
   active: boolean;
   zgsUsername: string | null;
   zgsTempPassword: string | null;
@@ -90,7 +91,8 @@ export function EmployeeRow({
             )}
           </div>
           <p className="truncate text-sm text-muted">
-            {user.email} · added {user.addedLabel}
+            {user.email}
+            {user.phone ? ` · ${user.phone}` : ""} · added {user.addedLabel}
           </p>
         </div>
 
@@ -170,6 +172,18 @@ export function EmployeeRow({
                 <input
                   name="title"
                   defaultValue={user.title ?? ""}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-muted">
+                  Phone (optional, admin only)
+                </label>
+                <input
+                  name="phone"
+                  type="tel"
+                  defaultValue={user.phone ?? ""}
+                  placeholder="+46 …"
                   className={inputClass}
                 />
               </div>

@@ -42,6 +42,17 @@ export function AddEmployeeForm({
         />
       </div>
       <div>
+        <label className="mb-1 block text-xs text-muted">
+          Phone (optional, admin only)
+        </label>
+        <input
+          name="phone"
+          type="tel"
+          placeholder="+46 …"
+          className={inputClass}
+        />
+      </div>
+      <div>
         <label className="mb-1 block text-xs text-muted">Email *</label>
         <input name="email" type="email" required className={inputClass} />
       </div>

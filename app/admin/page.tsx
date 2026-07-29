@@ -32,8 +32,10 @@ export default async function AdminPage() {
     prisma.license.findMany({
       where: {
         active: true,
-        permanent: false,
-        expiresAt: { not: null, gte: new Date(), lte: soon },
+        OR: [
+          { permanent: false, expiresAt: { not: null, gte: new Date(), lte: soon } },
+          { reminderAt: { not: null, lte: soon } },
+        ],
       },
       orderBy: { expiresAt: "asc" },
       include: { client: { select: { id: true, name: true } }, modules: true },
@@ -61,35 +63,48 @@ export default async function AdminPage() {
 
       {expiring.length > 0 && (
         <section className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-6">
-          <h2 className="flex items-center gap-2 font-semibold text-amber-300">
-            ⚠️ Licenses expiring within 30 days ({expiring.length})
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 font-semibold text-amber-300">
+              ⚠️ Expiring within 30 days ({expiring.length})
+            </h2>
+            <Link
+              href="/admin/licenses/expiring"
+              className="text-sm text-accent transition-all hover:brightness-125 hover:underline"
+            >
+              View all →
+            </Link>
+          </div>
           <ul className="mt-3 divide-y divide-amber-500/20">
-            {expiring.map((l) => (
-              <li
-                key={l.id}
-                className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm"
-              >
-                <div className="min-w-0">
-                  <span className="font-medium">{l.client.name}</span>
-                  <span className="text-muted">
-                    {" "}
-                    · {l.modules.map((m) => m.name).join(", ") || "—"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-amber-300">
-                    expires {formatDate(l.expiresAt)}
-                  </span>
-                  <Link
-                    href={`/admin/clients/${l.client.id}#licenses`}
-                    className="text-accent transition-all hover:brightness-125 hover:underline"
-                  >
-                    Manage →
-                  </Link>
-                </div>
-              </li>
-            ))}
+            {expiring.slice(0, 3).map((l) => {
+              const showReminder = l.permanent || !l.expiresAt;
+              return (
+                <li
+                  key={l.id}
+                  className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm"
+                >
+                  <div className="min-w-0">
+                    <span className="font-medium">{l.client.name}</span>
+                    <span className="text-muted">
+                      {" "}
+                      · {l.modules.map((m) => m.name).join(", ") || "—"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-amber-300">
+                      {showReminder
+                        ? `reminder ${formatDate(l.reminderAt)}`
+                        : `expires ${formatDate(l.expiresAt)}`}
+                    </span>
+                    <Link
+                      href={`/admin/clients/${l.client.id}#licenses`}
+                      className="text-accent transition-all hover:brightness-125 hover:underline"
+                    >
+                      Manage →
+                    </Link>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

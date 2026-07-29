@@ -19,6 +19,7 @@ model User {
   passwordHash String
   name         String?
   title        String? // job title / role at the company, shown to support
+  phone        String? // optional; admin-only, never shown to the customer
   role         Role     @default(CUSTOMER)
   active       Boolean  @default(true) // deactivated users cannot sign in
   mustChangePassword Boolean @default(true) // force a password change on first login
@@ -167,6 +168,8 @@ model License {
   permanent    Boolean         @default(false) // no expiry when true
   validFrom    DateTime? // when the license becomes valid
   expiresAt    DateTime?
+  reminderAt     DateTime? // admin-only renewal reminder (used for perpetual licenses)
+  reminderSentAt DateTime? // set when the expiry/reminder email has been sent
   // Uploaded license key file (served via /api/licenses/[id]/key)
   keyFileName   String?
   keyStoredName String?

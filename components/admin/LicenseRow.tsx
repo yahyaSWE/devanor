@@ -27,6 +27,8 @@ export type LicenseRowData = {
   validFromLabel: string; // display
   expiresAt: string | null; // yyyy-mm-dd, for the edit form
   expiresLabel: string; // display
+  reminderAt: string | null; // yyyy-mm-dd, for the edit form
+  reminderLabel: string; // display (admin-only)
   hasKey: boolean;
 };
 
@@ -76,6 +78,7 @@ export function LicenseRow({
             {license.permanent
               ? "permanent"
               : `expires ${license.expiresLabel}`}
+            {license.reminderAt ? ` · reminder ${license.reminderLabel}` : ""}
             {license.macIds.length ? ` · MAC: ${license.macIds.join(", ")}` : ""}
           </p>
         </div>
@@ -147,6 +150,7 @@ export function LicenseRow({
                 permanent: license.permanent,
                 validFrom: license.validFrom,
                 expiresAt: license.expiresAt,
+                reminderAt: license.reminderAt,
                 hasKey: license.hasKey,
               }}
               onDone={() => setEditing(false)}
