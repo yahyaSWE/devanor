@@ -97,10 +97,10 @@ export default async function PortalLicensesPage() {
                   <td className="px-5 py-3 text-muted">
                     {l.permanent
                       ? l.validFrom
-                        ? `from ${formatDate(l.validFrom)} →`
+                        ? `${formatDate(l.validFrom)} →`
                         : "Perpetual"
                       : `${
-                          l.validFrom ? `from ${formatDate(l.validFrom)} → ` : ""
+                          l.validFrom ? `${formatDate(l.validFrom)} → ` : ""
                         }${formatDate(l.expiresAt)}`}
                   </td>
                   <td className="px-5 py-3">
