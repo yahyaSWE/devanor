@@ -64,10 +64,11 @@ export function LicenseRow({
             </p>
             <ContractTypeBadge type={license.contractType} />
             <LockTypeBadge type={license.lockType} />
-            <LicenseStatusBadge status={license.status} />
-            {!license.active && (
-              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs text-amber-400">
-                Inactive
+            {license.active ? (
+              <LicenseStatusBadge status={license.status} />
+            ) : (
+              <span className="rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400">
+                Deactivated
               </span>
             )}
           </div>
