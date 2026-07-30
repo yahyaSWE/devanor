@@ -83,9 +83,10 @@ export async function sendWelcomeEmailWithContent(
     name: user.name || user.email,
     company: user.client?.name ?? "",
     loginUrl: `${appUrl()}/login`,
+    // Devanor account login (they sign in with their email).
     email: user.email,
-    username: user.zgsUsername ?? "",
-    password: user.zgsTempPassword ?? "",
+    username: user.email,
+    password: user.tempPassword ?? "",
   };
 
   const res = await sendEmail({

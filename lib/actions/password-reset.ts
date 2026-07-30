@@ -90,7 +90,7 @@ export async function resetPassword(
   await prisma.$transaction([
     prisma.user.update({
       where: { id: record.userId },
-      data: { passwordHash, mustChangePassword: false },
+      data: { passwordHash, mustChangePassword: false, tempPassword: null },
     }),
     // Invalidate all outstanding tokens for this user.
     prisma.passwordResetToken.deleteMany({ where: { userId: record.userId } }),

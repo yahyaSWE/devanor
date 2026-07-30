@@ -28,7 +28,7 @@ const SAMPLE = {
   company: "Acme AB",
   loginUrl: "https://www.devanor.com/login",
   email: "john.doe@acme.com",
-  username: "john.doe",
+  username: "john.doe@acme.com",
   password: "TempPass123",
 };
 

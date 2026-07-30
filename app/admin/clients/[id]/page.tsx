@@ -173,6 +173,7 @@ export default async function AdminClientDetailPage({
                   title: u.title,
                   phone: u.phone,
                   active: u.active,
+                  tempPassword: u.tempPassword,
                   zgsUsername: u.zgsUsername,
                   zgsTempPassword: u.zgsTempPassword,
                   welcomeEmailSent: !!u.welcomeEmailSentAt,

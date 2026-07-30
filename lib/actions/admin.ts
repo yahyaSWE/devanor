@@ -259,6 +259,7 @@ export async function createCustomer(
         title: parsed.data.title || null,
         phone: parsed.data.phone || null,
         passwordHash,
+        tempPassword: parsed.data.password, // emailable until the user changes it
         role: "CUSTOMER",
         clientId: parsed.data.clientId || null,
         zgsUsername: parsed.data.zgsUsername || null,

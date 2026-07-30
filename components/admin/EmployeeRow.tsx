@@ -22,6 +22,7 @@ export type EmployeeRowData = {
   title: string | null;
   phone: string | null;
   active: boolean;
+  tempPassword: string | null;
   zgsUsername: string | null;
   zgsTempPassword: string | null;
   welcomeEmailSent: boolean;
@@ -101,8 +102,7 @@ export function EmployeeRow({
             id: user.id,
             name: user.name,
             email: user.email,
-            zgsUsername: user.zgsUsername,
-            zgsTempPassword: user.zgsTempPassword,
+            tempPassword: user.tempPassword,
           }}
           templates={templates}
           companyName={companyName}

@@ -18,8 +18,7 @@ export function SendWelcomeMail({
     id: string;
     name: string | null;
     email: string;
-    zgsUsername: string | null;
-    zgsTempPassword: string | null;
+    tempPassword: string | null;
   };
   templates: NamedTemplate[];
   companyName: string;
@@ -41,8 +40,8 @@ export function SendWelcomeMail({
       .replace(/\{\{company\}\}/g, companyName)
       .replace(/\{\{loginUrl\}\}/g, loginUrl)
       .replace(/\{\{email\}\}/g, user.email)
-      .replace(/\{\{username\}\}/g, user.zgsUsername ?? "")
-      .replace(/\{\{password\}\}/g, user.zgsTempPassword ?? "");
+      .replace(/\{\{username\}\}/g, user.email)
+      .replace(/\{\{password\}\}/g, user.tempPassword ?? "");
 
   const previewBody = useMemo(() => render(body), [body]); // eslint-disable-line react-hooks/exhaustive-deps
 
