@@ -39,6 +39,7 @@ export default async function PortalOverview() {
           where: {
             clientId,
             active: true,
+            status: { not: "EXPIRED" },
             permanent: false,
             expiresAt: { not: null, gte: new Date(), lte: soon },
           },

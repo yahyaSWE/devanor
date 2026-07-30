@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 type Props = {
   action: (formData: FormData) => void | Promise<void>;
@@ -39,6 +39,7 @@ export function ConfirmSubmit({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
+  const [pending, startTransition] = useTransition();
 
   const close = () => {
     setOpen(false);
@@ -49,6 +50,19 @@ export function ConfirmSubmit({
   const confirmed =
     !requireText ||
     typed.trim().toLowerCase() === requireText.trim().toLowerCase();
+
+  // Run the action and close the modal in the same tick, so the popup never
+  // lingers and flips to the opposite (e.g. Deactivate → Activate) state after
+  // the row re-renders.
+  const submit = () => {
+    if (!confirmed) return;
+    const fd = new FormData();
+    for (const [k, v] of Object.entries(hidden)) fd.append(k, v);
+    startTransition(async () => {
+      await action(fd);
+    });
+    close();
+  };
 
   return (
     <>
@@ -94,22 +108,18 @@ export function ConfirmSubmit({
               >
                 Cancel
               </button>
-              <form action={action}>
-                {Object.entries(hidden).map(([k, v]) => (
-                  <input key={k} type="hidden" name={k} value={v} />
-                ))}
-                <button
-                  type="submit"
-                  disabled={!confirmed}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                    tone === "primary"
-                      ? "bg-accent text-on-accent hover:brightness-110"
-                      : "bg-red-500/90 text-white hover:bg-red-500 disabled:hover:bg-red-500/90"
-                  }`}
-                >
-                  {confirmLabel}
-                </button>
-              </form>
+              <button
+                type="button"
+                onClick={submit}
+                disabled={!confirmed || pending}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                  tone === "primary"
+                    ? "bg-accent text-on-accent hover:brightness-110"
+                    : "bg-red-500/90 text-white hover:bg-red-500 disabled:hover:bg-red-500/90"
+                }`}
+              >
+                {confirmLabel}
+              </button>
             </div>
           </div>
         </div>

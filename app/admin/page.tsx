@@ -32,9 +32,12 @@ export default async function AdminPage() {
     prisma.license.findMany({
       where: {
         active: true,
+        status: { not: "EXPIRED" },
         OR: [
+          // Non-perpetual: expiring soon but not already past its date.
           { permanent: false, expiresAt: { not: null, gte: new Date(), lte: soon } },
-          { reminderAt: { not: null, lte: soon } },
+          // Perpetual: admin-only renewal reminder coming up.
+          { permanent: true, reminderAt: { not: null, lte: soon } },
         ],
       },
       orderBy: { expiresAt: "asc" },
