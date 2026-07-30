@@ -47,6 +47,7 @@ export default async function AdminClientDetailPage({
     (l) => l.contractType === "MAINTENANCE",
   ).length;
 
+  const now = new Date();
   const moduleOptions = modules.map((m) => ({ id: m.id, name: m.name }));
   const licenseRows: LicenseRowData[] = client.licenses.map((l) => ({
     id: l.id,
@@ -59,6 +60,9 @@ export default async function AdminClientDetailPage({
     seats: l.seats,
     status: l.status,
     active: l.active,
+    expired:
+      l.status === "EXPIRED" ||
+      (!l.permanent && !!l.expiresAt && l.expiresAt < now),
     permanent: l.permanent,
     validFrom: l.validFrom ? l.validFrom.toISOString().slice(0, 10) : null,
     validFromLabel: formatDate(l.validFrom),
@@ -199,8 +203,9 @@ export default async function AdminClientDetailPage({
           ) : (
             <div className="space-y-6">
               {licenseGroups.map((g) => {
+                // Expired licenses are pulled out into their own group below.
                 const rows = licenseRows.filter(
-                  (l) => l.contractType === g.key,
+                  (l) => l.contractType === g.key && !l.expired,
                 );
                 if (rows.length === 0) return null;
                 return (
@@ -221,6 +226,28 @@ export default async function AdminClientDetailPage({
                   </div>
                 );
               })}
+
+              {(() => {
+                const rows = licenseRows.filter((l) => l.expired);
+                if (rows.length === 0) return null;
+                return (
+                  <div>
+                    <h3 className="mb-1 text-xs font-semibold uppercase tracking-wider text-red-400">
+                      Expired ({rows.length})
+                    </h3>
+                    <ul className="divide-y divide-border">
+                      {rows.map((l) => (
+                        <LicenseRow
+                          key={l.id}
+                          license={l}
+                          clientId={client.id}
+                          modules={moduleOptions}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>

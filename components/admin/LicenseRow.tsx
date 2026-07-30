@@ -22,6 +22,7 @@ export type LicenseRowData = {
   seats: number | null;
   status: string;
   active: boolean;
+  expired: boolean;
   permanent: boolean;
   validFrom: string | null; // yyyy-mm-dd, for the edit form
   validFromLabel: string; // display
@@ -64,7 +65,11 @@ export function LicenseRow({
             </p>
             <ContractTypeBadge type={license.contractType} />
             <LockTypeBadge type={license.lockType} />
-            {license.active ? (
+            {license.expired ? (
+              <span className="rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400">
+                Expired
+              </span>
+            ) : license.active ? (
               <LicenseStatusBadge status={license.status} />
             ) : (
               <span className="rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400">
