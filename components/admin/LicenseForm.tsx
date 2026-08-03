@@ -53,6 +53,7 @@ export function LicenseForm({
   const [macs, setMacs] = useState<string[]>([...(license?.macIds ?? []), ""]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [moduleSearch, setModuleSearch] = useState("");
 
   const isMaint = contractType === "MAINTENANCE";
   // A perpetual license is bought for life — it never expires.
@@ -120,18 +121,41 @@ export function LicenseForm({
       {/* Modules — one or more */}
       <div>
         <label className="mb-1 block text-xs text-muted">Modules *</label>
-        <div className="max-h-32 space-y-1 overflow-y-auto rounded-lg border border-border bg-background p-2">
-          {modules.map((m) => (
-            <label key={m.id} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                name="moduleId"
-                value={m.id}
-                defaultChecked={license?.moduleIds.includes(m.id)}
-              />
-              {m.name}
-            </label>
-          ))}
+        <input
+          value={moduleSearch}
+          onChange={(e) => setModuleSearch(e.target.value)}
+          placeholder="Search modules…"
+          className={`${inputClass} mb-1`}
+        />
+        <div className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border bg-background p-2">
+          {modules.map((m) => {
+            // Hide (don't unmount) non-matching rows so a checked module that is
+            // filtered out still submits.
+            const visible = m.name
+              .toLowerCase()
+              .includes(moduleSearch.trim().toLowerCase());
+            return (
+              <label
+                key={m.id}
+                className={`items-center gap-2 text-sm ${
+                  visible ? "flex" : "hidden"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  name="moduleId"
+                  value={m.id}
+                  defaultChecked={license?.moduleIds.includes(m.id)}
+                />
+                {m.name}
+              </label>
+            );
+          })}
+          {!modules.some((m) =>
+            m.name.toLowerCase().includes(moduleSearch.trim().toLowerCase()),
+          ) && (
+            <p className="px-1 py-1 text-xs text-muted">No modules match.</p>
+          )}
         </div>
       </div>
 
