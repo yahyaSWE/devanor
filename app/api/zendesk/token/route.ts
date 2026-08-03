@@ -32,7 +32,7 @@ export async function GET() {
     email,
     external_id: session.user.id,
   })
-    .setProtectedHeader({ alg: "HS256", kid: keyId })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: keyId })
     .setIssuedAt()
     .setExpirationTime("2h")
     .sign(new TextEncoder().encode(secret));
