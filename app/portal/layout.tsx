@@ -71,6 +71,7 @@ export default async function PortalLayout({
         zendeskKey={process.env.NEXT_PUBLIC_ZENDESK_KEY}
         name={session.user.name}
         email={session.user.email}
+        authEnabled={!!process.env.ZENDESK_MESSAGING_KEY_ID}
       />
     </div>
   );
