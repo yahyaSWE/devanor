@@ -72,6 +72,8 @@ export default async function PortalLayout({
         name={session.user.name}
         email={session.user.email}
         authEnabled={!!process.env.ZENDESK_MESSAGING_KEY_ID}
+        company={user?.client?.name ?? null}
+        companyFieldId={process.env.ZENDESK_COMPANY_FIELD_ID}
       />
     </div>
   );

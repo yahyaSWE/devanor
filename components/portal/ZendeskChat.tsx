@@ -20,12 +20,18 @@ export function ZendeskChat({
   name,
   email,
   authEnabled = false,
+  company,
+  companyFieldId,
 }: {
   zendeskKey?: string;
   name?: string | null;
   email?: string | null;
   /** When the messaging signing key is configured, authenticate the visitor. */
   authEnabled?: boolean;
+  /** The customer's company name, attached to each conversation for agents. */
+  company?: string | null;
+  /** Zendesk ticket field id backing the "Company" conversation field. */
+  companyFieldId?: string;
 }) {
   useEffect(() => {
     if (!zendeskKey) return;
@@ -59,12 +65,23 @@ export function ZendeskChat({
             // Not a messaging widget / API unavailable — ignore.
           }
         }
+        if (company && companyFieldId) {
+          try {
+            // Attach the customer's company to every conversation so agents see
+            // which company the person belongs to.
+            window.zE("messenger", "conversationFields", [
+              { id: companyFieldId, value: company },
+            ]);
+          } catch {
+            // Field not configured / not a messaging widget — ignore.
+          }
+        }
       } else if (tries > 40) {
         clearInterval(timer);
       }
     }, 500);
     return () => clearInterval(timer);
-  }, [zendeskKey, name, email, authEnabled]);
+  }, [zendeskKey, name, email, authEnabled, company, companyFieldId]);
 
   if (!zendeskKey) return null;
 
