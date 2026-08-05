@@ -7,6 +7,7 @@ type SendArgs = {
   subject: string;
   html: string;
   cc?: string[];
+  replyTo?: string;
 };
 
 export async function sendEmail({
@@ -14,6 +15,7 @@ export async function sendEmail({
   subject,
   html,
   cc,
+  replyTo,
 }: SendArgs): Promise<{ ok: boolean; skipped?: boolean }> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
@@ -38,6 +40,7 @@ export async function sendEmail({
         subject,
         html,
         ...(cc && cc.length ? { cc } : {}),
+        ...(replyTo ? { reply_to: replyTo } : {}),
       }),
     });
     if (!res.ok) {
