@@ -68,8 +68,9 @@ export function ZendeskChat({
         if (company && companyFieldId) {
           try {
             // Attach the customer's company to every conversation so agents see
-            // which company the person belongs to.
-            window.zE("messenger", "conversationFields", [
+            // which company the person belongs to. Note the "messenger:set"
+            // prefix — conversationFields is a setter, not an action.
+            window.zE("messenger:set", "conversationFields", [
               { id: companyFieldId, value: company },
             ]);
           } catch {
