@@ -30,6 +30,9 @@ export async function GET() {
     scope: "user",
     name,
     email,
+    // Zendesk only attaches the email to the end-user profile when it's marked
+    // verified — the portal already authenticated the user, so we trust it.
+    email_verified: true,
     external_id: session.user.id,
   })
     .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: keyId })
