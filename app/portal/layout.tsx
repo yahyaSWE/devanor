@@ -4,7 +4,7 @@ import { getPortalUser, downloadAudience, tutorialAudience } from "@/lib/portal"
 import { unreadCount } from "@/lib/portal-reads";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { SubNav, type SubNavItem } from "@/components/SubNav";
-import { ZendeskChat } from "@/components/portal/ZendeskChat";
+import { FreshdeskChat } from "@/components/portal/FreshdeskChat";
 import { IdleLogout } from "@/components/IdleLogout";
 
 export default async function PortalLayout({
@@ -67,13 +67,11 @@ export default async function PortalLayout({
       <DashboardHeader label="Support Portal" email={session.user.email ?? ""} />
       <SubNav items={portalNav} base="/portal" />
       <main className="flex-1">{children}</main>
-      <ZendeskChat
-        zendeskKey={process.env.NEXT_PUBLIC_ZENDESK_KEY}
-        name={session.user.name}
-        email={session.user.email}
-        authEnabled={!!process.env.ZENDESK_MESSAGING_KEY_ID}
-        company={user?.client?.name ?? null}
-        companyFieldId={process.env.ZENDESK_COMPANY_FIELD_ID}
+      <FreshdeskChat
+        token={process.env.NEXT_PUBLIC_FRESHDESK_TOKEN}
+        host={process.env.NEXT_PUBLIC_FRESHDESK_HOST}
+        widgetId={process.env.NEXT_PUBLIC_FRESHDESK_WIDGET_ID}
+        authEnabled={!!process.env.FRESHDESK_JWT_SECRET}
       />
     </div>
   );

@@ -4,7 +4,7 @@ import { OpenChatButton } from "@/components/portal/OpenChatButton";
 export const metadata = { title: "Support" };
 
 export default function PortalSupportPage() {
-  const chatEnabled = Boolean(process.env.NEXT_PUBLIC_ZENDESK_KEY);
+  const chatEnabled = Boolean(process.env.NEXT_PUBLIC_FRESHDESK_TOKEN);
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-8 px-6 py-10">
@@ -21,8 +21,8 @@ export default function PortalSupportPage() {
         {chatEnabled ? (
           <>
             <p className="mt-1 text-sm text-muted">
-              Our support chat is powered by Zendesk. Click below or use the chat
-              bubble in the corner.
+              Our support chat is powered by Freshdesk. Click below or use the
+              chat bubble in the corner.
             </p>
             <div className="mt-4">
               <OpenChatButton enabled={chatEnabled} />
@@ -32,10 +32,10 @@ export default function PortalSupportPage() {
           <p className="mt-1 text-sm text-muted">
             Live chat isn&apos;t configured yet. Set{" "}
             <code className="rounded bg-background px-1.5 py-0.5 text-xs">
-              NEXT_PUBLIC_ZENDESK_KEY
+              NEXT_PUBLIC_FRESHDESK_TOKEN
             </code>{" "}
-            to enable the Zendesk widget. In the meantime, use the contact details
-            below.
+            to enable the Freshdesk widget. In the meantime, use the contact
+            details below.
           </p>
         )}
       </section>

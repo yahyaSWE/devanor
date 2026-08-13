@@ -4,17 +4,10 @@ import { Button } from "@/components/Button";
 
 export function OpenChatButton({ enabled }: { enabled: boolean }) {
   function openChat() {
-    const zE = window.zE;
-    if (!zE) return;
-    // Works for both Classic and Messaging widgets.
     try {
-      zE("messenger", "open");
+      window.fdWidget?.open?.();
     } catch {
-      try {
-        zE("webWidget", "open");
-      } catch {
-        // widget not ready
-      }
+      // widget not ready
     }
   }
 
