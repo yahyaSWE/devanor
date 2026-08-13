@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { submitDemo, type DemoFormState } from "@/lib/actions/demo";
 import { Button } from "@/components/Button";
 import { BackButton } from "@/components/BackButton";
@@ -13,6 +13,9 @@ const inputClass =
 
 export default function BookDemoPage() {
   const [state, formAction, isPending] = useActionState(submitDemo, initialState);
+  // Stamped when the form first renders; the action rejects submissions that
+  // arrive suspiciously fast (see submitDemo).
+  const [startedAt] = useState(() => Date.now());
 
   return (
     <div className="mx-auto grid w-full max-w-7xl gap-12 px-6 pb-28 pt-32 lg:grid-cols-2 lg:px-10">
@@ -64,6 +67,28 @@ export default function BookDemoPage() {
           </div>
         ) : (
           <form action={formAction} className="space-y-4">
+            {/* Bot traps — invisible to real visitors. */}
+            <input
+              type="hidden"
+              name="startedAt"
+              value={startedAt}
+              suppressHydrationWarning
+              readOnly
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute left-[-9999px] h-0 w-0 overflow-hidden"
+            >
+              <label htmlFor="website">Website</label>
+              <input
+                id="website"
+                name="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
+
             <div>
               <label htmlFor="name" className="mb-1.5 block text-sm text-muted">
                 Name *
