@@ -27,16 +27,17 @@ export async function GET() {
   const name = user?.name || email;
   const company = user?.client?.name ?? "";
 
-  // Freshdesk identifies the contact by email; `exp` is mandatory. The company
-  // rides along as a custom contact field (create it in Freshdesk with the
-  // internal name below).
-  const companyField = process.env.FRESHDESK_COMPANY_FIELD ?? "cf_company";
+  // Freshdesk identifies the contact by EITHER email or unique_external_id —
+  // sending both is rejected ("JWT is Invalid"). We use email. `exp` is
+  // mandatory. The company only rides along once FRESHDESK_COMPANY_FIELD names
+  // a custom contact field that actually exists in Freshdesk; an unknown field
+  // also invalidates the token.
+  const companyField = process.env.FRESHDESK_COMPANY_FIELD;
 
   const jwt = await new SignJWT({
     email,
     name,
-    unique_external_id: session.user.id,
-    ...(company ? { [companyField]: company } : {}),
+    ...(companyField && company ? { [companyField]: company } : {}),
   })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuedAt()
