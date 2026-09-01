@@ -3,6 +3,8 @@
 import { useActionState, useEffect, useState } from "react";
 import { Button } from "@/components/Button";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
+import { SendWelcomeMail } from "@/components/admin/SendWelcomeMail";
+import type { NamedTemplate } from "@/lib/welcome";
 import {
   createInternalUser,
   deleteInternalUser,
@@ -17,6 +19,8 @@ export type InternalUserRow = {
   email: string;
   role: "ADMIN" | "SUPPORT" | "CRM";
   active: boolean;
+  tempPassword: string | null;
+  welcomeEmailSent: boolean;
   createdLabel: string;
   isCurrent: boolean;
 };
@@ -118,7 +122,15 @@ function EditInternalUser({ user, close }: { user: InternalUserRow; close: () =>
   );
 }
 
-export function InternalUsersManager({ users }: { users: InternalUserRow[] }) {
+export function InternalUsersManager({
+  users,
+  templates,
+  loginUrl,
+}: {
+  users: InternalUserRow[];
+  templates: NamedTemplate[];
+  loginUrl: string;
+}) {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<InternalUserRow | null>(null);
   return (
@@ -138,10 +150,22 @@ export function InternalUsersManager({ users }: { users: InternalUserRow[] }) {
                   <p className="truncate font-medium">{user.name}</p>
                   <span className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-0.5 text-xs text-accent">{roleLabel(user.role)}</span>
                   {!user.active && <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs text-amber-400">Inactive</span>}
+                  {user.welcomeEmailSent && <span className="rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-0.5 text-xs text-green-400">Welcome Email sent</span>}
                   {user.isCurrent && <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted">You</span>}
                 </div>
                 <p className="truncate text-sm text-muted">{user.email} · added {user.createdLabel}</p>
               </div>
+              <SendWelcomeMail
+                user={{
+                  id: user.id,
+                  name: user.name,
+                  email: user.email,
+                  tempPassword: user.tempPassword,
+                }}
+                templates={templates}
+                companyName="Devanor"
+                loginUrl={loginUrl}
+              />
               <button type="button" onClick={() => setEditing(user)} className="text-sm text-accent hover:underline">Edit</button>
               {!user.isCurrent && (
                 <>

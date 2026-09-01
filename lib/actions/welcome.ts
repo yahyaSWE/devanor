@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { requireAdmin, requirePermission } from "@/lib/auth-helpers";
+import {
+  requireAdmin,
+  requireInternal,
+  requirePermission,
+} from "@/lib/auth-helpers";
 import { sendWelcomeEmailWithContent } from "@/lib/welcome";
 
 export type ActionState = { ok?: boolean; error?: string };
@@ -69,7 +73,7 @@ export async function sendWelcomeEmail(
   body: string,
   cc: string,
 ): Promise<ActionState> {
-  await requirePermission("companies");
+  await requireInternal();
   if (!subject.trim() || !body.trim())
     return { error: "Subject and body are required." };
 
@@ -80,12 +84,15 @@ export async function sendWelcomeEmail(
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { clientId: true },
+    select: { clientId: true, role: true },
   });
   if (!user) return { error: "Employee not found." };
+  if (user.role === "CUSTOMER") await requirePermission("companies");
+  else await requireAdmin();
 
   const res = await sendWelcomeEmailWithContent(userId, subject, body, ccList);
   if (user.clientId) revalidatePath(`/admin/clients/${user.clientId}`);
+  else revalidatePath("/admin/internal-users");
 
   if (!res.ok) {
     return { error: "Email was not sent — check that Resend is configured." };

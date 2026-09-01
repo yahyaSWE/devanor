@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { sendWelcomeEmail } from "@/lib/actions/welcome";
 import type { NamedTemplate } from "@/lib/welcome";
 import { Button } from "@/components/Button";
@@ -24,6 +25,7 @@ export function SendWelcomeMail({
   companyName: string;
   loginUrl: string;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [templateId, setTemplateId] = useState(templates[0]?.id ?? "");
@@ -71,6 +73,7 @@ export function SendWelcomeMail({
       setMsg(null);
       const r = await sendWelcomeEmail(user.id, subject, body, cc);
       setMsg(r);
+      if (r.ok) router.refresh();
     });
 
   const close = () => {
