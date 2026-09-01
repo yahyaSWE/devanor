@@ -63,6 +63,7 @@ export function TutorialsManager({
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [companyId, setCompanyId] = useState("");
   const [filters, setFilters] = useState<Set<FilterKey>>(new Set());
   const [preview, setPreview] = useState<TutorialRow | null>(null);
   const [editing, setEditing] = useState<TutorialRow | null>(null);
@@ -83,8 +84,16 @@ export function TutorialsManager({
     const wantInactive = filters.has("inactive");
     const wantVideo = filters.has("video");
     const wantLink = filters.has("link");
+    const company = companies.find((item) => item.id === companyId);
+    const companyUserIds = new Set(company?.users.map((user) => user.id) ?? []);
 
     return tutorials.filter((t) => {
+      if (company) {
+        const global = t.clientIds.length === 0 && t.userIds.length === 0;
+        const forCompany = t.clientIds.includes(company.id);
+        const forEmployee = t.userIds.some((id) => companyUserIds.has(id));
+        if (!global && !forCompany && !forEmployee) return false;
+      }
       if (wantActive || wantInactive) {
         if (!((wantActive && t.active) || (wantInactive && !t.active)))
           return false;
@@ -102,7 +111,7 @@ export function TutorialsManager({
       }
       return true;
     });
-  }, [tutorials, search, filters]);
+  }, [tutorials, companies, companyId, search, filters]);
 
   const allFilteredSelected =
     filtered.length > 0 && filtered.every((item) => selected.has(item.id));
@@ -145,12 +154,27 @@ export function TutorialsManager({
     <div>
       {/* Search + filters */}
       <div className="mb-4 space-y-3">
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search title or company…"
-          className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm outline-none focus:border-accent/60"
-        />
+        <div className="grid gap-3 sm:grid-cols-[1fr_220px]">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search title or company…"
+            className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm outline-none focus:border-accent/60"
+          />
+          <select
+            value={companyId}
+            onChange={(event) => setCompanyId(event.target.value)}
+            aria-label="Filter tutorials by company"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent/60"
+          >
+            <option value="">All companies</option>
+            {companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {company.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <FilterChip
             active={filters.has("active")}
@@ -172,12 +196,13 @@ export function TutorialsManager({
             label="Links"
             onClick={() => toggleFilter("link")}
           />
-          {(filters.size > 0 || search) && (
+          {(filters.size > 0 || search || companyId) && (
             <button
               type="button"
               onClick={() => {
                 setFilters(new Set());
                 setSearch("");
+                setCompanyId("");
               }}
               className="text-xs text-muted underline hover:text-foreground"
             >

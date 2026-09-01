@@ -64,6 +64,7 @@ export function DownloadsManager({
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [companyId, setCompanyId] = useState("");
   const [filters, setFilters] = useState<Set<FilterKey>>(new Set());
   const [preview, setPreview] = useState<AdminDownloadRow | null>(null);
   const [editing, setEditing] = useState<AdminDownloadRow | null>(null);
@@ -81,7 +82,15 @@ export function DownloadsManager({
     const q = search.trim().toLowerCase();
     const wantActive = filters.has("active");
     const wantInactive = filters.has("inactive");
+    const company = companies.find((item) => item.id === companyId);
+    const companyUserIds = new Set(company?.users.map((user) => user.id) ?? []);
     return downloads.filter((d) => {
+      if (company) {
+        const global = d.clientIds.length === 0 && d.userIds.length === 0;
+        const forCompany = d.clientIds.includes(company.id);
+        const forEmployee = d.userIds.some((id) => companyUserIds.has(id));
+        if (!global && !forCompany && !forEmployee) return false;
+      }
       if (wantActive || wantInactive) {
         if (!((wantActive && d.active) || (wantInactive && !d.active)))
           return false;
@@ -97,7 +106,7 @@ export function DownloadsManager({
       }
       return true;
     });
-  }, [downloads, search, filters]);
+  }, [downloads, companies, companyId, search, filters]);
 
   const allFilteredSelected =
     filtered.length > 0 && filtered.every((item) => selected.has(item.id));
@@ -136,12 +145,27 @@ export function DownloadsManager({
     <div>
       {/* Search + filters */}
       <div className="mb-4 space-y-3">
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search title, category or company…"
-          className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm outline-none focus:border-accent/60"
-        />
+        <div className="grid gap-3 sm:grid-cols-[1fr_220px]">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search title, category or company…"
+            className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm outline-none focus:border-accent/60"
+          />
+          <select
+            value={companyId}
+            onChange={(event) => setCompanyId(event.target.value)}
+            aria-label="Filter downloads by company"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent/60"
+          >
+            <option value="">All companies</option>
+            {companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {company.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <FilterChip
             active={filters.has("active")}
@@ -153,12 +177,13 @@ export function DownloadsManager({
             label="Inactive"
             onClick={() => toggleFilter("inactive")}
           />
-          {(filters.size > 0 || search) && (
+          {(filters.size > 0 || search || companyId) && (
             <button
               type="button"
               onClick={() => {
                 setFilters(new Set());
                 setSearch("");
+                setCompanyId("");
               }}
               className="text-xs text-muted underline transition-colors hover:text-foreground"
             >
