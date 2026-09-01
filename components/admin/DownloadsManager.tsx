@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 import {
   toggleDownloadActive,
   deleteDownload,
+  bulkSetDownloadsActive,
+  bulkDeleteDownloads,
 } from "@/lib/actions/admin-content";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
 import { AddDownloadForm, type DownloadFormData } from "./AddDownloadForm";
 import type { AudienceCompany } from "./AudiencePicker";
+import { BulkContentActions } from "./BulkContentActions";
 
 export type AdminDownloadRow = {
   id: string;
@@ -64,6 +67,7 @@ export function DownloadsManager({
   const [filters, setFilters] = useState<Set<FilterKey>>(new Set());
   const [preview, setPreview] = useState<AdminDownloadRow | null>(null);
   const [editing, setEditing] = useState<AdminDownloadRow | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const toggleFilter = (k: FilterKey) =>
     setFilters((prev) => {
@@ -94,6 +98,23 @@ export function DownloadsManager({
       return true;
     });
   }, [downloads, search, filters]);
+
+  const allFilteredSelected =
+    filtered.length > 0 && filtered.every((item) => selected.has(item.id));
+  const toggleSelectAll = () =>
+    setSelected(
+      allFilteredSelected
+        ? new Set()
+        : new Set(filtered.map((item) => item.id)),
+    );
+  const toggleOne = (id: string) =>
+    setSelected((previous) => {
+      const next = new Set(previous);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const selectedIds = () => Array.from(selected);
 
   // Close modals on Escape.
   useEffect(() => {
@@ -147,15 +168,41 @@ export function DownloadsManager({
         </div>
       </div>
 
+      <BulkContentActions
+        selectedCount={selected.size}
+        itemName="document"
+        onSetActive={(active) => bulkSetDownloadsActive(selectedIds(), active)}
+        onRemove={() => bulkDeleteDownloads(selectedIds())}
+        onDone={() => {
+          setSelected(new Set());
+          router.refresh();
+        }}
+      />
+
       {/* List */}
       {downloads.length === 0 ? (
         <p className="text-sm text-muted">No files yet.</p>
       ) : filtered.length === 0 ? (
         <p className="text-sm text-muted">No files match your filters.</p>
       ) : (
-        <ul className="divide-y divide-border">
+        <>
+          <label className="mb-2 flex items-center gap-2 text-xs text-muted">
+            <input
+              type="checkbox"
+              checked={allFilteredSelected}
+              onChange={toggleSelectAll}
+            />
+            Select all ({filtered.length})
+          </label>
+          <ul className="max-h-[480px] divide-y divide-border overflow-y-auto pr-1">
           {filtered.map((d) => (
-            <li key={d.id} className="flex items-center gap-4 py-3">
+            <li key={d.id} className="flex items-center gap-3 py-3">
+              <input
+                type="checkbox"
+                checked={selected.has(d.id)}
+                onChange={() => toggleOne(d.id)}
+                aria-label={`Select ${d.title}`}
+              />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="truncate font-medium">{d.title}</p>
@@ -229,7 +276,8 @@ export function DownloadsManager({
               />
             </li>
           ))}
-        </ul>
+          </ul>
+        </>
       )}
 
       {/* Preview modal */}

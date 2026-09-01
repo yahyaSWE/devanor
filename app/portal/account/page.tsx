@@ -49,7 +49,17 @@ export default async function PortalAccountPage() {
 
       {(user?.zgsUsername || user?.zgsTempPassword) && (
         <section className="rounded-2xl border border-border bg-surface/40 p-6">
-          <h2 className="font-semibold">ZGS portal</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-semibold">ZGS portal</h2>
+            <a
+              href="https://support.zuken.com/global/home"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center rounded-full bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition-all hover:brightness-110 hover:shadow-[0_0_30px_-5px_var(--color-accent)]"
+            >
+              Visit ZGS portal ↗
+            </a>
+          </div>
           <p className="mb-4 mt-1 text-sm text-muted">
             Use these to sign in to the ZGS portal. Change the temporary password
             on your first login there.

@@ -116,6 +116,33 @@ export async function deleteDownload(formData: FormData): Promise<void> {
   }
 }
 
+export async function bulkSetDownloadsActive(
+  ids: string[],
+  active: boolean,
+): Promise<void> {
+  await requirePermission("content");
+  if (!ids.length) return;
+  await prisma.download.updateMany({
+    where: { id: { in: ids } },
+    data: { active },
+  });
+  revalidatePath("/admin/downloads");
+  revalidatePath("/portal/downloads");
+}
+
+export async function bulkDeleteDownloads(ids: string[]): Promise<void> {
+  await requirePermission("content");
+  if (!ids.length) return;
+  const downloads = await prisma.download.findMany({
+    where: { id: { in: ids } },
+    select: { storedName: true },
+  });
+  await Promise.all(downloads.map((item) => deleteUpload(item.storedName)));
+  await prisma.download.deleteMany({ where: { id: { in: ids } } });
+  revalidatePath("/admin/downloads");
+  revalidatePath("/portal/downloads");
+}
+
 // ─────────────────────────── Tutorials ───────────────────────────
 
 const tutorialSchema = z.object({
@@ -213,6 +240,28 @@ export async function deleteTutorial(formData: FormData): Promise<void> {
     revalidatePath("/admin/tutorials");
     revalidatePath("/portal/tutorials");
   }
+}
+
+export async function bulkSetTutorialsActive(
+  ids: string[],
+  active: boolean,
+): Promise<void> {
+  await requirePermission("content");
+  if (!ids.length) return;
+  await prisma.tutorial.updateMany({
+    where: { id: { in: ids } },
+    data: { active },
+  });
+  revalidatePath("/admin/tutorials");
+  revalidatePath("/portal/tutorials");
+}
+
+export async function bulkDeleteTutorials(ids: string[]): Promise<void> {
+  await requirePermission("content");
+  if (!ids.length) return;
+  await prisma.tutorial.deleteMany({ where: { id: { in: ids } } });
+  revalidatePath("/admin/tutorials");
+  revalidatePath("/portal/tutorials");
 }
 
 // ─────────── License catalog (modules, name only, not tied to a company) ───────────

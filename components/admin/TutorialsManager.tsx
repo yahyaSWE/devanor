@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 import {
   toggleTutorialActive,
   deleteTutorial,
+  bulkSetTutorialsActive,
+  bulkDeleteTutorials,
 } from "@/lib/actions/admin-content";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
 import { AddTutorialForm, type TutorialFormData } from "./AddTutorialForm";
 import type { AudienceCompany } from "./AudiencePicker";
+import { BulkContentActions } from "./BulkContentActions";
 
 export type TutorialRow = {
   id: string;
@@ -64,6 +67,7 @@ export function TutorialsManager({
   const [preview, setPreview] = useState<TutorialRow | null>(null);
   const [editing, setEditing] = useState<TutorialRow | null>(null);
   const [failedThumbs, setFailedThumbs] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const toggleFilter = (k: FilterKey) =>
     setFilters((prev) => {
@@ -99,6 +103,23 @@ export function TutorialsManager({
       return true;
     });
   }, [tutorials, search, filters]);
+
+  const allFilteredSelected =
+    filtered.length > 0 && filtered.every((item) => selected.has(item.id));
+  const toggleSelectAll = () =>
+    setSelected(
+      allFilteredSelected
+        ? new Set()
+        : new Set(filtered.map((item) => item.id)),
+    );
+  const toggleOne = (id: string) =>
+    setSelected((previous) => {
+      const next = new Set(previous);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const selectedIds = () => Array.from(selected);
 
   // Close modals on Escape.
   useEffect(() => {
@@ -166,15 +187,41 @@ export function TutorialsManager({
         </div>
       </div>
 
+      <BulkContentActions
+        selectedCount={selected.size}
+        itemName="tutorial"
+        onSetActive={(active) => bulkSetTutorialsActive(selectedIds(), active)}
+        onRemove={() => bulkDeleteTutorials(selectedIds())}
+        onDone={() => {
+          setSelected(new Set());
+          router.refresh();
+        }}
+      />
+
       {/* List */}
       {tutorials.length === 0 ? (
         <p className="text-sm text-muted">No tutorials yet.</p>
       ) : filtered.length === 0 ? (
         <p className="text-sm text-muted">No tutorials match your filters.</p>
       ) : (
-        <ul className="divide-y divide-border">
+        <>
+          <label className="mb-2 flex items-center gap-2 text-xs text-muted">
+            <input
+              type="checkbox"
+              checked={allFilteredSelected}
+              onChange={toggleSelectAll}
+            />
+            Select all ({filtered.length})
+          </label>
+          <ul className="max-h-[480px] divide-y divide-border overflow-y-auto pr-1">
           {filtered.map((t) => (
-            <li key={t.id} className="flex items-center gap-4 py-3">
+            <li key={t.id} className="flex items-center gap-3 py-3">
+              <input
+                type="checkbox"
+                checked={selected.has(t.id)}
+                onChange={() => toggleOne(t.id)}
+                aria-label={`Select ${t.title}`}
+              />
               {/* Mini preview poster */}
               <button
                 type="button"
@@ -271,7 +318,8 @@ export function TutorialsManager({
               />
             </li>
           ))}
-        </ul>
+          </ul>
+        </>
       )}
 
       {/* Preview modal */}
