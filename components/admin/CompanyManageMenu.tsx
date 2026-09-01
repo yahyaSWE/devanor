@@ -25,6 +25,7 @@ type Props = {
   };
   modules: { id: string; name: string }[];
   employees: { id: string; name: string | null; email: string }[];
+  canManageLicenses: boolean;
 };
 
 function MenuButton({
@@ -49,6 +50,7 @@ export function CompanyManageMenu({
   client,
   modules,
   employees,
+  canManageLicenses,
 }: Props) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -119,7 +121,9 @@ export function CompanyManageMenu({
         <div className="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-xl border border-border bg-surface py-1 shadow-2xl">
           <MenuButton onClick={() => open("edit")}>Edit company</MenuButton>
           <MenuButton onClick={() => open("employee")}>Add an employee</MenuButton>
-          <MenuButton onClick={() => open("license")}>Assign a license</MenuButton>
+          {canManageLicenses && (
+            <MenuButton onClick={() => open("license")}>Assign a license</MenuButton>
+          )}
 
           <div className="my-1 border-t border-border" />
 

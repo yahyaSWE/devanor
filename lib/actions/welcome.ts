@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { requireAdmin } from "@/lib/auth-helpers";
+import { requireAdmin, requirePermission } from "@/lib/auth-helpers";
 import { sendWelcomeEmailWithContent } from "@/lib/welcome";
 
 export type ActionState = { ok?: boolean; error?: string };
@@ -69,7 +69,7 @@ export async function sendWelcomeEmail(
   body: string,
   cc: string,
 ): Promise<ActionState> {
-  await requireAdmin();
+  await requirePermission("companies");
   if (!subject.trim() || !body.trim())
     return { error: "Subject and body are required." };
 

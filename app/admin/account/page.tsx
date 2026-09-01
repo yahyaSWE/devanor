@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth-helpers";
+import { requireInternal } from "@/lib/auth-helpers";
 import { ChangePasswordForm } from "@/components/portal/ChangePasswordForm";
 import { TemplatesManager } from "@/components/admin/TemplatesManager";
 import { listTemplates } from "@/lib/welcome";
@@ -6,8 +6,8 @@ import { listTemplates } from "@/lib/welcome";
 export const metadata = { title: "Admin · Account" };
 
 export default async function AdminAccountPage() {
-  const session = await requireAdmin();
-  const templates = await listTemplates();
+  const session = await requireInternal();
+  const templates = session.user.role === "ADMIN" ? await listTemplates() : [];
 
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-10">
@@ -28,7 +28,13 @@ export default async function AdminAccountPage() {
             </div>
             <div className="flex justify-between gap-4">
               <dt className="text-muted">Role</dt>
-              <dd>Administrator</dd>
+              <dd>
+                {session.user.role === "ADMIN"
+                  ? "Full Admin"
+                  : session.user.role === "SUPPORT"
+                    ? "Support"
+                    : "CRM"}
+              </dd>
             </div>
           </dl>
         </div>
@@ -40,9 +46,11 @@ export default async function AdminAccountPage() {
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-border bg-surface/40 p-6">
-        <TemplatesManager templates={templates} />
-      </div>
+      {session.user.role === "ADMIN" && (
+        <div className="mt-6 rounded-2xl border border-border bg-surface/40 p-6">
+          <TemplatesManager templates={templates} />
+        </div>
+      )}
     </div>
   );
 }

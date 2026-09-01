@@ -7,10 +7,12 @@ import {
 import type { AudienceCompany } from "@/components/admin/AudiencePicker";
 import { audienceLabel } from "@/lib/portal";
 import { getEmbedUrl, getVideoThumbnail, getLoomThumbnail } from "@/lib/video";
+import { requirePermission } from "@/lib/auth-helpers";
 
 export const metadata = { title: "Admin · Tutorials" };
 
 export default async function AdminTutorialsPage() {
+  await requirePermission("content");
   const [clients, tutorials] = await Promise.all([
     prisma.client.findMany({
       orderBy: { name: "asc" },

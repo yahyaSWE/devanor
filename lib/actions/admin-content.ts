@@ -4,7 +4,7 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { requireAdmin } from "@/lib/auth-helpers";
+import { requirePermission } from "@/lib/auth-helpers";
 import { deleteUpload } from "@/lib/storage";
 
 export type ActionState = { ok?: boolean; error?: string };
@@ -36,7 +36,7 @@ export async function addDownload(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireAdmin();
+  await requirePermission("content");
 
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return { error: "Title is required." };
@@ -67,7 +67,7 @@ export async function updateDownload(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireAdmin();
+  await requirePermission("content");
 
   const id = String(formData.get("id") ?? "");
   if (!id) return { error: "Missing document id." };
@@ -91,7 +91,7 @@ export async function updateDownload(
 }
 
 export async function toggleDownloadActive(formData: FormData): Promise<void> {
-  await requireAdmin();
+  await requirePermission("content");
   const id = String(formData.get("id") ?? "");
   const download = await prisma.download.findUnique({ where: { id } });
   if (download) {
@@ -105,7 +105,7 @@ export async function toggleDownloadActive(formData: FormData): Promise<void> {
 }
 
 export async function deleteDownload(formData: FormData): Promise<void> {
-  await requireAdmin();
+  await requirePermission("content");
   const id = String(formData.get("id") ?? "");
   const download = await prisma.download.findUnique({ where: { id } });
   if (download) {
@@ -129,7 +129,7 @@ export async function addTutorial(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireAdmin();
+  await requirePermission("content");
 
   const parsed = tutorialSchema.safeParse({
     title: formData.get("title"),
@@ -160,7 +160,7 @@ export async function updateTutorial(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireAdmin();
+  await requirePermission("content");
 
   const id = String(formData.get("id") ?? "");
   if (!id) return { error: "Missing tutorial id." };
@@ -192,7 +192,7 @@ export async function updateTutorial(
 }
 
 export async function toggleTutorialActive(formData: FormData): Promise<void> {
-  await requireAdmin();
+  await requirePermission("content");
   const id = String(formData.get("id") ?? "");
   const tutorial = await prisma.tutorial.findUnique({ where: { id } });
   if (tutorial) {
@@ -206,7 +206,7 @@ export async function toggleTutorialActive(formData: FormData): Promise<void> {
 }
 
 export async function deleteTutorial(formData: FormData): Promise<void> {
-  await requireAdmin();
+  await requirePermission("content");
   const id = String(formData.get("id") ?? "");
   if (id) {
     await prisma.tutorial.delete({ where: { id } });
@@ -221,7 +221,7 @@ export async function addLicenseModule(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireAdmin();
+  await requirePermission("licenses");
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return { error: "Name is required." };
 
@@ -242,7 +242,7 @@ export async function updateLicenseModule(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireAdmin();
+  await requirePermission("licenses");
   const id = String(formData.get("id") ?? "");
   const name = String(formData.get("name") ?? "").trim();
   if (!id || !name) return { error: "Name is required." };
@@ -261,7 +261,7 @@ export async function updateLicenseModule(
 }
 
 export async function deleteLicenseModule(formData: FormData): Promise<void> {
-  await requireAdmin();
+  await requirePermission("licenses");
   const id = String(formData.get("id") ?? "");
   if (id) {
     await prisma.licenseModule.delete({ where: { id } });
@@ -360,7 +360,7 @@ export async function assignLicense(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireAdmin();
+  await requirePermission("licenses");
 
   const clientId = String(formData.get("clientId") ?? "");
   if (!clientId) return { error: "Missing company." };
@@ -395,7 +395,7 @@ export async function updateLicense(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireAdmin();
+  await requirePermission("licenses");
 
   const id = String(formData.get("id") ?? "");
   if (!id) return { error: "Missing license." };
@@ -439,7 +439,7 @@ export async function updateLicense(
 }
 
 export async function toggleLicenseActive(formData: FormData): Promise<void> {
-  await requireAdmin();
+  await requirePermission("licenses");
   const id = String(formData.get("id") ?? "");
   const lic = await prisma.license.findUnique({
     where: { id },
@@ -457,7 +457,7 @@ export async function toggleLicenseActive(formData: FormData): Promise<void> {
 }
 
 export async function deleteLicense(formData: FormData): Promise<void> {
-  await requireAdmin();
+  await requirePermission("licenses");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const lic = await prisma.license.findUnique({

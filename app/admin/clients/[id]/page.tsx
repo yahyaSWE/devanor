@@ -8,6 +8,7 @@ import { LicenseRow, type LicenseRowData } from "@/components/admin/LicenseRow";
 import { listTemplates } from "@/lib/welcome";
 import { appUrl } from "@/lib/email";
 import { formatDate } from "@/lib/format";
+import { requirePermission } from "@/lib/auth-helpers";
 
 export async function generateMetadata({
   params,
@@ -24,6 +25,8 @@ export default async function AdminClientDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await requirePermission("companies");
+  const canManageLicenses = session.user.role === "ADMIN";
   const { id } = await params;
   const [client, modules] = await Promise.all([
     prisma.client.findUnique({
@@ -126,10 +129,12 @@ export default async function AdminClientDetailPage({
         </div>
 
         <div className="flex items-center gap-3">
-          <a href="#licenses" className="text-sm text-accent hover:underline">
-            {licenseCount} license{licenseCount === 1 ? "" : "s"} ·{" "}
-            {maintenanceCount} maintenance
-          </a>
+          {canManageLicenses && (
+            <a href="#licenses" className="text-sm text-accent hover:underline">
+              {licenseCount} license{licenseCount === 1 ? "" : "s"} ·{" "}
+              {maintenanceCount} maintenance
+            </a>
+          )}
           <CompanyManageMenu
             client={{
               id: client.id,
@@ -145,6 +150,7 @@ export default async function AdminClientDetailPage({
               name: u.name,
               email: u.email,
             }))}
+            canManageLicenses={canManageLicenses}
           />
         </div>
       </div>
@@ -193,7 +199,7 @@ export default async function AdminClientDetailPage({
       </div>
 
       {/* Licenses */}
-      <div id="licenses" className="mt-6">
+      {canManageLicenses && <div id="licenses" className="mt-6">
         <div className="rounded-2xl border border-border bg-surface/40 p-6">
           <h2 className="mb-4 font-semibold">
             Licenses ({licenseRows.length})
@@ -251,7 +257,7 @@ export default async function AdminClientDetailPage({
             </div>
           )}
         </div>
-      </div>
+      </div>}
     </div>
   );
 }

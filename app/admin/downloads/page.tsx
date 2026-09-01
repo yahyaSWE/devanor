@@ -7,10 +7,16 @@ import {
 import type { AudienceCompany } from "@/components/admin/AudiencePicker";
 import { audienceLabel } from "@/lib/portal";
 import { formatBytes } from "@/lib/format";
+import { requirePermission } from "@/lib/auth-helpers";
+import {
+  isImageDownload,
+  isPreviewableDownload,
+} from "@/lib/download-preview";
 
 export const metadata = { title: "Admin · Downloads" };
 
 export default async function AdminDownloadsPage() {
+  await requirePermission("content");
   const [clients, downloads] = await Promise.all([
     prisma.client.findMany({
       orderBy: { name: "asc" },
@@ -37,7 +43,7 @@ export default async function AdminDownloadsPage() {
   }));
 
   const rows: AdminDownloadRow[] = downloads.map((d) => {
-    const isImage = d.mimeType.startsWith("image/");
+    const isImage = isImageDownload(d.mimeType);
     return {
       id: d.id,
       title: d.title,
@@ -49,7 +55,7 @@ export default async function AdminDownloadsPage() {
       userIds: d.users.map((u) => u.id),
       audience: audienceLabel(d),
       active: d.active,
-      previewable: isImage || d.mimeType === "application/pdf",
+      previewable: isPreviewableDownload(d.mimeType, d.fileName),
       isImage,
     };
   });

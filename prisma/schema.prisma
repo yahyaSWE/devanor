@@ -10,35 +10,37 @@ datasource db {
 
 enum Role {
   ADMIN
+  SUPPORT
+  CRM
   CUSTOMER
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String?
-  title        String? // job title / role at the company, shown to support
-  phone        String? // optional; admin-only, never shown to the customer
-  role         Role     @default(CUSTOMER)
-  active       Boolean  @default(true) // deactivated users cannot sign in
-  mustChangePassword Boolean @default(true) // force a password change on first login
+  id                 String               @id @default(cuid())
+  email              String               @unique
+  passwordHash       String
+  name               String?
+  title              String? // job title / role at the company, shown to support
+  phone              String? // optional; admin-only, never shown to the customer
+  role               Role                 @default(CUSTOMER)
+  active             Boolean              @default(true) // deactivated users cannot sign in
+  mustChangePassword Boolean              @default(true) // force a password change on first login
   // The initial Devanor login password in plain text, so it can be emailed in a
   // welcome mail ({{password}}). Cleared once the user sets their own password.
-  tempPassword    String?
+  tempPassword       String?
   // ZGS portal credentials (third-party site) shown to the employee. Plain text
   // on purpose: admin shares them, the user changes them on the ZGS site.
-  zgsUsername     String?
-  zgsTempPassword String?
+  zgsUsername        String?
+  zgsTempPassword    String?
   welcomeEmailSentAt DateTime? // set when a welcome email has been sent
-  client       Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  clientId     String?
-  resetTokens  PasswordResetToken[]
-  views        ItemView[]
+  client             Client?              @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  clientId           String?
+  resetTokens        PasswordResetToken[]
+  views              ItemView[]
   // Content targeted at this employee specifically (see Download/Tutorial).
-  downloads    Download[] @relation("DownloadUsers")
-  tutorials    Tutorial[] @relation("TutorialUsers")
-  createdAt    DateTime @default(now())
+  downloads          Download[]           @relation("DownloadUsers")
+  tutorials          Tutorial[]           @relation("TutorialUsers")
+  createdAt          DateTime             @default(now())
 }
 
 // Records that a customer has seen a specific download/tutorial/license, so the
@@ -159,29 +161,29 @@ model LicenseModule {
 // A license/maintenance entry assigned to a client. One row can cover several
 // catalog modules. The uploaded license key file is downloadable by the customer.
 model License {
-  id           String          @id @default(cuid())
-  modules      LicenseModule[]
-  contractType ContractType    @default(PERPETUAL)
-  lockType     LockType? // null for maintenance
-  version      String? // license version / year model
-  macIds       String[] // one or more MAC IDs
-  seats        Int?
-  status       LicenseStatus   @default(ACTIVE)
-  active       Boolean         @default(true) // false = hidden from the customer portal
-  permanent    Boolean         @default(false) // no expiry when true
-  validFrom    DateTime? // when the license becomes valid
-  expiresAt    DateTime?
+  id             String          @id @default(cuid())
+  modules        LicenseModule[]
+  contractType   ContractType    @default(PERPETUAL)
+  lockType       LockType? // null for maintenance
+  version        String? // license version / year model
+  macIds         String[] // one or more MAC IDs
+  seats          Int?
+  status         LicenseStatus   @default(ACTIVE)
+  active         Boolean         @default(true) // false = hidden from the customer portal
+  permanent      Boolean         @default(false) // no expiry when true
+  validFrom      DateTime? // when the license becomes valid
+  expiresAt      DateTime?
   reminderAt     DateTime? // admin-only renewal reminder (used for perpetual licenses)
   reminderSentAt DateTime? // set when the expiry/reminder email has been sent
   // Uploaded license key file (served via /api/licenses/[id]/key)
-  keyFileName   String?
-  keyStoredName String?
-  keyMimeType   String?
-  keySize       Int?
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  clientId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  keyFileName    String?
+  keyStoredName  String?
+  keyMimeType    String?
+  keySize        Int?
+  client         Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId       String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 // Editable email templates. Several named welcome templates can coexist; the

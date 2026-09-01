@@ -3,16 +3,19 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ContractTypeBadge } from "@/components/ContractTypeBadge";
+import { LicenseStatusBadge } from "@/components/LicenseStatusBadge";
+import { LicenseModulesCell } from "@/components/portal/LicenseModulesCell";
 
 export type ExpiringRow = {
   id: string;
   companyId: string;
   companyName: string;
-  moduleNames: string;
+  moduleNames: string[];
   contractType: string; // PERPETUAL | SUBSCRIPTION | MAINTENANCE
   dateLabel: string;
-  kind: "expired" | "expiring" | "reminder";
+  kind: "expired" | "expiring" | "reminder" | "trial";
   active: boolean;
+  status: string;
 };
 
 type FilterKey =
@@ -21,7 +24,8 @@ type FilterKey =
   | "PERPETUAL"
   | "expired"
   | "expiring"
-  | "reminder";
+  | "reminder"
+  | "TRIAL";
 
 function Chip({
   active,
@@ -51,6 +55,7 @@ const kindStyles: Record<ExpiringRow["kind"], string> = {
   expired: "border-red-500/30 bg-red-500/10 text-red-400",
   expiring: "border-amber-500/30 bg-amber-500/10 text-amber-400",
   reminder: "border-sky-500/30 bg-sky-500/10 text-sky-300",
+  trial: "border-accent/40 bg-accent/10 text-accent",
 };
 
 export function ExpiringLicensesManager({ rows }: { rows: ExpiringRow[] }) {
@@ -72,15 +77,17 @@ export function ExpiringLicensesManager({ rows }: { rows: ExpiringRow[] }) {
     const q = search.trim().toLowerCase();
     const wantContract = contractFilters.filter((c) => filters.has(c));
     const wantStatus = statusFilters.filter((s) => filters.has(s));
+    const wantTrial = filters.has("TRIAL");
     return rows.filter((r) => {
       if (wantContract.length && !wantContract.includes(r.contractType as never))
         return false;
       if (wantStatus.length && !wantStatus.includes(r.kind as never))
         return false;
+      if (wantTrial && r.status !== "TRIAL") return false;
       if (q) {
         if (
           !r.companyName.toLowerCase().includes(q) &&
-          !r.moduleNames.toLowerCase().includes(q)
+          !r.moduleNames.join(" ").toLowerCase().includes(q)
         )
           return false;
       }
@@ -102,6 +109,7 @@ export function ExpiringLicensesManager({ rows }: { rows: ExpiringRow[] }) {
           <Chip active={filters.has("expired")} label="Expired" onClick={() => toggle("expired")} />
           <Chip active={filters.has("expiring")} label="Expiring" onClick={() => toggle("expiring")} />
           <Chip active={filters.has("reminder")} label="Reminder" onClick={() => toggle("reminder")} />
+          <Chip active={filters.has("TRIAL")} label="Trial" onClick={() => toggle("TRIAL")} />
           <span className="mx-1 h-4 w-px bg-border" />
           <Chip active={filters.has("MAINTENANCE")} label="Maintenance" onClick={() => toggle("MAINTENANCE")} />
           <Chip active={filters.has("SUBSCRIPTION")} label="Subscription" onClick={() => toggle("SUBSCRIPTION")} />
@@ -135,23 +143,31 @@ export function ExpiringLicensesManager({ rows }: { rows: ExpiringRow[] }) {
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="truncate font-medium">{r.companyName}</p>
                   <ContractTypeBadge type={r.contractType} />
-                  <span
-                    className={`rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${kindStyles[r.kind]}`}
-                  >
-                    {r.kind}
-                  </span>
+                  {r.kind !== "trial" && (
+                    <span
+                      className={`rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${kindStyles[r.kind]}`}
+                    >
+                      {r.kind}
+                    </span>
+                  )}
+                  {r.status === "TRIAL" && <LicenseStatusBadge status="TRIAL" />}
                   {!r.active && (
                     <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted">
                       Deactivated
                     </span>
                   )}
                 </div>
-                <p className="truncate text-sm text-muted">
-                  {r.moduleNames || "—"} ·{" "}
-                  {r.kind === "reminder"
-                    ? `reminder ${r.dateLabel}`
-                    : `expires ${r.dateLabel}`}
-                </p>
+                <div className="flex flex-wrap items-center gap-1 text-sm text-muted">
+                  <LicenseModulesCell modules={r.moduleNames} isNew={false} />
+                  <span>
+                    ·{" "}
+                    {r.kind === "reminder"
+                      ? `reminder ${r.dateLabel}`
+                      : r.kind === "trial" && r.dateLabel === "—"
+                        ? "trial period"
+                        : `expires ${r.dateLabel}`}
+                  </span>
+                </div>
               </div>
               <Link
                 href={`/admin/clients/${r.companyId}#licenses`}

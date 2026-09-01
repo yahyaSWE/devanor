@@ -64,7 +64,11 @@ export default async function PortalLayout({
   return (
     <div className="flex min-h-full flex-col">
       <IdleLogout />
-      <DashboardHeader label="Support Portal" email={session.user.email ?? ""} />
+      <DashboardHeader
+        label="Support Portal"
+        email={session.user.email ?? ""}
+        company={user?.client ?? null}
+      />
       <SubNav items={portalNav} base="/portal" />
       <main className="flex-1">{children}</main>
       <FreshdeskChat

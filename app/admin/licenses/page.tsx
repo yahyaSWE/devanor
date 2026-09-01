@@ -4,10 +4,12 @@ import {
   LicenseCatalogManager,
   type CatalogModule,
 } from "@/components/admin/LicenseCatalogManager";
+import { requirePermission } from "@/lib/auth-helpers";
 
 export const metadata = { title: "Admin · Licenses" };
 
 export default async function AdminLicensesPage() {
+  await requirePermission("licenses");
   const modules = await prisma.licenseModule.findMany({
     orderBy: { name: "asc" },
     include: {

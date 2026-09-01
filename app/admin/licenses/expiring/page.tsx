@@ -5,10 +5,12 @@ import {
   type ExpiringRow,
 } from "@/components/admin/ExpiringLicensesManager";
 import { formatDate } from "@/lib/format";
+import { requirePermission } from "@/lib/auth-helpers";
 
 export const metadata = { title: "Admin · Expiring licenses" };
 
 export default async function ExpiringLicensesPage() {
+  await requirePermission("licenses");
   const now = new Date();
   const soon = new Date();
   soon.setDate(soon.getDate() + 30);
@@ -20,6 +22,7 @@ export default async function ExpiringLicensesPage() {
       OR: [
         { permanent: false, expiresAt: { not: null, lte: soon } },
         { reminderAt: { not: null, lte: soon } },
+        { status: "TRIAL" },
       ],
     },
     orderBy: [{ expiresAt: "asc" }, { reminderAt: "asc" }],
@@ -27,9 +30,13 @@ export default async function ExpiringLicensesPage() {
   });
 
   const rows: ExpiringRow[] = licenses.map((l) => {
-    const isReminder = l.permanent || !l.expiresAt;
+    const isStandaloneTrial =
+      l.status === "TRIAL" && (!l.expiresAt || l.expiresAt > soon);
+    const isReminder = !isStandaloneTrial && (l.permanent || !l.expiresAt);
     const kind: ExpiringRow["kind"] = isReminder
       ? "reminder"
+      : isStandaloneTrial
+        ? "trial"
       : l.expiresAt && l.expiresAt < now
         ? "expired"
         : "expiring";
@@ -37,11 +44,12 @@ export default async function ExpiringLicensesPage() {
       id: l.id,
       companyId: l.client.id,
       companyName: l.client.name,
-      moduleNames: l.modules.map((m) => m.name).join(", "),
+      moduleNames: l.modules.map((m) => m.name),
       contractType: l.contractType,
       dateLabel: formatDate(isReminder ? l.reminderAt : l.expiresAt),
       kind,
       active: l.active,
+      status: l.status,
     };
   });
 
@@ -52,8 +60,8 @@ export default async function ExpiringLicensesPage() {
       </Link>
       <h1 className="mt-4 text-2xl font-semibold">Expiring &amp; expired licenses</h1>
       <p className="mt-1 text-muted">
-        Licenses expiring within 30 days, already expired, or with an admin
-        renewal reminder due.
+        Trials, licenses expiring within 30 days, already expired licenses, and
+        admin renewal reminders.
       </p>
 
       <section className="mt-8 rounded-2xl border border-border bg-surface/40 p-6">

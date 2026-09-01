@@ -21,7 +21,7 @@ export type AdminDownloadRow = {
   userIds: string[];
   audience: string;
   active: boolean;
-  /** PDFs and images can be shown inline; anything else has nothing to preview. */
+  /** PDFs, images and Word documents can be shown inline. */
   previewable: boolean;
   isImage: boolean;
 };
@@ -184,12 +184,12 @@ export function DownloadsManager({
                   Preview
                 </button>
               ) : (
-                <span
-                  title="No preview available for this file type"
-                  className="shrink-0 text-sm text-muted/40"
+                <a
+                  href={`/api/downloads/${d.id}`}
+                  className="shrink-0 text-sm text-accent hover:underline"
                 >
-                  Preview
-                </span>
+                  Download
+                </a>
               )}
               <button
                 type="button"

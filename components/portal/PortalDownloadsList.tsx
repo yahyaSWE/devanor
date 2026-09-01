@@ -185,7 +185,7 @@ export function PortalDownloadsList({ downloads }: { downloads: DownloadRow[] })
                 onClick={() => (d.previewable ? onView(d) : onDownload(d.id))}
                 className="shrink-0 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-all duration-200 hover:brightness-110 hover:shadow-[0_0_30px_-5px_var(--color-accent)]"
               >
-                {d.previewable ? "View" : "Download"}
+                {d.previewable ? "Preview" : "Download"}
               </button>
             </li>
           ))}

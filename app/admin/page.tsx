@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { RegisterCompanyModal } from "@/components/admin/RegisterCompanyModal";
 import { CompaniesManager, type CompanyRow } from "@/components/admin/CompaniesManager";
 import { formatDate } from "@/lib/format";
+import { requirePermission } from "@/lib/auth-helpers";
+import { LicenseModulesCell } from "@/components/portal/LicenseModulesCell";
 
 export const metadata = { title: "Admin" };
 
@@ -16,6 +18,8 @@ function Stat({ label, value }: { label: string; value: number }) {
 }
 
 export default async function AdminPage() {
+  const session = await requirePermission("companies");
+  const canSeeLicenses = session.user.role === "ADMIN";
   // Licenses expiring within the next 30 days (active, non-permanent, dated).
   const soon = new Date();
   soon.setDate(soon.getDate() + 30);
@@ -29,7 +33,7 @@ export default async function AdminPage() {
       },
     }),
     prisma.user.count({ where: { role: "CUSTOMER" } }),
-    prisma.license.findMany({
+    canSeeLicenses ? prisma.license.findMany({
       where: {
         active: true,
         status: { not: "EXPIRED" },
@@ -42,7 +46,7 @@ export default async function AdminPage() {
       },
       orderBy: { expiresAt: "asc" },
       include: { client: { select: { id: true, name: true } }, modules: true },
-    }),
+    }) : Promise.resolve([]),
   ]);
 
   const rows: CompanyRow[] = clients.map((c) => ({
@@ -87,10 +91,13 @@ export default async function AdminPage() {
                 >
                   <div className="min-w-0">
                     <span className="font-medium">{l.client.name}</span>
-                    <span className="text-muted">
-                      {" "}
-                      · {l.modules.map((m) => m.name).join(", ") || "—"}
-                    </span>
+                    <div className="inline-flex items-center gap-1 text-muted">
+                      <span>·</span>
+                      <LicenseModulesCell
+                        modules={l.modules.map((m) => m.name)}
+                        isNew={false}
+                      />
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-amber-300">

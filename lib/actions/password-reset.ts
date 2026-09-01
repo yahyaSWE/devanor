@@ -14,7 +14,7 @@ function hashToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-const emailSchema = z.object({ email: z.string().email() });
+const emailSchema = z.object({ email: z.string().trim().toLowerCase().email() });
 
 /**
  * Create a reset token and email a link. Always returns ok (never reveals
@@ -27,8 +27,10 @@ export async function requestPasswordReset(
   const parsed = emailSchema.safeParse({ email: formData.get("email") });
   if (!parsed.success) return { error: "Enter a valid email address." };
 
-  const user = await prisma.user.findUnique({
-    where: { email: parsed.data.email },
+  const user = await prisma.user.findFirst({
+    where: {
+      email: { equals: parsed.data.email, mode: "insensitive" },
+    },
   });
 
   // Only issue tokens for active accounts, but don't disclose either way.

@@ -6,9 +6,11 @@ import { site } from "@/lib/site";
 export function DashboardHeader({
   label,
   email,
+  company,
 }: {
   label: string;
   email: string;
+  company?: { name: string; logoUrl: string } | null;
 }) {
   return (
     <header className="border-b border-border bg-surface/40">
@@ -28,6 +30,21 @@ export function DashboardHeader({
           </span>
         </div>
         <div className="flex items-center gap-4">
+          {company && (
+            <div
+              className="hidden h-10 max-w-40 items-center rounded-lg border border-border bg-background/60 px-3 sm:flex"
+              title={company.name}
+            >
+              <Image
+                src={company.logoUrl}
+                alt={company.name}
+                width={88}
+                height={32}
+                className="max-h-7 w-auto max-w-28 object-contain"
+                unoptimized
+              />
+            </div>
+          )}
           <span className="hidden text-sm text-muted sm:inline">{email}</span>
           <LogoutButton />
         </div>

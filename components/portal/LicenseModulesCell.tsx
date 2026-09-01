@@ -10,9 +10,11 @@ import { useEffect, useState } from "react";
 export function LicenseModulesCell({
   modules,
   isNew,
+  className = "",
 }: {
   modules: string[];
   isNew: boolean;
+  className?: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -29,7 +31,7 @@ export function LicenseModulesCell({
   const extra = modules.length - 1;
 
   return (
-    <span className="flex flex-wrap items-center gap-2">
+    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
       <span>{first}</span>
       {extra > 0 && (
         <button
@@ -74,6 +76,6 @@ export function LicenseModulesCell({
           </div>
         </div>
       )}
-    </span>
+    </div>
   );
 }

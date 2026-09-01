@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { requireAdmin } from "@/lib/auth-helpers";
+import { requirePermission } from "@/lib/auth-helpers";
 import {
   isStorageConfigured,
   uploadToBucket,
@@ -51,7 +51,7 @@ export async function addClient(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireAdmin();
+  await requirePermission("companies");
 
   const parsed = clientSchema.safeParse({
     name: formData.get("name"),
@@ -103,7 +103,7 @@ export async function addClient(
 }
 
 export async function deleteClient(formData: FormData): Promise<void> {
-  await requireAdmin();
+  await requirePermission("companies");
   const id = formData.get("id");
   if (typeof id === "string") {
     // Employees belong to the company — remove their logins along with it.
@@ -133,7 +133,7 @@ export async function updateClient(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireAdmin();
+  await requirePermission("companies");
 
   const parsed = updateClientSchema.safeParse({
     id: formData.get("id"),
@@ -180,7 +180,7 @@ export async function updateClient(
 }
 
 export async function toggleClientActive(formData: FormData): Promise<void> {
-  await requireAdmin();
+  await requirePermission("companies");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const client = await prisma.client.findUnique({
@@ -199,7 +199,7 @@ export async function toggleClientActive(formData: FormData): Promise<void> {
 }
 
 export async function toggleClientVisibility(formData: FormData): Promise<void> {
-  await requireAdmin();
+  await requirePermission("companies");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const client = await prisma.client.findUnique({
@@ -218,7 +218,7 @@ export async function toggleClientVisibility(formData: FormData): Promise<void> 
 }
 
 const customerSchema = z.object({
-  email: z.string().email("Enter a valid email."),
+  email: z.string().trim().toLowerCase().email("Enter a valid email."),
   name: z.string().optional(),
   title: z.string().optional(),
   phone: z.string().optional(),
@@ -232,7 +232,7 @@ export async function createCustomer(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireAdmin();
+  await requirePermission("companies");
 
   const parsed = customerSchema.safeParse({
     email: formData.get("email"),
@@ -284,15 +284,15 @@ export async function createCustomer(
 }
 
 export async function deleteUser(formData: FormData): Promise<void> {
-  await requireAdmin();
+  await requirePermission("companies");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const user = await prisma.user.findUnique({
     where: { id },
     select: { role: true, clientId: true },
   });
-  // Never allow deleting admin accounts from here.
-  if (!user || user.role === "ADMIN") return;
+  // Internal accounts are managed only from the Full Admin user manager.
+  if (!user || user.role !== "CUSTOMER") return;
   await prisma.user.delete({ where: { id } });
   revalidatePath("/admin");
   if (user.clientId) revalidatePath(`/admin/clients/${user.clientId}`);
@@ -300,7 +300,7 @@ export async function deleteUser(formData: FormData): Promise<void> {
 
 const updateUserSchema = z.object({
   id: z.string().min(1),
-  email: z.string().email("Enter a valid email."),
+  email: z.string().trim().toLowerCase().email("Enter a valid email."),
   name: z.string().optional(),
   title: z.string().optional(),
   phone: z.string().optional(),
@@ -313,7 +313,7 @@ export async function updateUser(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireAdmin();
+  await requirePermission("companies");
 
   const parsed = updateUserSchema.safeParse({
     id: formData.get("id"),
@@ -332,7 +332,7 @@ export async function updateUser(
     where: { id: parsed.data.id },
     select: { role: true, clientId: true },
   });
-  if (!existing || existing.role === "ADMIN") {
+  if (!existing || existing.role !== "CUSTOMER") {
     return { error: "This account cannot be edited here." };
   }
 
@@ -362,14 +362,14 @@ export async function updateUser(
 
 // Activate / deactivate a single employee login. Deactivated users cannot sign in.
 export async function toggleUserActive(formData: FormData): Promise<void> {
-  await requireAdmin();
+  await requirePermission("companies");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const user = await prisma.user.findUnique({
     where: { id },
     select: { role: true, active: true, clientId: true },
   });
-  if (!user || user.role === "ADMIN") return; // never lock out admins here
+  if (!user || user.role !== "CUSTOMER") return;
   await prisma.user.update({ where: { id }, data: { active: !user.active } });
   revalidatePath("/admin");
   if (user.clientId) revalidatePath(`/admin/clients/${user.clientId}`);
@@ -386,7 +386,7 @@ export async function bulkSetClientActive(
   ids: string[],
   active: boolean,
 ): Promise<void> {
-  await requireAdmin();
+  await requirePermission("companies");
   if (!ids.length) return;
   await prisma.client.updateMany({ where: { id: { in: ids } }, data: { active } });
   await revalidateCompanies();
@@ -396,7 +396,7 @@ export async function bulkSetClientVisibility(
   ids: string[],
   showOnSite: boolean,
 ): Promise<void> {
-  await requireAdmin();
+  await requirePermission("companies");
   if (!ids.length) return;
   await prisma.client.updateMany({
     where: { id: { in: ids } },
@@ -406,7 +406,7 @@ export async function bulkSetClientVisibility(
 }
 
 export async function bulkDeleteClients(ids: string[]): Promise<void> {
-  await requireAdmin();
+  await requirePermission("companies");
   if (!ids.length) return;
   // Remove employee logins for these companies first.
   await prisma.user.deleteMany({

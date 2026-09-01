@@ -49,7 +49,7 @@ export function ProductCarousel({ products }: { products: Product[] }) {
                   : "card"
               }`}
             >
-              <div className="relative aspect-video w-full">
+              <div className="relative aspect-video w-full overflow-hidden">
                 {p.image ? (
                   <Image
                     src={p.image}
@@ -106,7 +106,7 @@ export function ProductCarousel({ products }: { products: Product[] }) {
                 <button
                   type="button"
                   onClick={() => setActive(i)}
-                  className="block w-full cursor-pointer text-left"
+                  className="group block w-full cursor-pointer text-left"
                   tabIndex={0}
                 >
                   {inner}

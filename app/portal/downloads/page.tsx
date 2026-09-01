@@ -7,6 +7,10 @@ import {
   PortalDownloadsList,
   type DownloadRow,
 } from "@/components/portal/PortalDownloadsList";
+import {
+  isImageDownload,
+  isPreviewableDownload,
+} from "@/lib/download-preview";
 
 export const metadata = { title: "Downloads" };
 
@@ -27,7 +31,7 @@ export default async function PortalDownloadsPage() {
   ]);
 
   const rows: DownloadRow[] = downloads.map((d) => {
-    const isImage = d.mimeType.startsWith("image/");
+    const isImage = isImageDownload(d.mimeType);
     return {
       id: d.id,
       title: d.title,
@@ -37,7 +41,7 @@ export default async function PortalDownloadsPage() {
       sizeLabel: formatBytes(d.size),
       dateLabel: formatDate(d.createdAt),
       isNew: isUnread(d, seen),
-      previewable: isImage || d.mimeType === "application/pdf",
+      previewable: isPreviewableDownload(d.mimeType, d.fileName),
       isImage,
     };
   });

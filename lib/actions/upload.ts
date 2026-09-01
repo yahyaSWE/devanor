@@ -2,7 +2,7 @@
 
 import { randomUUID } from "crypto";
 import path from "path";
-import { requireAdmin } from "@/lib/auth-helpers";
+import { requirePermission } from "@/lib/auth-helpers";
 import { createSignedUpload, DOWNLOAD_BUCKET } from "@/lib/supabase-storage";
 
 export type UploadTarget = { storedName: string; token: string; path: string };
@@ -15,7 +15,7 @@ export type UploadTarget = { storedName: string; token: string; path: string };
 export async function createUploadTarget(
   fileName: string,
 ): Promise<UploadTarget> {
-  await requireAdmin();
+  await requirePermission("content");
   const ext = path.extname(fileName || "") || "";
   const storedName = `${randomUUID()}${ext}`;
   const { token, path: uploadPath } = await createSignedUpload(

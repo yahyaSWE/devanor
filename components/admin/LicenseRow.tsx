@@ -10,6 +10,7 @@ import { ConfirmSubmit } from "@/components/ConfirmSubmit";
 import { ContractTypeBadge } from "@/components/ContractTypeBadge";
 import { LockTypeBadge } from "@/components/LockTypeBadge";
 import { LicenseStatusBadge } from "@/components/LicenseStatusBadge";
+import { LicenseModulesCell } from "@/components/portal/LicenseModulesCell";
 
 export type LicenseRowData = {
   id: string;
@@ -60,22 +61,27 @@ export function LicenseRow({
       <div className="flex items-center gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate font-medium">
-              {license.moduleNames.join(", ") || "—"}
-            </p>
+            <LicenseModulesCell
+              modules={license.moduleNames}
+              isNew={false}
+              className="font-medium"
+            />
             <ContractTypeBadge type={license.contractType} />
             <LockTypeBadge type={license.lockType} />
+            {license.status === "TRIAL" && (
+              <LicenseStatusBadge status="TRIAL" />
+            )}
             {license.expired ? (
               <span className="rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400">
                 Expired
               </span>
-            ) : license.active ? (
+            ) : license.active && license.status !== "TRIAL" ? (
               <LicenseStatusBadge status={license.status} />
-            ) : (
+            ) : !license.active ? (
               <span className="rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400">
                 Deactivated
               </span>
-            )}
+            ) : null}
           </div>
           <p className="truncate text-sm text-muted">
             {license.seats ? `${license.seats} seats · ` : ""}

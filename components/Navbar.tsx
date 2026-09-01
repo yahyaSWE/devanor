@@ -8,14 +8,22 @@ import { usePathname } from "next/navigation";
 import { ButtonLink } from "./Button";
 import { products, site } from "@/lib/site";
 
-type SessionUser = { email: string; role: "ADMIN" | "CUSTOMER" } | null;
+type SessionUser = {
+  email: string;
+  role: "ADMIN" | "SUPPORT" | "CRM" | "CUSTOMER";
+} | null;
 
 export function Navbar({ user }: { user: SessionUser }) {
   const [open, setOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const dashboardHref = user?.role === "ADMIN" ? "/admin" : "/portal";
+  const dashboardHref =
+    user?.role === "SUPPORT"
+      ? "/admin/downloads"
+      : user?.role === "ADMIN" || user?.role === "CRM"
+        ? "/admin"
+        : "/portal";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);

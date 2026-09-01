@@ -16,7 +16,11 @@ export const authConfig = {
       }
 
       if (path.startsWith("/admin")) {
-        if (isLoggedIn && role === "ADMIN") return true;
+        if (
+          isLoggedIn &&
+          (role === "ADMIN" || role === "SUPPORT" || role === "CRM")
+        )
+          return true;
         if (isLoggedIn) return Response.redirect(new URL("/portal", nextUrl));
         return false;
       }
@@ -35,7 +39,11 @@ export const authConfig = {
     },
     session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role as "ADMIN" | "CUSTOMER";
+        session.user.role = token.role as
+          | "ADMIN"
+          | "SUPPORT"
+          | "CRM"
+          | "CUSTOMER";
         session.user.id = token.id as string;
         session.user.mustChangePassword = Boolean(token.mustChangePassword);
       }
