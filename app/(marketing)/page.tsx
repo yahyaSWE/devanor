@@ -129,7 +129,7 @@ export default function HomePage() {
               index="03"
               eyebrow="Why Devanor"
               title="Design partners, not just a software provider"
-              subtitle="Over 7 years of hands-on E3.series experience, backed by expertise in both electrical and mechanical engineering."
+              subtitle="Over 8 years of hands-on E3.series experience, backed by expertise in both electrical and mechanical engineering."
             />
             <div className="mt-6">
               <ButtonLink href="/about" variant="outline">

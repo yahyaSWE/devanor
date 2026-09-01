@@ -72,7 +72,7 @@ export const products: Product[] = [
     slug: "e3-schematic",
     name: "E3.schematic",
     summary:
-      "Generate circuit diagrams, terminal, equipment and cable lists, and connection tables in one object-oriented design environment.",
+      "Generate circuit diagrams, terminal plans, cable lists and connection tables in one design environment.",
     detail:
       "E3.schematic is a Windows-based platform built for automation, power generation, panel building and machinery. Its object-oriented engineering and complete IEC/ISO symbol libraries help you produce consistent documentation while minimising errors, with flexible reports and manufacturing-ready output.",
     highlights: [
@@ -239,7 +239,7 @@ export const services = [
   {
     name: "Helpdesk Support",
     description:
-      "Direct access to E3.series experts for troubleshooting, guidance, and best-practice advice—keeping your projects moving and your team productive.",
+      "Direct access to E3.series experts for troubleshooting, guidance and best-practice advice, helping keep your projects moving and your team productive.",
   },
   {
     name: "Automation",

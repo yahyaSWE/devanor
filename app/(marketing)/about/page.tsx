@@ -51,7 +51,7 @@ export default function AboutPage() {
             investment through implementation, optimisation and ongoing support.
           </p>
           <p>
-            With over 7 years of hands-on E3.series experience and expertise in both
+            With over 8 years of hands-on E3.series experience and expertise in both
             electrical and mechanical engineering, we combine software knowledge with
             real-world engineering experience to help customers design smarter and
             work more efficiently.
