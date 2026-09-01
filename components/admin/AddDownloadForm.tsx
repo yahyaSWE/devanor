@@ -19,6 +19,9 @@ export type DownloadFormData = {
   title: string;
   description: string | null;
   category: string | null;
+  fileName: string;
+  sizeLabel: string;
+  previewable: boolean;
   clientIds: string[];
   userIds: string[];
 };
@@ -55,16 +58,14 @@ export function AddDownloadForm({
     const form = e.currentTarget;
     const fd = new FormData(form);
 
-    // Editing only changes metadata — the stored file stays as it is.
-    if (isEdit) {
-      formAction(fd);
-      return;
-    }
-
     const file = (form.elements.namedItem("file") as HTMLInputElement)?.files?.[0];
     fd.delete("file");
-    if (!file) {
+    if (!file && !isEdit) {
       setErr("Choose a file to upload.");
+      return;
+    }
+    if (!file) {
+      formAction(fd);
       return;
     }
     setBusy(true);
@@ -111,19 +112,39 @@ export function AddDownloadForm({
           className={inputClass}
         />
       </div>
-      {!isEdit && (
-        <div>
-          <label className="mb-1 block text-xs text-muted">
-            File * (up to 25 MB)
-          </label>
-          <input
-            name="file"
-            type="file"
-            required
-            className="block w-full text-xs text-muted file:mr-3 file:rounded-md file:border-0 file:bg-surface-2 file:px-3 file:py-2 file:text-foreground"
-          />
-        </div>
-      )}
+      <div>
+        {isEdit && (
+          <div className="mb-3 rounded-lg border border-border bg-background/40 p-3">
+            <p className="text-xs font-medium text-muted">Current file</p>
+            <p className="mt-1 break-all text-sm">{download.fileName}</p>
+            <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-xs text-muted">{download.sizeLabel}</p>
+              <a
+                href={`/api/downloads/${download.id}${download.previewable ? "?inline=1" : ""}`}
+                target={download.previewable ? "_blank" : undefined}
+                rel={download.previewable ? "noopener noreferrer" : undefined}
+                className="text-xs text-accent hover:underline"
+              >
+                {download.previewable ? "Preview current file ↗" : "Download current file"}
+              </a>
+            </div>
+          </div>
+        )}
+        <label className="mb-1 block text-xs text-muted">
+          {isEdit ? "Replace file (optional, up to 25 MB)" : "File * (up to 25 MB)"}
+        </label>
+        <input
+          name="file"
+          type="file"
+          required={!isEdit}
+          className="block w-full text-xs text-muted file:mr-3 file:rounded-md file:border-0 file:bg-surface-2 file:px-3 file:py-2 file:text-foreground"
+        />
+        {isEdit && (
+          <p className="mt-1 text-xs text-muted">
+            Leave empty to keep the current file.
+          </p>
+        )}
+      </div>
       <AudiencePicker
         companies={companies}
         defaultClientIds={download?.clientIds}

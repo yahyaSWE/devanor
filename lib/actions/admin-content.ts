@@ -75,6 +75,18 @@ export async function updateDownload(
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return { error: "Title is required." };
 
+  const existing = await prisma.download.findUnique({
+    where: { id },
+    select: { storedName: true },
+  });
+  if (!existing) return { error: "Document not found." };
+
+  const replacementStoredName = String(formData.get("storedName") ?? "");
+  const replacementFileName = String(formData.get("fileName") ?? "");
+  if (!!replacementStoredName !== !!replacementFileName) {
+    return { error: "The replacement file upload is incomplete." };
+  }
+
   await prisma.download.update({
     where: { id },
     data: {
@@ -82,8 +94,25 @@ export async function updateDownload(
       description: String(formData.get("description") ?? "").trim() || null,
       category: String(formData.get("category") ?? "").trim() || null,
       ...readAudience(formData).set,
+      ...(replacementStoredName
+        ? {
+            storedName: replacementStoredName,
+            fileName: replacementFileName,
+            mimeType:
+              String(formData.get("mimeType") ?? "") ||
+              "application/octet-stream",
+            size: Number(formData.get("size") ?? 0),
+          }
+        : {}),
     },
   });
+
+  if (
+    replacementStoredName &&
+    replacementStoredName !== existing.storedName
+  ) {
+    await deleteUpload(existing.storedName);
+  }
 
   revalidatePath("/admin/downloads");
   revalidatePath("/portal/downloads");

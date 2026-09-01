@@ -371,6 +371,9 @@ export function DownloadsManager({
                   title: editing.title,
                   description: editing.description,
                   category: editing.category,
+                  fileName: editing.fileName,
+                  sizeLabel: editing.sizeLabel,
+                  previewable: editing.previewable,
                   clientIds: editing.clientIds,
                   userIds: editing.userIds,
                 } satisfies DownloadFormData
