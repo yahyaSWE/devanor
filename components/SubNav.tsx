@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export type SubNavItem = { label: string; href: string; count?: number };
+export type SubNavItem = {
+  label: string;
+  href: string;
+  count?: number;
+  external?: boolean;
+};
 
 export function SubNav({ items, base }: { items: SubNavItem[]; base: string }) {
   const path = usePathname();
@@ -13,12 +18,15 @@ export function SubNav({ items, base }: { items: SubNavItem[]; base: string }) {
       <nav className="mx-auto flex w-full max-w-6xl gap-1 overflow-x-auto px-6">
         {items.map((item) => {
           const active =
-            path === item.href ||
-            (item.href !== base && path.startsWith(item.href + "/"));
+            !item.external &&
+            (path === item.href ||
+              (item.href !== base && path.startsWith(item.href + "/")));
           return (
             <Link
               key={item.href}
               href={item.href}
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noopener noreferrer" : undefined}
               className={`flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-3 text-sm transition-colors ${
                 active
                   ? "border-accent text-foreground"
@@ -26,6 +34,7 @@ export function SubNav({ items, base }: { items: SubNavItem[]; base: string }) {
               }`}
             >
               {item.label}
+              {item.external ? <span aria-hidden="true">↗</span> : null}
               {item.count ? (
                 <span className="grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1.5 text-xs font-semibold text-white">
                   {item.count}
