@@ -49,6 +49,37 @@ async function ensureContactAttributes(accountId: number, apiToken: string) {
   return results.every((result) => result.ok);
 }
 
+type ChatwootContact = {
+  id: number;
+  email?: string | null;
+  identifier?: string | null;
+};
+
+async function findExistingPortalContact(
+  accountId: number,
+  apiToken: string,
+  email: string,
+  portalUserId: string,
+  telegramContactId: number,
+) {
+  const response = await fetch(
+    `${CHATWOOT_BASE_URL}/api/v1/accounts/${accountId}/contacts/search?q=${encodeURIComponent(email)}`,
+    { headers: { api_access_token: apiToken }, cache: "no-store" },
+  );
+  if (!response.ok) return undefined;
+
+  const data = (await response.json()) as { payload?: ChatwootContact[] };
+  const exactMatches = (data.payload ?? []).filter(
+    (contact) =>
+      contact.id !== telegramContactId &&
+      contact.email?.toLowerCase() === email.toLowerCase(),
+  );
+  return (
+    exactMatches.find((contact) => contact.identifier === portalUserId) ??
+    exactMatches[0]
+  );
+}
+
 type WebhookPayload = {
   event?: string;
   content?: string;
@@ -174,7 +205,14 @@ export async function POST(request: NextRequest) {
     portal_email: user.email,
   };
 
-  const customAttributesReady = await ensureContactAttributes(accountId, apiToken);
+  await ensureContactAttributes(accountId, apiToken);
+  const existingPortalContact = await findExistingPortalContact(
+    accountId,
+    apiToken,
+    user.email,
+    user.id,
+    contactId,
+  );
 
   const response = await fetch(
     `${CHATWOOT_BASE_URL}/api/v1/accounts/${accountId}/contacts/${contactId}`,
@@ -186,7 +224,10 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         name: user.name ?? user.email,
-        custom_attributes: customAttributesReady ? customAttributes : undefined,
+        // Set the native email only when it is not already owned by the
+        // website-widget contact. Otherwise the two contacts are merged below.
+        email: existingPortalContact ? undefined : user.email,
+        custom_attributes: customAttributes,
         additional_attributes: additionalAttributes,
       }),
     },
@@ -199,6 +240,32 @@ export async function POST(request: NextRequest) {
       (await response.text()).slice(0, 500),
     );
     return new Response("Chatwoot update failed", { status: 502 });
+  }
+
+  if (existingPortalContact) {
+    const mergeResponse = await fetch(
+      `${CHATWOOT_BASE_URL}/api/v1/accounts/${accountId}/actions/contact_merge`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          api_access_token: apiToken,
+        },
+        body: JSON.stringify({
+          base_contact_id: existingPortalContact.id,
+          mergee_contact_id: contactId,
+        }),
+      },
+    );
+    if (!mergeResponse.ok) {
+      console.error(
+        "[chatwoot] Could not merge Telegram and website contacts",
+        mergeResponse.status,
+        (await mergeResponse.text()).slice(0, 500),
+      );
+    } else {
+      console.info("[chatwoot] Telegram and website contacts merged");
+    }
   }
 
   const conversationId = payload.conversation?.id;
