@@ -1,10 +1,14 @@
 import { site } from "@/lib/site";
 import { OpenChatButton } from "@/components/portal/OpenChatButton";
+import { requireUser } from "@/lib/auth-helpers";
+import { createTelegramLinkCode } from "@/lib/chatwoot";
 
 export const metadata = { title: "Support" };
 
-export default function PortalSupportPage() {
-  const chatEnabled = Boolean(process.env.NEXT_PUBLIC_FRESHDESK_TOKEN);
+export default async function PortalSupportPage() {
+  const session = await requireUser();
+  const telegramCode = createTelegramLinkCode(session.user.id);
+  const chatEnabled = true;
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-8 px-6 py-10">
@@ -21,20 +25,26 @@ export default function PortalSupportPage() {
         {chatEnabled ? (
           <>
             <p className="mt-1 text-sm text-muted">
-              Our support chat is powered by Freshdesk. Click below or use the
+              Our support chat is powered by Chatwoot. Click below or use the
               chat bubble in the corner.
             </p>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-wrap gap-3">
               <OpenChatButton enabled={chatEnabled} />
+              {telegramCode && (
+                <a
+                  href={`https://t.me/devanorbot?start=${encodeURIComponent(telegramCode)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 px-6 py-3 text-sm font-semibold transition-colors hover:border-accent hover:text-accent"
+                >
+                  Chat via Telegram
+                </a>
+              )}
             </div>
           </>
         ) : (
           <p className="mt-1 text-sm text-muted">
-            Live chat isn&apos;t configured yet. Set{" "}
-            <code className="rounded bg-background px-1.5 py-0.5 text-xs">
-              NEXT_PUBLIC_FRESHDESK_TOKEN
-            </code>{" "}
-            to enable the Freshdesk widget. In the meantime, use the contact
+            Live chat isn&apos;t configured yet. In the meantime, use the contact
             details below.
           </p>
         )}

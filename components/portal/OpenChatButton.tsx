@@ -5,7 +5,7 @@ import { Button } from "@/components/Button";
 export function OpenChatButton({ enabled }: { enabled: boolean }) {
   function openChat() {
     try {
-      window.fdWidget?.open?.();
+      window.$chatwoot?.toggle("open");
     } catch {
       // widget not ready
     }

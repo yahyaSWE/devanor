@@ -4,8 +4,12 @@ import { getPortalUser, downloadAudience, tutorialAudience } from "@/lib/portal"
 import { unreadCount } from "@/lib/portal-reads";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { SubNav, type SubNavItem } from "@/components/SubNav";
-import { FreshdeskChat } from "@/components/portal/FreshdeskChat";
+import { ChatwootChat } from "@/components/portal/ChatwootChat";
 import { IdleLogout } from "@/components/IdleLogout";
+import { chatwootIdentifierHash } from "@/lib/chatwoot";
+
+const CHATWOOT_BASE_URL = "https://chatwoot-rswkm-u77951.vm.elestio.app";
+const CHATWOOT_WEBSITE_TOKEN = "qcSCVW2p1p742iE9ECkdMWxC";
 
 export default async function PortalLayout({
   children,
@@ -71,12 +75,22 @@ export default async function PortalLayout({
       />
       <SubNav items={portalNav} base="/portal" />
       <main className="flex-1">{children}</main>
-      <FreshdeskChat
-        token={process.env.NEXT_PUBLIC_FRESHDESK_TOKEN}
-        host={process.env.NEXT_PUBLIC_FRESHDESK_HOST}
-        widgetId={process.env.NEXT_PUBLIC_FRESHDESK_WIDGET_ID}
-        authEnabled={!!process.env.FRESHDESK_JWT_SECRET}
-      />
+      {user && (
+        <ChatwootChat
+          baseUrl={CHATWOOT_BASE_URL}
+          websiteToken={CHATWOOT_WEBSITE_TOKEN}
+          user={{
+            identifier: user.id,
+            identifierHash: chatwootIdentifierHash(user.id),
+            name: user.name ?? user.email,
+            email: user.email,
+            phone: user.phone ?? undefined,
+            companyId: user.client?.id,
+            companyName: user.client?.name,
+            jobTitle: user.title ?? undefined,
+          }}
+        />
+      )}
     </div>
   );
 }
