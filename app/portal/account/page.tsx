@@ -61,8 +61,7 @@ export default async function PortalAccountPage() {
             </a>
           </div>
           <p className="mb-4 mt-1 text-sm text-muted">
-            Use these to sign in to the ZGS portal. Change the temporary password
-            on your first login there.
+            Use these to sign in to the ZGS portal.
           </p>
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between gap-4">
@@ -70,7 +69,7 @@ export default async function PortalAccountPage() {
               <dd>{user.zgsUsername ?? "—"}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-muted">Temporary password</dt>
+              <dt className="text-muted">Password</dt>
               <dd className="font-mono">{user.zgsTempPassword ?? "—"}</dd>
             </div>
           </dl>

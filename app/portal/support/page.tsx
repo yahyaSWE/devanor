@@ -25,8 +25,7 @@ export default async function PortalSupportPage() {
         {chatEnabled ? (
           <>
             <p className="mt-1 text-sm text-muted">
-              Our support chat is powered by Chatwoot. Click below or use the
-              chat bubble in the corner.
+              Chat with us using the chat bubble or connect your Telegram account.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <OpenChatButton enabled={chatEnabled} />
@@ -41,6 +40,16 @@ export default async function PortalSupportPage() {
                 </a>
               )}
             </div>
+            <p className="mt-4 text-sm text-muted">
+              If you experience any issues with the support chat, contact us at{" "}
+              <a
+                href={site.contact.emailHref}
+                className="text-accent transition-colors hover:underline"
+              >
+                {site.contact.email}
+              </a>
+              .
+            </p>
           </>
         ) : (
           <p className="mt-1 text-sm text-muted">
@@ -50,29 +59,6 @@ export default async function PortalSupportPage() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-border bg-surface/40 p-6">
-        <h2 className="font-semibold">Contact us</h2>
-        <div className="mt-4 grid gap-4 text-sm sm:grid-cols-3">
-          <div>
-            <p className="text-muted">Email</p>
-            <a href={site.contact.emailHref} className="transition-colors hover:text-accent">
-              {site.contact.email}
-            </a>
-          </div>
-          <div>
-            <p className="text-muted">Phone</p>
-            <a href={site.contact.phoneHref} className="transition-colors hover:text-accent">
-              {site.contact.phone}
-            </a>
-          </div>
-          <div>
-            <p className="text-muted">WhatsApp</p>
-            <a href={site.contact.whatsappHref} className="transition-colors hover:text-accent">
-              {site.contact.whatsapp}
-            </a>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
