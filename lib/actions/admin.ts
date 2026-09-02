@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import path from "path";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { setChatwootContactsBlocked } from "@/lib/chatwoot-admin";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
@@ -185,13 +186,21 @@ export async function toggleClientActive(formData: FormData): Promise<void> {
   if (!id) return;
   const client = await prisma.client.findUnique({
     where: { id },
-    select: { active: true },
+    select: {
+      active: true,
+      users: { where: { role: "CUSTOMER" }, select: { email: true } },
+    },
   });
   if (!client) return;
+  const active = !client.active;
   await prisma.client.update({
     where: { id },
-    data: { active: !client.active },
+    data: { active },
   });
+  await setChatwootContactsBlocked(
+    client.users.map((user) => user.email),
+    !active,
+  );
   revalidatePath("/about");
   revalidatePath("/");
   revalidatePath("/admin");
@@ -367,10 +376,12 @@ export async function toggleUserActive(formData: FormData): Promise<void> {
   if (!id) return;
   const user = await prisma.user.findUnique({
     where: { id },
-    select: { role: true, active: true, clientId: true },
+    select: { role: true, active: true, clientId: true, email: true },
   });
   if (!user || user.role !== "CUSTOMER") return;
-  await prisma.user.update({ where: { id }, data: { active: !user.active } });
+  const active = !user.active;
+  await prisma.user.update({ where: { id }, data: { active } });
+  await setChatwootContactsBlocked([user.email], !active);
   revalidatePath("/admin");
   if (user.clientId) revalidatePath(`/admin/clients/${user.clientId}`);
 }
@@ -388,7 +399,15 @@ export async function bulkSetClientActive(
 ): Promise<void> {
   await requirePermission("companies");
   if (!ids.length) return;
+  const users = await prisma.user.findMany({
+    where: { clientId: { in: ids }, role: "CUSTOMER" },
+    select: { email: true },
+  });
   await prisma.client.updateMany({ where: { id: { in: ids } }, data: { active } });
+  await setChatwootContactsBlocked(
+    users.map((user) => user.email),
+    !active,
+  );
   await revalidateCompanies();
 }
 
