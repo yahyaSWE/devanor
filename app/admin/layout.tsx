@@ -38,7 +38,7 @@ export default async function AdminLayout({
       <IdleLogout />
       <DashboardHeader label={label} email={session.user.email ?? ""} />
       <SubNav items={adminNav} base="/admin" />
-      {role === "SUPPORT" && (
+      {(role === "SUPPORT" || role === "ADMIN") && (
         <div className="border-b border-border bg-accent/10">
           <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-4">
             <div>
