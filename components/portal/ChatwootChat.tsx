@@ -21,6 +21,7 @@ type ChatwootApi = {
   setUser: (identifier: string, attributes: Record<string, string | undefined>) => void;
   setCustomAttributes: (attributes: Record<string, string>) => void;
   toggle: (state?: "open" | "close") => void;
+  toggleBubbleVisibility: (state: "show" | "hide") => void;
   reset: () => void;
 };
 
@@ -52,6 +53,8 @@ export function ChatwootChat({
 
     const identify = () => {
       if (cancelled || !window.$chatwoot) return;
+
+      window.$chatwoot.toggleBubbleVisibility("show");
 
       window.$chatwoot.setUser(user.identifier, {
         name: user.name,
@@ -103,6 +106,8 @@ export function ChatwootChat({
     return () => {
       cancelled = true;
       window.removeEventListener("chatwoot:ready", onReady);
+      window.$chatwoot?.toggle("close");
+      window.$chatwoot?.toggleBubbleVisibility("hide");
     };
   }, [baseUrl, websiteToken, user]);
 
