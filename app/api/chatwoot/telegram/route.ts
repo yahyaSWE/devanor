@@ -87,6 +87,8 @@ type WebhookPayload = {
   message_type?: string | number;
   account_id?: number;
   account?: { id?: number };
+  channel?: string;
+  inbox?: { channel_type?: string };
   contact?: {
     id?: number;
     custom_attributes?: Record<string, unknown>;
@@ -110,6 +112,63 @@ type WebhookPayload = {
     };
   };
 };
+
+type ContactContext = NonNullable<WebhookPayload["sender"]>;
+
+async function loadConversationContext(
+  accountId: number,
+  apiToken: string,
+  conversationId?: number,
+) {
+  if (!conversationId) return undefined;
+  const response = await fetch(
+    `${CHATWOOT_BASE_URL}/api/v1/accounts/${accountId}/conversations/${conversationId}`,
+    { headers: { api_access_token: apiToken }, cache: "no-store" },
+  );
+  if (!response.ok) return undefined;
+  return (await response.json()) as {
+    channel?: string;
+    meta?: { channel?: string; sender?: ContactContext };
+    inbox?: { channel_type?: string };
+  };
+}
+
+function channelIsTelegram(...channels: Array<string | undefined>) {
+  return channels.some((channel) => channel?.toLowerCase().includes("telegram"));
+}
+
+async function sendChatwootMessage(
+  accountId: number,
+  apiToken: string,
+  conversationId: number | undefined,
+  content: string,
+) {
+  if (!conversationId) return;
+  await fetch(
+    `${CHATWOOT_BASE_URL}/api/v1/accounts/${accountId}/conversations/${conversationId}/messages`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", api_access_token: apiToken },
+      body: JSON.stringify({ content, message_type: "outgoing", private: false }),
+    },
+  );
+}
+
+async function setContactBlocked(
+  accountId: number,
+  apiToken: string,
+  contactId: number,
+  blocked: boolean,
+) {
+  return fetch(
+    `${CHATWOOT_BASE_URL}/api/v1/accounts/${accountId}/contacts/${contactId}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", api_access_token: apiToken },
+      body: JSON.stringify({ blocked }),
+    },
+  );
+}
 
 function validWebhookSignature(request: NextRequest, rawBody: string) {
   const secret = process.env.CHATWOOT_WEBHOOK_SECRET;
@@ -162,29 +221,79 @@ export async function POST(request: NextRequest) {
   const code = /^\/start(?:@[a-zA-Z0-9_]+)?\s+([a-zA-Z0-9_-]{20,64})\s*$/i.exec(
     content.trim(),
   )?.[1];
-  const contact = payload.sender ?? payload.contact ?? payload.conversation?.meta?.sender;
+  const conversationId = payload.conversation?.id;
+  if (!apiToken) {
+    console.error("[chatwoot] API token is not configured");
+    return new Response("Chatwoot API not configured", { status: 503 });
+  }
+
+  const conversationContext = await loadConversationContext(
+    accountId,
+    apiToken,
+    conversationId,
+  );
+  const contact =
+    payload.sender ??
+    payload.contact ??
+    payload.conversation?.meta?.sender ??
+    conversationContext?.meta?.sender;
   const contactId = contact?.id;
-  const userId = code ? verifyTelegramLinkCode(code) : undefined;
-  if (!apiToken || !contactId || !userId) {
-    if (content.trim().toLowerCase().startsWith("/start")) {
-      console.warn("[chatwoot] Telegram portal link ignored", {
-        hasApiToken: Boolean(apiToken),
-        hasContactId: Boolean(contactId),
-        hasCode: Boolean(code),
-        validCode: Boolean(userId),
-        hasAccountId: payloadAccountId !== undefined,
-      });
-    }
+  const linkedUserId =
+    (contact?.custom_attributes?.portal_user_id as string | undefined) ??
+    (contact?.additional_attributes?.portal_user_id as string | undefined);
+  const verifiedLinkUserId = code ? verifyTelegramLinkCode(code) : undefined;
+  const isTelegram =
+    Boolean(code) ||
+    channelIsTelegram(
+      payload.channel,
+      payload.inbox?.channel_type,
+      payload.conversation?.channel,
+      payload.conversation?.meta?.channel,
+      conversationContext?.channel,
+      conversationContext?.meta?.channel,
+      conversationContext?.inbox?.channel_type,
+    );
+
+  if (!isTelegram) {
     return Response.json({ ok: true, ignored: true });
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: { client: true },
-  });
-  if (!user || user.role !== "CUSTOMER" || !user.active) {
-    console.warn("[chatwoot] Telegram portal link has no active customer");
+  if (!contactId) {
+    console.warn("[chatwoot] Telegram message has no contact id");
     return Response.json({ ok: true, ignored: true });
+  }
+
+  const portalUserId = verifiedLinkUserId ?? linkedUserId;
+  const user = portalUserId
+    ? await prisma.user.findUnique({
+        where: { id: portalUserId },
+        include: { client: true },
+      })
+    : null;
+  const authorized = Boolean(
+    user &&
+      user.role === "CUSTOMER" &&
+      user.active &&
+      user.client?.active &&
+      (verifiedLinkUserId || linkedUserId),
+  );
+
+  if (!authorized || !user) {
+    await sendChatwootMessage(
+      accountId,
+      apiToken,
+      conversationId,
+      "This support channel is only available to verified Devanor portal users. Please sign in at https://www.devanor.com/login and open Telegram from the Support page.",
+    ).catch(() => undefined);
+    await setContactBlocked(accountId, apiToken, contactId, true);
+    console.info("[chatwoot] Unverified Telegram contact blocked");
+    return Response.json({ ok: true, blocked: true });
+  }
+
+  // Normal messages from a previously linked, active customer need no further
+  // processing. Only a fresh signed /start command refreshes the profile data.
+  if (!verifiedLinkUserId) {
+    return Response.json({ ok: true, verified: true });
   }
 
   const customAttributes = {
@@ -224,6 +333,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         name: user.name ?? user.email,
+        blocked: false,
         // Set the native email only when it is not already owned by the
         // website-widget contact. Otherwise the two contacts are merged below.
         email: existingPortalContact ? undefined : user.email,
@@ -264,26 +374,22 @@ export async function POST(request: NextRequest) {
         (await mergeResponse.text()).slice(0, 500),
       );
     } else {
+      await setContactBlocked(
+        accountId,
+        apiToken,
+        existingPortalContact.id,
+        false,
+      );
       console.info("[chatwoot] Telegram and website contacts merged");
     }
   }
 
-  const conversationId = payload.conversation?.id;
   if (conversationId) {
-    await fetch(
-      `${CHATWOOT_BASE_URL}/api/v1/accounts/${accountId}/conversations/${conversationId}/messages`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          api_access_token: apiToken,
-        },
-        body: JSON.stringify({
-          content: `Your Telegram account is now linked to ${user.client?.name ?? "your Devanor portal account"}. You can continue chatting here directly.`,
-          message_type: "outgoing",
-          private: false,
-        }),
-      },
+    await sendChatwootMessage(
+      accountId,
+      apiToken,
+      conversationId,
+      `Your Telegram account is now linked to ${user.client?.name ?? "your Devanor portal account"}. You can continue chatting here directly.`,
     ).catch(() => undefined);
   }
 
