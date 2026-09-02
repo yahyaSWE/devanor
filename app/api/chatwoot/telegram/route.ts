@@ -10,6 +10,7 @@ const contactAttributeDefinitions = [
   ["Company name", "company_name"],
   ["Job title", "job_title"],
   ["Portal user ID", "portal_user_id"],
+  ["Portal email", "portal_email"],
 ] as const;
 
 async function ensureContactAttributes(accountId: number, apiToken: string) {
@@ -66,6 +67,7 @@ type WebhookPayload = {
     additional_attributes?: Record<string, unknown>;
   };
   conversation?: {
+    id?: number;
     channel?: string;
     meta?: {
       channel?: string;
@@ -160,6 +162,7 @@ export async function POST(request: NextRequest) {
     company_name: user.client?.name ?? "",
     job_title: user.title ?? "",
     portal_user_id: user.id,
+    portal_email: user.email,
   };
   const additionalAttributes = {
     ...(contact?.additional_attributes ?? {}),
@@ -168,6 +171,7 @@ export async function POST(request: NextRequest) {
     company_name: user.client?.name ?? "",
     job_title: user.title ?? "",
     portal_user_id: user.id,
+    portal_email: user.email,
   };
 
   const customAttributesReady = await ensureContactAttributes(accountId, apiToken);
@@ -182,8 +186,6 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         name: user.name ?? user.email,
-        email: user.email,
-        phone_number: user.phone ?? undefined,
         custom_attributes: customAttributesReady ? customAttributes : undefined,
         additional_attributes: additionalAttributes,
       }),
@@ -197,6 +199,25 @@ export async function POST(request: NextRequest) {
       (await response.text()).slice(0, 500),
     );
     return new Response("Chatwoot update failed", { status: 502 });
+  }
+
+  const conversationId = payload.conversation?.id;
+  if (conversationId) {
+    await fetch(
+      `${CHATWOOT_BASE_URL}/api/v1/accounts/${accountId}/conversations/${conversationId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          api_access_token: apiToken,
+        },
+        body: JSON.stringify({
+          content: `Your Telegram account is now linked to ${user.client?.name ?? "your Devanor portal account"}. You can continue chatting here directly.`,
+          message_type: "outgoing",
+          private: false,
+        }),
+      },
+    ).catch(() => undefined);
   }
 
   console.info("[chatwoot] Telegram contact identified");
