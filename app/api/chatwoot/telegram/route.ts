@@ -51,8 +51,15 @@ async function ensureContactAttributes(accountId: number, apiToken: string) {
 type WebhookPayload = {
   event?: string;
   content?: string;
+  processed_message_content?: string;
   message_type?: string | number;
+  account_id?: number;
   account?: { id?: number };
+  contact?: {
+    id?: number;
+    custom_attributes?: Record<string, unknown>;
+    additional_attributes?: Record<string, unknown>;
+  };
   sender?: {
     id?: number;
     custom_attributes?: Record<string, unknown>;
@@ -60,7 +67,14 @@ type WebhookPayload = {
   };
   conversation?: {
     channel?: string;
-    meta?: { channel?: string };
+    meta?: {
+      channel?: string;
+      sender?: {
+        id?: number;
+        custom_attributes?: Record<string, unknown>;
+        additional_attributes?: Record<string, unknown>;
+      };
+    };
   };
 };
 
@@ -101,20 +115,33 @@ export async function POST(request: NextRequest) {
   const accountId = Number(process.env.CHATWOOT_ACCOUNT_ID ?? "1");
   const apiToken = process.env.CHATWOOT_API_ACCESS_TOKEN;
   const incoming = payload.message_type === "incoming" || payload.message_type === 0;
-  if (
-    payload.event !== "message_created" ||
-    !incoming ||
-    payload.account?.id !== accountId
-  ) {
+  const payloadAccountId = payload.account?.id ?? payload.account_id;
+  if (payload.event !== "message_created" || !incoming) {
+    return Response.json({ ok: true, ignored: true });
+  }
+  // Some Chatwoot channel payloads omit the account object. Only reject an
+  // explicit mismatch; the signed webhook and API-scoped token remain trusted.
+  if (payloadAccountId !== undefined && payloadAccountId !== accountId) {
     return Response.json({ ok: true, ignored: true });
   }
 
-  const code = /^\/start\s+([a-zA-Z0-9_-]{20,64})\s*$/.exec(
-    payload.content?.trim() ?? "",
+  const content = payload.content ?? payload.processed_message_content ?? "";
+  const code = /^\/start(?:@[a-zA-Z0-9_]+)?\s+([a-zA-Z0-9_-]{20,64})\s*$/i.exec(
+    content.trim(),
   )?.[1];
-  const contactId = payload.sender?.id;
+  const contact = payload.sender ?? payload.contact ?? payload.conversation?.meta?.sender;
+  const contactId = contact?.id;
   const userId = code ? verifyTelegramLinkCode(code) : undefined;
   if (!apiToken || !contactId || !userId) {
+    if (content.trim().toLowerCase().startsWith("/start")) {
+      console.warn("[chatwoot] Telegram portal link ignored", {
+        hasApiToken: Boolean(apiToken),
+        hasContactId: Boolean(contactId),
+        hasCode: Boolean(code),
+        validCode: Boolean(userId),
+        hasAccountId: payloadAccountId !== undefined,
+      });
+    }
     return Response.json({ ok: true, ignored: true });
   }
 
@@ -123,18 +150,19 @@ export async function POST(request: NextRequest) {
     include: { client: true },
   });
   if (!user || user.role !== "CUSTOMER" || !user.active) {
+    console.warn("[chatwoot] Telegram portal link has no active customer");
     return Response.json({ ok: true, ignored: true });
   }
 
   const customAttributes = {
-    ...(payload.sender?.custom_attributes ?? {}),
+    ...(contact?.custom_attributes ?? {}),
     company_id: user.client?.id ?? "",
     company_name: user.client?.name ?? "",
     job_title: user.title ?? "",
     portal_user_id: user.id,
   };
   const additionalAttributes = {
-    ...(payload.sender?.additional_attributes ?? {}),
+    ...(contact?.additional_attributes ?? {}),
     identified_via: "portal_telegram_link",
     company_id: user.client?.id ?? "",
     company_name: user.client?.name ?? "",
@@ -163,9 +191,14 @@ export async function POST(request: NextRequest) {
   );
 
   if (!response.ok) {
-    console.error("[chatwoot] Could not identify Telegram contact", response.status);
+    console.error(
+      "[chatwoot] Could not identify Telegram contact",
+      response.status,
+      (await response.text()).slice(0, 500),
+    );
     return new Response("Chatwoot update failed", { status: 502 });
   }
 
+  console.info("[chatwoot] Telegram contact identified");
   return Response.json({ ok: true });
 }
