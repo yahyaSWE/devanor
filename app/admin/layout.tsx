@@ -33,7 +33,7 @@ export default async function AdminLayout({
       ? [
           {
             label: "Support",
-            href: "https://chatwoot-rswkm-u77951.vm.elestio.app/",
+            href: "https://support.devanor.com/",
             external: true,
           },
         ]
